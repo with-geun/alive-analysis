@@ -111,12 +111,53 @@ Before starting any analysis, apply the "execution test" — if the analysis res
 
 **The "data-driven paradox" trap**: More data and better tools don't automatically lead to better decisions. The gap is usually between insight and execution — always design the analysis with the end action in mind.
 
+#### Metric Framework — Know Which Metrics Matter and Why
+Every analysis touches metrics. Understanding the metric hierarchy prevents optimizing the wrong thing.
+
+**4-Tier Metric Classification:**
+```
+🌟 North Star Metric (NSM)
+    The ONE metric capturing core product value for customers.
+    ├── NOT revenue itself (lagging) — but a leading indicator of revenue
+    ├── NOT directly manipulable — "if you can move it directly, it's not a good NSM"
+    ├── GOOD: "Weekly active buyers", "Monthly items received on time"
+    └── BAD: "DAU" (vanity), "Page views" (no value signal), "MRR" (lagging)
+
+📊 Leading / Input Metrics
+    3-5 drivers that teams can directly influence to move the NSM.
+    ├── More responsive and under immediate team control
+    ├── Example: NSM = "Weekly active buyers"
+    │   → Inputs: signup rate, first-purchase conversion, repeat purchase rate
+    └── Each team owns 1-2 input metrics (their OMTM — One Metric That Matters)
+
+🛡️ Guardrail Metrics (Counter-Metrics)
+    Metrics that must NOT get worse while optimizing the NSM.
+    ├── "For every metric, have a paired metric that addresses adverse consequences"
+    ├── 2-3 max — too many creates false positive noise
+    ├── Example: Optimizing Stories engagement? → Guardrail: main feed engagement
+    └── If a guardrail triggers during an experiment → escalate before proceeding
+
+🔬 Diagnostic Metrics
+    Metrics for root cause analysis — not optimization targets.
+    ├── Used in INVESTIGATE to decompose problems
+    ├── Example: "Why did conversion drop?" → check: page load time, error rate, funnel drop-off by step
+    └── These explain the WHY behind NSM/Input movements
+```
+
+**When the AI encounters metrics during analysis:**
+- ASK: "Which tier does this metric belong to? Are we optimizing an Input metric, or diagnosing a problem?"
+- LOOK: "Is there a counter-metric we should also check?"
+- INVESTIGATE: "Are we accidentally improving one metric at the cost of a guardrail?"
+- VOICE: "Frame recommendations in terms of the NSM hierarchy — what moves, what's protected"
+- EVOLVE: "Should the metric framework be updated based on these findings?"
+
 Common mistakes to prevent:
 - Starting analysis without a clear question
 - Scope creep — trying to answer everything at once
 - Not confirming the requester's actual goal (vs stated goal)
 - Confusing "interesting" with "actionable"
 - Ignoring the hypothesis tree — jumping to the first plausible explanation
+- Optimizing a metric without checking its counter-metric
 
 ### Stage 2: LOOK (👀)
 **Core question**: What does the data ACTUALLY show — and what's missing?
@@ -192,6 +233,17 @@ Before analyzing metrics, understand what you're actually measuring:
 - **Error** = how far your estimate/prediction is from the true value (estimate vs truth)
 - Standard deviation tells you about spread. Standard error tells you how reliable your estimate is.
 - When reporting to stakeholders: deviation describes "how consistent is this?", error describes "how confident are we?"
+
+**Metric Quality Check (STEDII — Microsoft Research):**
+Before trusting any metric in your analysis, verify it passes the STEDII test:
+- **Sensitive**: Can it detect real changes? (If your experiment moves the needle but the metric doesn't budge, it's not sensitive enough)
+- **Trustworthy**: Is the data accurate and aligned with what you think it measures? (Check for tracking bugs, definition drift)
+- **Efficient**: Is it practical to compute? (A metric requiring 6 hours of data processing isn't useful for daily decisions)
+- **Debuggable**: When it moves, can you decompose WHY? (A good metric can be broken down by segments, time, and sub-components)
+- **Interpretable**: Does everyone on the team understand what it means and whether "up" is good? (If you need a 5-minute explanation, it's too complex)
+- **Inclusive**: Does it fairly represent all user segments? (Metrics based only on power users miss the majority)
+
+Quick practical test: "If this metric improved 10%, would the team know exactly what happened and what to do next?" If no → the metric needs redesign.
 
 **Risk-adjusted metrics (Sharpe Ratio concept):**
 - Raw performance numbers can be misleading without considering risk/volatility
@@ -442,6 +494,13 @@ When the analysis involves designing or evaluating experiments:
 - Not accounting for multiple comparisons (testing 5 metrics → ~23% chance of at least one false positive)
 - Ignoring practical significance: "statistically significant but only 0.1% improvement" → not worth the engineering cost
 
+**Experiment Trustworthiness Checklist (from Microsoft Research):**
+- **Sample Ratio Mismatch (SRM)**: Are treatment/control groups properly balanced? If the split is 51/49 when it should be 50/50, something went wrong in randomization → results are unreliable
+- **Novelty effects**: Did the metric spike initially then decay? Initial excitement about a new feature fades — wait for the "steady state" before drawing conclusions
+- **Guardrail monitoring**: Set up automated alerts for guardrail metrics DURING the experiment, not just at the end. Auto-stop tests that cause egregious degradation.
+- **Segment analysis**: The overall result can hide opposite effects in different segments (e.g., great for power users, terrible for new users). Always slice by key dimensions.
+- **Metric holism**: Don't just track the primary metric. Use a metric taxonomy: data quality metrics → primary success metric → feature diagnostics → guardrails
+
 **Contaminated Control — when the control group is also affected:**
 Sometimes the control group isn't "clean" — they receive a baseline treatment (common coupon, existing feature) that overlaps with what you're testing. In this case:
 - **Stratified analysis**: Split by whether the baseline treatment was received → compare A's effect within each stratum
@@ -638,6 +697,13 @@ For each recommendation, make the trade-offs explicit:
 - What do we **risk** or lose?
 - What's the **cost of inaction**?
 - Reference guardrail metrics from config.md: "This recommendation would improve conversion but check impact on refund rate."
+
+**Counter-metric check (mandatory for every recommendation):**
+- "For every success metric, identify a counter-metric that would reveal if we're just plugging one hole with another"
+- Example: Recommending "increase push notification frequency" → success: DAU up → counter: unsubscribe rate, app delete rate
+- Example: Recommending "lower delivery fee" → success: order volume up → counter: unit economics, delivery capacity
+- If a counter-metric is already in config.md guardrails, reference it explicitly
+- If no counter-metric exists → propose one and suggest adding it to config.md
 
 #### Presenting Simulation Results
 When the analysis involved simulation (policy/strategy evaluation):
@@ -884,8 +950,8 @@ Check: 🟢 Proceed / 🔴 Stop
 
 - Document language is set in `.analysis/config.md`
 - Checklists, templates, and status messages follow the configured language
-- Default: Korean (한국어)
-- Supported: Korean, English, Japanese
+- Default: English
+- Supported: English, Korean, Japanese (and any natural language the user specifies during init)
 
 ---
 

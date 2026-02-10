@@ -46,26 +46,38 @@ This sets the tone for all subsequent questions and generated files.
 Explain the metric categories first:
 
 "Let's set up the metrics your team tracks.
- We'll organize them into 3 tiers — skip any you don't have yet.
+ We'll organize them into 4 tiers — skip any you don't have yet.
 
- 🌟 North Star Metric: The ONE metric that best captures your product's core value
- 📊 KPIs / Indirect Metrics: Metrics that drive or indicate the North Star
- 🛡️ Guardrail Metrics: Metrics that must NOT get worse while optimizing others"
+ 🌟 North Star Metric: The ONE metric capturing your product's core value for customers
+ 📊 Leading / Input Metrics: Metrics that teams directly influence to move the North Star
+ 🛡️ Guardrail Metrics: Metrics that must NOT get worse while optimizing others
+ 🔬 Diagnostic Metrics: Metrics used for root cause analysis (not optimization targets)"
 
 **Q4. North Star Metric** (0~1)
-- Example: "Weekly active buyers", "Monthly recurring revenue"
+- Must represent customer value, not just revenue
+- "If you can directly move it, it's probably not the right NSM"
+- GOOD: "Weekly active buyers", "Monthly items received on time"
+- BAD: "DAU" (vanity), "Page views" (no value), "MRR" (lagging — use as business KPI instead)
 - Ask: definition + data source (if known)
 - Can skip: "Don't have one yet" or "Not sure"
 
-**Q5. KPIs / Indirect Metrics** (0~5)
-- Examples: "Purchase CVR", "ARPU", "D7 retention", "Signup rate"
-- For each: definition + data source (if known)
+**Q5. Leading / Input Metrics** (0~5)
+- These are the levers teams pull to move the North Star
+- Each team should own 1-2 of these as their primary focus
+- Examples: "Signup rate", "First-purchase CVR", "D7 retention", "Feature adoption rate"
+- For each: definition + data source + which team owns it (if known)
 - Can skip
 
 **Q6. Guardrail Metrics** (0~3)
-- Examples: "Refund rate must stay under 5%", "Page load time < 3s", "NPS > 40"
-- These are constraints, not optimization targets
+- For every optimization target, there should be a "counter-metric"
+- These are constraints, not optimization targets — thresholds that must not be breached
+- Examples: "Refund rate must stay under 5%", "Page load time < 3s", "Unsubscribe rate < 2%"
 - Can skip
+
+**Q6b. Diagnostic Metrics** (0~5, optional)
+- Used for debugging when things go wrong — not tracked daily
+- Examples: "Funnel drop-off by step", "Error rate by endpoint", "Session depth by cohort"
+- Can skip — these often emerge naturally during analyses
 
 ### Step 5: Stakeholders
 
@@ -144,16 +156,21 @@ analyses/
 |--------|-----------|-------------|
 | {metric} | {definition} | {source} |
 
-### 📊 KPIs / Indirect Metrics
-| Metric | Definition | Data Source |
-|--------|-----------|-------------|
-| {metric_1} | {definition} | {source} |
-| {metric_2} | {definition} | {source} |
+### 📊 Leading / Input Metrics
+| Metric | Definition | Owner Team | Data Source |
+|--------|-----------|-----------|-------------|
+| {metric_1} | {definition} | {team} | {source} |
+| {metric_2} | {definition} | {team} | {source} |
 
 ### 🛡️ Guardrail Metrics
-| Metric | Threshold | Data Source |
-|--------|-----------|-------------|
-| {metric_1} | {threshold} | {source} |
+| Metric | Threshold | Counter to | Data Source |
+|--------|-----------|-----------|-------------|
+| {metric_1} | {threshold} | {which metric it guards} | {source} |
+
+### 🔬 Diagnostic Metrics
+| Metric | Used for | Data Source |
+|--------|---------|-------------|
+| {metric_1} | {debugging scenario} | {source} |
 
 (Empty sections can say "Not defined yet — add later")
 
@@ -182,7 +199,26 @@ analyses/
 
 ### Step 10: Generate status.md and checklist files
 
-Generate status.md (empty state) and all 5 checklist files from the skill templates.
+Generate status.md (empty state):
+
+```markdown
+# alive-analysis Status
+> Last updated: {YYYY-MM-DD}
+
+## Active Analyses
+
+| ID | Title | Type | Stage | Owner | Started |
+|----|-------|------|-------|-------|---------|
+| (none) | | | | | |
+
+## Recently Archived
+
+| ID | Title | Insight | Archived |
+|----|-------|---------|----------|
+| (none) | | | |
+```
+
+Generate all 5 checklist files from the skill templates in SKILL.md.
 
 ### Step 11: Confirmation
 

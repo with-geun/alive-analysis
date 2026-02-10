@@ -36,9 +36,12 @@ Check if there are any 🔴 (stop) items:
 Based on current stage, generate the next file.
 
 **ASK → LOOK** (generate `02_look.md`):
+
+**Note:** If this is a 📈 Modeling analysis, use the Modeling-specific LOOK template defined in `analysis-new.md` instead of the Investigation template below. Same for INVESTIGATE and VOICE stages.
+
 ```markdown
 # LOOK: {title}
-> ID: {ID} | Stage: 👀 LOOK | Updated: {YYYY-MM-DD}
+> ID: {ID} | Type: 🔍 Investigation | Stage: 👀 LOOK | Updated: {YYYY-MM-DD}
 
 ## Data Sources
 - Primary:
@@ -95,7 +98,7 @@ Key question: "Does the pattern hold across ALL segments, or is it driven by one
 **LOOK → INVESTIGATE** (generate `03_investigate.md`):
 ```markdown
 # INVESTIGATE: {title}
-> ID: {ID} | Stage: 🔍 INVESTIGATE | Updated: {YYYY-MM-DD}
+> ID: {ID} | Type: 🔍 Investigation | Stage: 🔍 INVESTIGATE | Updated: {YYYY-MM-DD}
 
 ## Hypothesis Scorecard
 | # | Hypothesis | Evidence For | Evidence Against | Status | Contribution |
@@ -165,7 +168,7 @@ Strategy: Test the easiest-to-disprove hypotheses first.
 **INVESTIGATE → VOICE** (generate `04_voice.md`):
 ```markdown
 # VOICE: {title}
-> ID: {ID} | Stage: 📢 VOICE | Updated: {YYYY-MM-DD}
+> ID: {ID} | Type: 🔍 Investigation | Stage: 📢 VOICE | Updated: {YYYY-MM-DD}
 
 ## Executive Summary
 (1-3 sentences for leadership — lead with business impact)
@@ -222,7 +225,7 @@ Strategy: Test the easiest-to-disprove hypotheses first.
 **VOICE → EVOLVE** (generate `05_evolve.md`):
 ```markdown
 # EVOLVE: {title}
-> ID: {ID} | Stage: 🌱 EVOLVE | Updated: {YYYY-MM-DD}
+> ID: {ID} | Type: 🔍 Investigation | Stage: 🌱 EVOLVE | Updated: {YYYY-MM-DD}
 
 ## Conclusion Robustness Check
 - What new data could **disprove** our conclusion?

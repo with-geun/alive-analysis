@@ -56,6 +56,7 @@ claude plugin uninstall alive-analysis
 rm -rf .claude/commands/analysis-*.md
 rm -rf .claude/skills/alive-analysis/
 rm .claude/hooks/session-start.sh
+# Edit .claude/hooks.json to remove the alive-analysis hook entry
 
 # Remove analysis data (irreversible!)
 # rm -rf .analysis/ analyses/

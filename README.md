@@ -101,7 +101,7 @@ analyses/active/F-2026-0210-001_dau-drop/
 ```
 
 ### Quick Analysis
-Fast turnaround. Single file with abbreviated ALIVE sections and 3-item checklist.
+Fast turnaround. Single file with abbreviated ALIVE sections and 4-item checklist.
 
 ```
 analyses/active/quick_Q-2026-0210-002_retention-check.md
