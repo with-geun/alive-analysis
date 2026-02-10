@@ -288,58 +288,84 @@ Common mistakes to prevent:
 ### Default: ASK Checklist
 ```markdown
 ## Checklist — ASK
+### Methodology
 - [ ] 🟢/🔴 Have you accurately identified the requester's REAL goal (not just stated goal)?
 - [ ] 🟢/🔴 Is the question framed as causal or correlational?
 - [ ] 🟢/🔴 Have you built a hypothesis tree (not just one guess)?
+### Quality
 - [ ] 🟢/🔴 Have you secured relevant domain knowledge?
 - [ ] 🟢/🔴 Have you created an analysis plan that fits the timeline?
+- [ ] 🟢/🔴 Have you estimated time per scope area?
 - [ ] 🟢/🔴 Have you confirmed the data specification and access method?
+- [ ] 🟢/🔴 Have you considered a confusion matrix (if applicable)?
 - [ ] 🟢/🔴 Have you considered appropriate sample size?
 ```
 
 ### Default: LOOK Checklist
 ```markdown
 ## Checklist — LOOK
+### Methodology
 - [ ] 🟢/🔴 Have you segmented the data before drawing conclusions?
 - [ ] 🟢/🔴 Have you checked for confounding variables?
 - [ ] 🟢/🔴 Have you considered external factors (seasonality, competitors, market)?
 - [ ] 🟢/🔴 Have you checked for cross-service impacts?
+### Quality
+- [ ] 🟢/🔴 Are you avoiding unnecessarily large datasets?
+- [ ] 🟢/🔴 Are you not wasting time re-verifying confirmed findings?
 - [ ] 🟢/🔴 Is the sampling method appropriate?
 - [ ] 🟢/🔴 Have you checked for data errors (outliers, missing values)?
+- [ ] 🟢/🔴 Have you considered edge cases (specific IDs, exceptions)?
 - [ ] 🟢/🔴 Are you only performing analysis needed for the problem?
+- [ ] 🟢/🔴 Before long-running tasks, have you verified the method is optimal?
 ```
 
 ### Default: INVESTIGATE Checklist
 ```markdown
 ## Checklist — INVESTIGATE
+### Methodology
 - [ ] 🟢/🔴 Have you tested MULTIPLE hypotheses (not just confirmed one)?
 - [ ] 🟢/🔴 Have you applied multi-lens analysis (macro/meso/micro)?
 - [ ] 🟢/🔴 If claiming causation, have you verified: time ordering, mechanism, counterfactual?
 - [ ] 🟢/🔴 Have you performed sensitivity analysis (robustness check)?
-- [ ] 🟢/🔴 Have you clearly handled outliers/anomalies?
 - [ ] 🟢/🔴 Have you assigned confidence levels to each finding?
+### Quality
+- [ ] 🟢/🔴 Have you exchanged feedback with a colleague?
+- [ ] 🟢/🔴 Have you clearly handled outliers/anomalies?
+- [ ] 🟢/🔴 Have you visually verified the results yourself?
+- [ ] 🟢/🔴 Are charts easy to understand?
+- [ ] 🟢/🔴 Have you removed unnecessary visualizations/complexity?
 - [ ] 🟢/🔴 Can the results be reproduced? (queries/code recorded in assets/)
 ```
 
 ### Default: VOICE Checklist
 ```markdown
 ## Checklist — VOICE
+### Methodology
 - [ ] 🟢/🔴 Have you applied "So What → Now What" for each finding?
 - [ ] 🟢/🔴 Have you tagged confidence levels (🟢/🟡/🔴) with reasoning?
 - [ ] 🟢/🔴 Have you included trade-off analysis for recommendations?
 - [ ] 🟢/🔴 Have you checked guardrail metrics impact?
 - [ ] 🟢/🔴 Are limitations visible (not buried in a footnote)?
+### Quality
+- [ ] 🟢/🔴 Have you accurately answered the requester's question?
+- [ ] 🟢/🔴 Have you reviewed results with a colleague?
+- [ ] 🟢/🔴 Have you validated explanations through simulation?
+- [ ] 🟢/🔴 Have you documented data sources for re-verification?
 - [ ] 🟢/🔴 Have you tailored messages for each stakeholder audience?
 ```
 
 ### Default: EVOLVE Checklist
 ```markdown
 ## Checklist — EVOLVE
+### Methodology
 - [ ] 🟢/🔴 Have you stress-tested the conclusion (what would disprove it)?
 - [ ] 🟢/🔴 Have you set up monitoring for identified issues?
+- [ ] 🟢/🔴 Have you connected findings back to the North Star metric?
+### Quality
+- [ ] 🟢/🔴 Are there perspectives missed in this analysis?
 - [ ] 🟢/🔴 Are follow-up questions specifically defined?
 - [ ] 🟢/🔴 Have you captured reusable knowledge for future analyses?
-- [ ] 🟢/🔴 Have you connected findings back to the North Star metric?
+- [ ] 🟢/🔴 Are there parts to automate or schedule?
 - [ ] 🟢/🔴 Have you summarized the key insight in one sentence?
 ```
 
