@@ -86,6 +86,17 @@ This framework applies at every data touchpoint:
 - Are there related analyses or prior findings to build on?
 - What data can you access? (MCP, exported files, BI dashboards)
 
+#### Analyst Mindset
+Good analysis comes from asking better questions, not just finding right answers.
+
+- **Data + intuition are complementary**, not competing: Data without domain context is noise. Intuition without data is guessing. The best analysis combines both.
+- **Three maturity levels of data use:**
+  - Level 1 "Data-driven": Let the numbers decide (risky — numbers without context mislead)
+  - Level 2 "Data-informed": Use data as ONE input alongside domain expertise and judgment
+  - Level 3 "Data-inspired": Use data to discover questions you didn't know to ask
+- **"Why?" is more valuable than "What?"**: Dashboards tell you WHAT happened. Analysis tells you WHY and WHAT TO DO about it.
+- **Resist the urge to answer immediately**: A well-framed question saves more time than a fast answer to the wrong question.
+
 Common mistakes to prevent:
 - Starting analysis without a clear question
 - Scope creep — trying to answer everything at once
@@ -151,6 +162,29 @@ Before trusting ANY data, verify these common traps:
 - Population drift: the definition of "user" may change as tracking evolves
 
 **When you find a gotcha**: Document it in the analysis as a Data Quality Note — future analyses will thank you.
+
+#### Metric Interpretation Guide
+Before analyzing metrics, understand what you're actually measuring:
+
+**Don't trust averages alone — check variability:**
+- **Coefficient of Variation (CV) = σ / μ**: Measures how spread out the data is relative to its mean
+- CV lets you compare variability across different scales (e.g., "Is revenue more volatile than user count?")
+- High CV (>1) = very spread out, average is misleading → segment the data further
+- Low CV (<0.3) = data is consistent, average is reliable
+- Example: Two stores both averaging 100 orders/day, but Store A has CV=0.1 (steady) and Store B has CV=0.8 (wild swings). Very different stories.
+
+**Deviation vs Error — know the difference:**
+- **Deviation** = how far individual data points spread from the mean (individual vs group)
+- **Error** = how far your estimate/prediction is from the true value (estimate vs truth)
+- Standard deviation tells you about spread. Standard error tells you how reliable your estimate is.
+- When reporting to stakeholders: deviation describes "how consistent is this?", error describes "how confident are we?"
+
+**Risk-adjusted metrics (Sharpe Ratio concept):**
+- Raw performance numbers can be misleading without considering risk/volatility
+- **Sharpe Ratio idea**: (return - baseline) / volatility — "how much performance per unit of risk?"
+- Apply this thinking: "Channel A has higher conversion but huge variance. Channel B is lower but stable. Which is actually better?"
+- When comparing options: normalize by variability, not just average performance
+- Especially useful for: campaign comparison, channel evaluation, pricing strategy assessment
 
 #### Data Access During Conversation
 - **MCP connected**: AI can run queries directly — ask before executing
@@ -286,6 +320,76 @@ In organizations with multiple products/services:
 - Look for cannibalisation: did a new feature pull users from an existing one?
 - Check infrastructure: shared API, CDN, DB performance impacts
 
+#### Analytical Methods Toolkit
+Choose the right method for the question. This is a practical decision guide, not a statistics textbook.
+
+**"Which groups are different?" → Group Comparison**
+- 2 groups → t-test (or simple mean comparison with confidence intervals)
+- 3+ groups → ANOVA (Analysis of Variance)
+  - ANOVA answers: "Is at least one group meaningfully different from the others?"
+  - If ANOVA is significant → post-hoc tests tell you WHICH groups differ
+  - Example: "Do conversion rates differ across 5 acquisition channels?" → ANOVA
+  - Caution: ANOVA assumes similar variance across groups and roughly normal distributions. For very skewed data (e.g., revenue), consider non-parametric alternatives or log-transformation.
+
+**"Which users are similar?" → Segmentation / Clustering**
+- K-Means clustering: Groups users by similarity in multiple dimensions
+  - Practical guide: Start with 3-5 clusters, increase until segments stop being interpretable
+  - Critical: **Standardize variables first** — otherwise high-magnitude variables (revenue in ₩) dominate over low-magnitude ones (visit count)
+  - Always validate clusters with domain sense: "Do these segments make business sense?"
+  - Name the clusters with business language ("Price-sensitive bargain hunters", not "Cluster 3")
+
+**"What tends to appear together?" → Association Rules**
+- Market basket analysis: "Users who did X also tend to do Y"
+- Key metrics: Support (how common), Confidence (how reliable), Lift (how much more likely than random)
+- **Lift > 1** = positive association, **Lift = 1** = no relationship, **Lift < 1** = negative association
+- Use cases beyond shopping carts: feature usage patterns, content consumption sequences, error co-occurrence
+- Caution: Association ≠ causation. "Users who buy A also buy B" doesn't mean A causes B purchases.
+
+**"Can we predict a future outcome?" → Prediction Models**
+- **LTV (Lifetime Value) prediction**: Critical for acquisition and retention decisions
+  - Simple approach: Average revenue × expected lifespan (good enough for many cases)
+  - Better: Cohort-based LTV curves (track actual revenue by acquisition month)
+  - Advanced: Probabilistic models (BG/NBD, Gamma-Gamma) when you have repeat transaction data
+  - Key insight: **LTV by segment** is far more useful than overall LTV — combine with clustering
+- **Forecasting**: Time series patterns (trend, seasonality, cyclical)
+- When choosing model complexity: "Can I explain this to a stakeholder?" If not, simplify.
+
+**"Is this A/B test result real?" → Experiment Analysis**
+- See the A/B Test Design Guide below for setup; here's the analysis part:
+- Check: Was randomization successful? (compare pre-experiment metrics between groups)
+- Check: Is the sample size sufficient? (see power analysis below)
+- Check: Are there novelty effects? (new feature excitement fades)
+- Check: Are there segment-level effects hidden in the average? (overall flat, but huge for one segment)
+
+**"How spread out / risky is this?" → Variability Analysis**
+- CV (Coefficient of Variation): Compare variability across different scales
+- Sharpe Ratio adaptation: Compare performance options risk-adjusted (see LOOK stage)
+- Percentile analysis: "What does the 90th percentile experience look like vs median?"
+
+#### A/B Test Design Guide
+When the analysis involves designing or evaluating experiments:
+
+**Sample Size Calculation (before running the test):**
+- Required inputs: baseline conversion rate, minimum detectable effect (MDE), significance level (α, usually 0.05), power (1-β, usually 0.8)
+- Rule of thumb: smaller effects need exponentially larger samples
+- If the required sample size is too large for your traffic:
+  - Option A: Accept a larger MDE ("we can only detect 5% improvement, not 2%")
+  - Option B: Run longer (but watch for seasonality and novelty effects)
+  - Option C: Target a high-traffic segment only
+  - Option D: Use a more sensitive metric as primary (e.g., click rate instead of purchase rate)
+
+**Traffic Split Ratio:**
+- Default: 50/50 (maximum statistical power)
+- When to deviate: business risk requires limiting exposure (e.g., 90/10 for risky changes)
+- 90/10 split needs ~3.6x more total traffic than 50/50 for the same power
+- The ratio is a business decision, not just a statistical one
+
+**Common Pitfalls:**
+- Peeking at results too early → inflated false positive rate
+- Stopping early when results "look significant" → confirmation bias
+- Not accounting for multiple comparisons (testing 5 metrics → ~23% chance of at least one false positive)
+- Ignoring practical significance: "statistically significant but only 0.1% improvement" → not worth the engineering cost
+
 #### Sensitivity Analysis
 Before finalizing findings, test robustness:
 - "If we change the date range by ±1 week, does the conclusion hold?"
@@ -400,6 +504,14 @@ When the analysis involved simulation (policy/strategy evaluation):
 - For stakeholders, avoid jargon ("confidence interval") → use plain language ("best case / expected / worst case")
 - Offer **handle bars**: "If you want to test different assumptions, here are the adjustable inputs"
 
+#### Communicating Numbers Effectively
+When presenting quantitative findings:
+- **Always provide context for numbers**: "Conversion dropped 2pp" → "Conversion dropped from 12% to 10% (2pp), which means ~500 fewer purchases per week at current traffic"
+- **Use relative AND absolute**: "30% increase" sounds big but might be 3 → 4 users. Always show both.
+- **Report variability, not just averages**: "Average order value is ₩50,000" → "Average ₩50,000, but ranges from ₩10,000 to ₩200,000 (CV=0.8). The 'average customer' doesn't exist."
+- **Distinguish signal from noise**: If the confidence interval includes zero or the opposite direction, say so: "The effect could be anywhere from -2% to +8%, so we can't be sure it's positive."
+- **Use benchmarks**: "Is 12% conversion good?" → Compare to industry, historical, or team-set targets from config.md
+
 #### Audience-Specific Communication
 - **Executives / C-level**: Lead with business impact in one sentence. Numbers, not methodology. "So what does this mean for revenue?"
 - **Product / Engineering**: Include technical detail. "Which feature, which release, which segment." Actionable next steps.
@@ -491,6 +603,7 @@ Common mistakes to prevent:
 - [ ] 🟢/🔴 Have you checked for confounding variables?
 - [ ] 🟢/🔴 Have you considered external factors (seasonality, competitors, market)?
 - [ ] 🟢/🔴 Have you checked for cross-service impacts?
+- [ ] 🟢/🔴 Have you checked variability (not just averages) for key metrics?
 ### Quality
 - [ ] 🟢/🔴 Are you avoiding unnecessarily large datasets?
 - [ ] 🟢/🔴 Are you not wasting time re-verifying confirmed findings?
@@ -510,6 +623,7 @@ Common mistakes to prevent:
 - [ ] 🟢/🔴 If claiming causation, have you verified: time ordering, mechanism, counterfactual?
 - [ ] 🟢/🔴 Have you performed sensitivity analysis (robustness check)?
 - [ ] 🟢/🔴 Have you assigned confidence levels to each finding?
+- [ ] 🟢/🔴 Is the analytical method appropriate for the question type? (comparison → ANOVA/t-test, segmentation → clustering, prediction → regression/ML)
 ### Quality
 - [ ] 🟢/🔴 Have you exchanged feedback with a colleague?
 - [ ] 🟢/🔴 Have you clearly handled outliers/anomalies?
