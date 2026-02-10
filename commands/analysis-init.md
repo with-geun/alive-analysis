@@ -8,7 +8,8 @@ You are setting up the alive-analysis workflow kit for this project.
 This is the most important step — the context collected here will be used
 throughout every analysis to make conversations smarter and faster.
 
-Follow these steps exactly:
+All questions are optional — the user can skip anything they don't know yet.
+Follow these steps in order:
 
 ### Step 1: Check existing setup
 
@@ -16,66 +17,89 @@ Check if `.analysis/` folder already exists.
 - If it exists, warn the user and ask if they want to re-initialize.
 - If not, proceed.
 
-### Step 2: Team & Work Context
+### Step 2: Language (ask first)
 
-Use AskUserQuestion to ask:
+Ask the user what language they want for analysis documents.
+Accept any natural language input — don't limit to a dropdown.
+
+"What language would you like for your analysis documents?
+ Type freely: English, 한국어, 日本語, Español, Deutsch, etc.
+ Default: English"
+
+This sets the tone for all subsequent questions and generated files.
+
+### Step 3: Team & Work Context
 
 **Q1. Team / Project name**
-- Free text input
+- Free text
 
 **Q2. What does your team do? What domain?**
-- Examples: "이커머스 데이터분석팀", "핀테크 그로스팀", "SaaS PM팀"
-- This helps the AI understand business context during analysis
+- Examples: "Ecommerce data analytics", "Fintech growth team", "SaaS product team"
 
-**Q3. Primary language for documents**
-- Korean (Recommended)
-- English
-- Japanese
-- Other
+**Q3. What are your company or team's key goals this year?**
+- Examples: "Increase revenue 30% YoY", "Improve D30 retention to 25%", "Reduce CAC by 20%"
+- This helps the AI understand what matters when framing analysis conclusions
+- Can skip if unknown
 
-**Q4. Default analysis mode**
-- Full (for data analyst teams)
-- Quick (for cross-functional teams)
+### Step 4: Metrics — Structured Input
 
-### Step 3: Key Metrics & Definitions
+Explain the metric categories first:
 
-Ask the user to define their core metrics. This prevents asking "what retention?" every time.
+"Let's set up the metrics your team tracks.
+ We'll organize them into 3 tiers — skip any you don't have yet.
 
-**Q5. What are your team's key metrics? (list up to 5)**
-- Examples: "D7 리텐션", "DAU", "전환율", "ARPU", "NPS"
-- For each metric, ask:
-  - Definition (e.g., "D7 = 가입 후 7일차 재방문율")
-  - Where the data lives (e.g., "BigQuery analytics.retention_cohort")
+ 🌟 North Star Metric: The ONE metric that best captures your product's core value
+ 📊 KPIs / Indirect Metrics: Metrics that drive or indicate the North Star
+ 🛡️ Guardrail Metrics: Metrics that must NOT get worse while optimizing others"
 
-**Q6. Who are the typical stakeholders for your analyses?**
-- Examples: "PM팀", "경영진", "마케팅팀", "개발팀"
-- This will be used in the VOICE stage to suggest audience-specific messages
+**Q4. North Star Metric** (0~1)
+- Example: "Weekly active buyers", "Monthly recurring revenue"
+- Ask: definition + data source (if known)
+- Can skip: "Don't have one yet" or "Not sure"
 
-### Step 4: Data Stack & Connections
+**Q5. KPIs / Indirect Metrics** (0~5)
+- Examples: "Purchase CVR", "ARPU", "D7 retention", "Signup rate"
+- For each: definition + data source (if known)
+- Can skip
 
-**Q7. What data tools/platforms does your team use?**
-- Options (multi-select):
-  - BigQuery
-  - PostgreSQL / MySQL
-  - Snowflake / Redshift
+**Q6. Guardrail Metrics** (0~3)
+- Examples: "Refund rate must stay under 5%", "Page load time < 3s", "NPS > 40"
+- These are constraints, not optimization targets
+- Can skip
+
+### Step 5: Stakeholders
+
+**Q7. Who typically receives your analysis results?**
+- Examples: "PM team", "C-level", "Marketing team", "Engineering"
+- Used in VOICE stage to auto-suggest audience sections
+- Can skip
+
+### Step 6: Data Stack & Connections
+
+**Q8. What data tools/platforms does your team use?**
+- Accept free text or multi-select:
+  - BigQuery / Snowflake / Redshift
+  - MySQL / PostgreSQL
   - Looker / Tableau / Metabase
   - Python / Jupyter
-  - Spreadsheets (Google Sheets / Excel)
-  - Other (free text)
+  - Spreadsheets
+  - Other
 
-**Q8. MCP connection setup**
-- If the user has MCP-compatible data tools, guide them:
-  - "MCP를 연결하면 분석 중에 AI가 직접 쿼리를 실행할 수 있습니다."
-  - "지금 설정할까요, 나중에 할까요?"
-- If "now": walk through MCP server connection for their data stack
-- If "later": note in config.md as "MCP: not configured (run /analysis init --mcp to set up later)"
+**Q9. MCP connection setup**
+- Explain: "MCP lets the AI query your database directly during analysis."
+- Options: Set up now / Later
+- If "now": guide MCP server connection for their data stack
+- If "later": note in config as "MCP: not configured"
+- ⚠️ Never auto-install. Always get explicit confirmation.
+- ⚠️ Warn: "MCP servers require data access permissions. Check your team's security policy."
 
-**Important**: Never auto-install MCP servers. Always ask for explicit user confirmation.
-Warn: "MCP 서버는 데이터 접근 권한이 필요합니다. 팀 보안 정책을 확인하세요."
+### Step 7: Default analysis mode
 
-### Step 5: Create folder structure
+**Q10. Default analysis mode?**
+- Full: For data analyst teams — 5 ALIVE stage files + full checklists
+- Quick: For cross-functional teams — single file with abbreviated flow
 
-Create the following structure:
+### Step 8: Create folder structure
 
 ```
 .analysis/
@@ -95,7 +119,7 @@ analyses/
     └── .gitkeep
 ```
 
-### Step 6: Generate config.md
+### Step 9: Generate config.md
 
 ```markdown
 # alive-analysis Config
@@ -107,18 +131,36 @@ analyses/
 > Default Mode: {mode}
 > Initialized: {YYYY-MM-DD}
 
-## Team
+## Annual Goals
 
-- Default assignee: {user}
-- Stakeholders: {stakeholder_list}
+- {goal_1}
+- {goal_2}
+- (or: "Not defined yet")
 
-## Key Metrics
+## Metrics
 
+### 🌟 North Star
+| Metric | Definition | Data Source |
+|--------|-----------|-------------|
+| {metric} | {definition} | {source} |
+
+### 📊 KPIs / Indirect Metrics
 | Metric | Definition | Data Source |
 |--------|-----------|-------------|
 | {metric_1} | {definition} | {source} |
 | {metric_2} | {definition} | {source} |
-| ... | | |
+
+### 🛡️ Guardrail Metrics
+| Metric | Threshold | Data Source |
+|--------|-----------|-------------|
+| {metric_1} | {threshold} | {source} |
+
+(Empty sections can say "Not defined yet — add later")
+
+## Team
+
+- Default assignee: {user}
+- Stakeholders: {stakeholder_list}
 
 ## Data Stack
 
@@ -138,48 +180,30 @@ analyses/
 - Summary required: true
 ```
 
-### Step 7: Generate status.md
+### Step 10: Generate status.md and checklist files
 
-```markdown
-# Analysis Status
-> Last updated: {YYYY-MM-DD HH:mm}
+Generate status.md (empty state) and all 5 checklist files from the skill templates.
 
-## Active (0)
-
-| ID | Title | Mode | Stage | Started | Owner |
-|----|-------|------|-------|---------|-------|
-
-## Recently Archived (latest 5)
-
-| ID | Title | Key Insight | Completed |
-|----|-------|-------------|-----------|
-
-## Pending
-
-(none)
-```
-
-### Step 8: Generate checklist files
-
-Read the checklist templates from the alive-analysis skill and generate each file in `.analysis/checklists/`.
-Each checklist file should contain the default checklist items with 🟢/🔴 signal format.
-
-### Step 9: Confirmation
+### Step 11: Confirmation
 
 Tell the user:
 - alive-analysis has been initialized
 - Show the created folder structure
-- Recap what was configured (team, metrics, data stack, MCP status)
-- Suggest running `/analysis new` to start their first analysis
-- Mention that checklists in `.analysis/checklists/` can be customized per team needs
-- If MCP not configured: "데이터 직접 조회를 원하면 나중에 `/analysis init --mcp`로 설정할 수 있어요"
+- Recap what was configured:
+  - Language, team, goals
+  - Metrics (how many in each tier, or "skipped")
+  - Data stack + MCP status
+- Suggest: "Run `/analysis new` to start your first analysis"
+- Note: "Checklists in `.analysis/checklists/` can be customized per team"
+- If MCP not configured: "To connect later: `/analysis init --mcp`"
+- If metrics skipped: "You can update metrics anytime by editing `.analysis/config.md`"
 
 ### How this context is used later
 
-The AI should read `.analysis/config.md` at the start of every analysis command and use it:
+The AI should read `.analysis/config.md` at the start of every analysis command:
 
-- **ASK**: Suggest relevant key metrics, know the stakeholders already
-- **LOOK**: Know which databases to query, connect via MCP if available
-- **INVESTIGATE**: Use the right tools (SQL for BQ users, Python for notebook users)
-- **VOICE**: Auto-suggest audience sections based on stakeholder list
-- **EVOLVE**: Reference key metrics when proposing follow-up analyses
+- **ASK**: Reference North Star + KPIs to frame the question. Know stakeholders.
+- **LOOK**: Know which databases to query. Connect via MCP if available.
+- **INVESTIGATE**: Use the right tools. Reference guardrail metrics ("does this change hurt refund rate?").
+- **VOICE**: Auto-suggest audience sections from stakeholder list. Frame conclusions against annual goals.
+- **EVOLVE**: Reference metric tiers when proposing follow-ups. Connect back to North Star.
