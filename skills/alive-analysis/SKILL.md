@@ -54,6 +54,31 @@ Ask explicitly:
 - "If we find a correlation, what would we need to prove causation?"
 - This determines the methodology: correlation → observational analysis; causation → quasi-experimental or controlled experiment
 
+#### Structured Data Request (5 Elements)
+When the analysis requires data, structure every data request with these 5 elements.
+This saves massive back-and-forth time — most data request delays come from unclear questions, not technical difficulty.
+
+```
+[Period]  +  [Subject]  +  [Condition]  +  [Metric]  +  [Output Format]
+ WHEN         WHO/WHAT      FILTER         MEASURE       HOW TO SHOW
+```
+
+| Element | Bad example | Good example |
+|---------|------------|-------------|
+| Period | "recently", "last month" | "2026-01-01 ~ 2026-01-31" |
+| Subject | "users", "stores" | "active stores with at least 1 order" |
+| Condition | "normal orders only" | "completed orders, excluding test accounts" |
+| Metric | "GMV", "revenue" | "Net GMV (after coupon discount), order count" |
+| Output | "a list, sorted" | "store-level, top 100 by order count, as spreadsheet" |
+
+**For non-analysts**: The AI should actively help structure vague questions into these 5 elements.
+**For analysts**: Use this as a self-check before writing SQL or requesting data from others.
+
+This framework applies at every data touchpoint:
+- ASK: When defining what data is needed to answer the question
+- LOOK: When formulating MCP queries or data requests to colleagues
+- INVESTIGATE: When running ad-hoc queries to test hypotheses
+
 #### Key Questions to Ask the User
 - What triggered this question? (event, dashboard alert, stakeholder request)
 - What decision will this analysis inform?
@@ -661,6 +686,147 @@ The AI should seamlessly handle data that arrives during the conversation:
    - Generate SQL/Python code for user to execute
    - Ask user to paste results back
    - AI interprets and continues the conversation
+
+### Situational Protocols
+
+These situations can happen at ANY stage. The AI should recognize them and respond accordingly.
+
+#### Protocol 1: Scope Creep — "Can you also look at X?"
+
+Scope creep is the most common analysis killer. Handle it explicitly:
+
+**Detection signals:**
+- Requester adds new questions mid-analysis
+- "While you're at it, can you also check..."
+- The analysis starts branching into unrelated areas
+- You realize the current scope will take 3x longer than expected
+
+**Response protocol:**
+```
+AI: "That's a great question, but it's outside our current scope.
+     Let me capture it so we don't lose it.
+
+     Current scope: {original question from ASK}
+     New request: {what they just asked}
+
+     Options:
+     A. Park it — I'll add it to EVOLVE as a follow-up analysis
+     B. Swap it — Replace the current scope with this new question
+     C. Expand — Add it to current scope (⚠️ this will extend the timeline)
+
+     Which do you prefer?"
+```
+
+**Rules:**
+- Always refer back to the original scope defined in ASK
+- Never silently expand scope — make it visible
+- If user chooses C (expand), update 01_ask.md scope section and re-estimate timeline
+- If parking, add to a "Parked Questions" list in the current stage file
+- For Quick analyses: be extra strict — Quick should stay quick
+
+**Template for parked questions (add to current stage file):**
+```markdown
+## Parked Questions (out of scope)
+- {question} — parked at {stage}, will address in follow-up
+```
+
+#### Protocol 2: Rabbit Hole Guard — "One more thing..."
+
+Analysis paralysis is real. The AI should actively guard against it.
+
+**Detection signals:**
+- Spending more than 3 rounds of conversation on a single sub-question
+- User says "let me just check one more thing" repeatedly
+- The investigation is going deeper but not getting more actionable
+- Findings are "interesting" but don't change the conclusion
+- Time spent exceeds the original estimate from ASK
+
+**Response protocol:**
+```
+AI: "Hold on — let me check where we are.
+
+     ⏱️ Time check:
+     - Original scope from ASK: {question}
+     - Time estimate: {from ASK}
+     - Current depth: we're {N} levels deep on {sub-topic}
+
+     🎯 Actionability check:
+     - If this sub-analysis confirms our suspicion, does it change the recommendation?
+     - If YES → keep going
+     - If NO → we have enough to conclude. Let's move to VOICE.
+
+     What do you think — keep digging or wrap up this thread?"
+```
+
+**The "5-Why but not 50-Why" rule:**
+- Depth is good. Infinite depth is not.
+- After each finding, ask: "Does knowing this change what we'd recommend?"
+- If the answer is no for 2 consecutive findings → suggest moving to VOICE
+- If the user insists, respect their judgment but document: "Continued investigation at user's discretion"
+
+**Depth indicators to surface:**
+```
+🟢 Productive depth — each layer reveals new actionable insight
+🟡 Diminishing returns — findings are confirming what we already know
+🔴 Rabbit hole — interesting but won't change the conclusion
+```
+
+#### Protocol 3: Data Quality Emergency — "Wait, this data is wrong"
+
+Discovering bad data mid-analysis is one of the most frustrating situations. Handle it calmly and systematically.
+
+**Detection signals:**
+- Numbers that don't add up or contradict known facts
+- Sudden spikes/drops that coincide with tracking changes, not real events
+- Different data sources giving wildly different answers
+- User says "that doesn't look right" or "that number seems off"
+- Metric definitions changed between periods being compared
+
+**Response protocol:**
+```
+AI: "🚨 Potential data quality issue detected.
+     Let's assess the impact before deciding what to do.
+
+     Issue: {what's wrong}
+     Discovered at: {current stage}
+
+     Impact assessment:
+     1. Does this affect the CORE question, or just a side finding?
+     2. How much of our analysis so far is based on this data?
+     3. Can we work around it (different source, different date range)?
+
+     Options:
+     A. Patch & continue — Use alternative data source / date range / method
+        ⚠️ Document the workaround and its limitations
+     B. Scope down — Narrow the analysis to what we CAN answer with reliable data
+        Update ASK scope accordingly
+     C. Pause & fix — Stop analysis, flag data issue to data engineering, resume later
+        Park the analysis as 'blocked' in status.md
+     D. Report with caveat — Complete with current data but flag the quality issue prominently
+        Only if the core conclusion is still defensible
+
+     Which approach makes sense here?"
+```
+
+**Documentation requirements:**
+When a data quality issue is found, always document in the current stage file:
+```markdown
+## ⚠️ Data Quality Issue
+- **Discovered**: {date}, during {stage}
+- **Issue**: {description}
+- **Impact**: {what's affected}
+- **Resolution**: {A/B/C/D from above} — {details}
+- **Remaining risk**: {what we still don't know}
+```
+
+**Rules:**
+- Never pretend bad data is fine — always surface it
+- Don't restart the entire analysis unless truly necessary
+- The sunk cost of prior work is real — salvage what you can
+- If the data issue affects the core question → the user MUST decide, not the AI
+- Update confidence levels in VOICE to reflect data quality concerns
+
+---
 
 ### What NOT to do
 
