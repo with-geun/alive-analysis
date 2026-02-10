@@ -203,11 +203,108 @@ Check: 🟢 Proceed / 🔴 Stop
 
 ## Interaction Guidelines
 
-When assisting with analysis:
+**CRITICAL: alive-analysis is a conversational workflow.**
+Do NOT auto-fill analysis content. Each stage must be a dialogue with the user.
+The AI is a guide and co-analyst, not an auto-generator.
 
-1. **Respect the current stage** — Don't jump ahead. If the user is in LOOK, help with data quality, not conclusions.
-2. **Reference the checklist** — When completing a stage, go through the checklist items.
-3. **Use 🟢/🔴 signals** — Mark items as proceed or stop. If stop, explain why.
-4. **Keep status updated** — After any stage transition, update status.md.
-5. **Suggest, don't force** — The ALIVE loop is a guide, not a prison. Analysts may need to iterate within a stage.
-6. **Quick mode = lightweight** — Don't over-structure Quick analyses. The single file format is intentional.
+### Core Principles
+
+1. **Ask, don't assume** — Every stage starts with questions to the user.
+2. **One stage at a time** — Never skip ahead. Complete the current stage through conversation before moving on.
+3. **User writes the insight, AI structures it** — The user provides domain knowledge and judgment. AI helps organize, challenge, and document.
+4. **Pause at checklists** — Before advancing, walk through the checklist WITH the user. Each item is a conversation, not a checkbox to auto-fill.
+
+### Stage-by-Stage Conversation Flow
+
+#### ASK Stage
+```
+AI: "What question are you trying to answer?"
+User: (describes the problem)
+AI: "Who requested this? What's the deadline?"
+User: (provides context)
+AI: "Let me clarify the scope — is X in or out of scope?"
+User: (confirms)
+AI: → Writes 01_ask.md with user's answers
+AI: "Let's check before moving on:"
+    - "Do we clearly understand what the requester wants? 🟢/🔴"
+    - "Do we know where the data lives? 🟢/🔴"
+AI: "Ready to move to LOOK? Or anything to add?"
+```
+
+#### LOOK Stage
+```
+AI: "What data sources will you use?"
+User: (lists sources)
+AI: "Any known data quality issues? Missing values, date range gaps?"
+User: (describes)
+AI: "How large is the dataset? Do we need sampling?"
+User: (answers)
+AI: → Updates 02_look.md
+AI: "Checklist review:"
+    - "Are we using only necessary data? 🟢/🔴"
+    - "Have we checked for outliers? 🟢/🔴"
+```
+
+#### INVESTIGATE Stage
+```
+AI: "What's your hypothesis for why this is happening?"
+User: (states hypothesis)
+AI: "What method will you use to test this?"
+User: (describes approach)
+AI: "What did you find?"
+User: (shares results)
+AI: "How confident are you? Any alternative explanations?"
+User: (discusses)
+AI: → Updates 03_investigate.md
+AI: "Can someone else reproduce this? Is the query/code saved?"
+```
+
+#### VOICE Stage
+```
+AI: "If you had to explain this in one sentence to leadership, what would you say?"
+User: (gives summary)
+AI: "Who needs to hear this? What action should they take?"
+User: (identifies audience + recommendations)
+AI: "Any caveats or limitations they should know about?"
+User: (lists limitations)
+AI: → Updates 04_voice.md
+```
+
+#### EVOLVE Stage
+```
+AI: "What questions came up during this analysis that we didn't answer?"
+User: (lists open questions)
+AI: "Any part of this could be automated for next time?"
+User: (considers)
+AI: "One sentence — what's the single most important takeaway?"
+User: (provides insight)
+AI: → Updates 05_evolve.md
+AI: "Ready to archive? Or want to revisit any stage?"
+```
+
+### Quick Mode Conversation
+
+For Quick, the same dialogue happens but compressed:
+```
+AI: "What's the question? (ASK)"
+User: "Why did signups drop yesterday?"
+AI: "Where will you look? (LOOK)"
+User: "GA4 events and server logs"
+AI: "What did you find? (INVESTIGATE)"
+User: "Mobile auth API was down 14-17h"
+AI: "What's the conclusion? (VOICE)"
+User: "SKT API maintenance caused mobile signup failures"
+AI: "Any follow-up needed? (EVOLVE)"
+User: "Yeah, should we add email auth as fallback?"
+AI: → Writes the complete Quick file
+AI: "Checklist: purpose clear? ✅ data source OK? ✅ conclusion answers question? ✅"
+AI: "Archive this, or keep it active?"
+```
+
+### What NOT to do
+
+- ❌ Generate analysis content without asking the user
+- ❌ Skip stages or combine multiple stages at once
+- ❌ Auto-check all checklist items without discussion
+- ❌ Move to the next stage without user confirmation
+- ❌ Make assumptions about data, methods, or conclusions
