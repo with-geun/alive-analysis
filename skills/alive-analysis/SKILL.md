@@ -97,6 +97,20 @@ Good analysis comes from asking better questions, not just finding right answers
 - **"Why?" is more valuable than "What?"**: Dashboards tell you WHAT happened. Analysis tells you WHY and WHAT TO DO about it.
 - **Resist the urge to answer immediately**: A well-framed question saves more time than a fast answer to the wrong question.
 
+#### Actionable Question Design
+Before starting any analysis, apply the "execution test" — if the analysis result won't change what we do, the question needs redesigning.
+
+**Transform abstract questions into actionable ones:**
+- BAD: "Why is our conversion rate low?" (too broad, no clear action path)
+- GOOD: "Among our 4 ad channels, which targeting conditions should we adjust to improve first-purchase conversion?" (specific lever, measurable outcome, within team's control)
+
+**Three checks before starting:**
+1. **Control check**: Can our team directly change the variable in question? If not, reframe to what we CAN control.
+2. **Measurement check**: Can we clearly measure success? Define the metric and threshold upfront.
+3. **Resource check**: If we find the answer, do we have the resources to act on it within a reasonable timeframe?
+
+**The "data-driven paradox" trap**: More data and better tools don't automatically lead to better decisions. The gap is usually between insight and execution — always design the analysis with the end action in mind.
+
 Common mistakes to prevent:
 - Starting analysis without a clear question
 - Scope creep — trying to answer everything at once
@@ -185,6 +199,44 @@ Before analyzing metrics, understand what you're actually measuring:
 - Apply this thinking: "Channel A has higher conversion but huge variance. Channel B is lower but stable. Which is actually better?"
 - When comparing options: normalize by variability, not just average performance
 - Especially useful for: campaign comparison, channel evaluation, pricing strategy assessment
+
+#### Trend Momentum — Don't Just Look at Levels, Look at Velocity
+A metric can be "high" but falling fast, or "low" but rising rapidly. Looking only at current values misses the story.
+
+**When reviewing time-series metrics, always ask:**
+- "Is this metric accelerating, decelerating, or stable?"
+- "How many consecutive periods has it been rising/falling?"
+- "Is the rate of change increasing or slowing down?"
+
+Practical approach (inspired by RSI — Relative Strength Index):
+- Compare recent gains vs recent losses over a window (e.g., last 14 days or 4 weeks)
+- If mostly gains → strong upward momentum → the trend is likely to continue
+- If mostly losses → strong downward momentum → don't assume it will bounce back on its own
+- Mixed signals → flat or transitional period → investigate what's changing
+
+**Why this matters in practice:**
+- A brand/product with high momentum but low absolute sales = **early opportunity** (catch rising stars)
+- A brand/product with declining momentum but still high absolute sales = **early warning** (don't wait for the crash)
+- Helps prioritize: "Which segments need attention NOW?" vs "Which are fine on autopilot?"
+
+#### Cohort Analysis Pitfalls
+When looking at cohort data (retention, LTV curves), watch for these common traps:
+
+**Age vs Period vs Cohort confusion:**
+- **Age effect**: Users naturally become less active over time (normal decay curve)
+- **Period effect**: Something happened in a specific month that affected ALL cohorts (holiday, outage, promotion)
+- **Cohort effect**: A specific group of users was inherently different (acquired via different channel, onboarding changed)
+- If you don't separate these three, you'll misattribute: "This cohort has bad retention" when really "December was bad for everyone" (period effect)
+
+**How to disentangle (practical approach):**
+1. First normalize by period: divide each cohort's metric by the overall monthly metric → removes calendar/promo effects
+2. Then compare cohorts at the same Age → reveals true cohort quality differences
+3. If a cohort looks bad → check: was there an onboarding change, channel shift, or different user mix?
+
+**Censoring trap — recent cohorts always look worse:**
+- The newest cohort hasn't had time to reach Month 6, so it LOOKS like retention is dropping
+- Always compare cohorts at the same maximum Age they've all reached
+- Don't panic about "declining retention" if you're comparing 12-month cohorts to 2-month cohorts
 
 #### Data Access During Conversation
 - **MCP connected**: AI can run queries directly — ask before executing
@@ -280,7 +332,7 @@ Before comparing treatment vs control:
 - **Dose-response**: Does more of the cause produce more of the effect?
 - **Counterfactual**: What happened to the control group / unaffected segment?
 - **Consistency**: Does the pattern hold across different segments and time periods?
-- If true experiment isn't possible → quasi-experimental methods (diff-in-diff, regression discontinuity, propensity score matching)
+- If true experiment isn't possible → see "Quasi-Experimental Methods" section below
 
 **Common traps:**
 - **Selection bias**: Only surveying people who responded → biased sample (e.g., satisfaction survey only captures motivated respondents)
@@ -390,6 +442,104 @@ When the analysis involves designing or evaluating experiments:
 - Not accounting for multiple comparisons (testing 5 metrics → ~23% chance of at least one false positive)
 - Ignoring practical significance: "statistically significant but only 0.1% improvement" → not worth the engineering cost
 
+**Contaminated Control — when the control group is also affected:**
+Sometimes the control group isn't "clean" — they receive a baseline treatment (common coupon, existing feature) that overlaps with what you're testing. In this case:
+- **Stratified analysis**: Split by whether the baseline treatment was received → compare A's effect within each stratum
+- **Interaction modeling**: Include A, B, and A×B terms to see if the baseline treatment absorbs/amplifies A's effect
+- **3-arm design** (when feasible): Create three groups (A only, B only, A+B) to directly measure each effect and their interaction
+- Key question: "Is the additional treatment being cannibalized by the existing one, or do they create synergy?"
+
+#### When A/B Testing Isn't Possible — Quasi-Experimental Methods
+Real-world situations often prevent clean A/B tests (ethical constraints, company-wide promotions, external interference, too few users to randomize). When you need to prove causation without an experiment, consider these approaches.
+
+**The AI should suggest the appropriate method based on the user's situation during conversation.**
+
+**1. Difference-in-Differences (DiD) — "Compare trends, not just levels"**
+- **When to suggest**: There's a clear before/after event AND a comparison group that wasn't affected
+- **How it works**: Compare the change in the treatment group to the change in the control group → the difference-of-differences is the causal effect
+- **Key assumption**: Both groups were trending similarly BEFORE the event (parallel trends)
+- **Example prompt**: "We launched a new feature for Premium users only. Can we compare their retention change to Free users' retention change over the same period?"
+- **Watch out for**: If the groups were already diverging before the event, DiD won't work
+
+**2. Regression Discontinuity (RDD) — "Use a threshold as a natural experiment"**
+- **When to suggest**: There's a clear cutoff/threshold that determines who gets treatment (score ≥ 70 → VIP, purchase ≥ ₩100K → coupon)
+- **How it works**: Users just above and just below the threshold are essentially random → compare their outcomes
+- **Key assumption**: Users can't manipulate their score to cross the threshold
+- **Example prompt**: "Customers with loyalty score ≥ 500 get VIP benefits. Do the benefits actually increase their next-month spending? Let's compare users at 490-510."
+- **Watch out for**: If users know the threshold and game it (e.g., intentionally spending more to qualify), the method breaks down
+
+**3. Propensity Score Matching (PSM) — "Find fair comparison pairs"**
+- **When to suggest**: You want to compare treated vs untreated, but the groups are inherently different (different demographics, behaviors)
+- **How it works**: Calculate each user's probability of receiving treatment based on their characteristics → match similar users across groups → compare outcomes
+- **Key assumption**: All important differences between groups are captured in the matching variables
+- **Example prompt**: "Coupon recipients were our most active users. Can we find non-recipients with similar activity levels to fairly compare?"
+- **Watch out for**: Hidden variables not captured in matching (unmeasured confounders)
+
+**4. Instrumental Variables (IV) — "Use an external lever"**
+- **When to suggest**: There's an external factor that affects treatment but NOT the outcome directly (hardest to find, use with caution)
+- **How it works**: Find a variable (instrument) that influences whether someone gets treated, but only affects the outcome THROUGH the treatment
+- **Example**: Ad time slot (random) → affects whether user sees the ad → but doesn't directly affect purchase intent
+- **Practical note**: Good instruments are rare in marketing. DiD, RDD, and PSM are usually more practical for most business analyses.
+
+**How to choose (conversational guide for the AI):**
+```
+User wants to prove causation but can't do A/B test →
+
+"Do you have a before/after + comparison group?"
+  → YES → Suggest DiD
+
+"Is there a clear threshold/cutoff?"
+  → YES → Suggest RDD
+
+"Can you find similar untreated users to compare?"
+  → YES → Suggest PSM
+
+"None of the above, but there's an external factor..."
+  → MAYBE → Discuss IV (with caveats)
+
+"None of these fit"
+  → Be honest: "We can establish strong correlation with controls,
+    but proving causation requires one of these structures.
+    Let's document this as a limitation."
+```
+
+#### Model Interpretability — When You Build a Prediction Model
+If the analysis involves building a predictive model (churn prediction, LTV estimation, demand forecasting), always pair prediction with explanation.
+
+**The "black box" trap**: A model that predicts well but can't explain WHY is dangerous for decision-making. Stakeholders need to know which levers to pull.
+
+**During conversation, when a model is built, ask:**
+- "Which features matter most for this prediction?" (feature importance)
+- "For this specific case, what pushed the prediction up or down?" (individual explanation)
+- "Do the important features match your domain intuition?" (sanity check)
+- "Where does the model fail? Which segments does it get wrong?" (error analysis)
+
+**SHAP concept (simplified for conversation):**
+- Every prediction can be broken down into each feature's contribution
+- "The model predicted high churn for this user because: low login frequency (+30%), no purchase in 30 days (+25%), but premium membership (-15%)"
+- This turns "the model says they'll churn" into "HERE'S WHY the model thinks they'll churn — and here's what we might change"
+
+**Business validation**: Always check — do the model's top factors match what domain experts believe? If the model says "color of profile picture" is the #1 churn predictor, something is wrong (likely a proxy or data leakage).
+
+#### Time Series Pattern Reading
+When analyzing metrics over time (sales forecasting, trend analysis), focus on patterns and uncertainty, not just point predictions.
+
+**What to look for:**
+- **Trend**: Is there a long-term upward or downward direction?
+- **Seasonality**: Are there repeating patterns (weekly, monthly, annual cycles)?
+- **Irregularity**: Are there sudden spikes/drops that don't fit the pattern? (external events, data issues)
+
+**Uncertainty communication is crucial:**
+- Never present a single predicted number — always present a range
+- "We expect next month's revenue to be ₩500M-₩600M, with ₩550M as the most likely" (not just "₩550M")
+- Wider range = more uncertainty = signal to investigate what's driving the instability
+- Short-term forecasts are more reliable than long-term — be explicit about this
+
+**When uncertainty suddenly increases:**
+- Ask: "What changed? New competitor? Seasonal shift? Tracking change?"
+- Increased uncertainty itself is an insight — "the market is becoming less predictable"
+- This is valuable for planning: wider uncertainty → larger safety margins needed
+
 #### Sensitivity Analysis
 Before finalizing findings, test robustness:
 - "If we change the date range by ±1 week, does the conclusion hold?"
@@ -443,12 +593,6 @@ The analyst's role is not to "give the answer" but to "build the decision tool."
 - High market volatility
 - Unprecedented policy with no analogous data
 - → In these cases, present wider confidence intervals and emphasize worst-case scenarios
-
-#### Mid-Conversation Data Handling
-- When user provides a file: read it, summarize structure, ask what to look for
-- When MCP is available: propose queries, get confirmation, run and discuss results
-- When user shares screenshots: interpret patterns, ask clarifying questions
-- When running ad-hoc analysis: document every query/step for reproducibility in `assets/`
 
 Common mistakes to prevent:
 - Confirmation bias — only looking for supporting evidence
@@ -518,6 +662,23 @@ When presenting quantitative findings:
 - **Cross-functional (marketing, ops)**: Connect to their KPIs. "Here's how this affects your campaign ROI."
 - Reference stakeholders from config.md to auto-suggest audience sections.
 
+#### From Insight to Execution — The Translation Step
+Analysis without an execution path is just intellectual exercise. Every recommendation should come with a concrete action plan.
+
+**Execution roadmap structure:**
+1. **Immediate** (this week): What can we change right now with no dependencies? (e.g., adjust ad targeting, change push notification rules)
+2. **Short-term** (2 weeks): What needs a small experiment or coordination? (e.g., A/B test a new feature placement, segment-based campaign)
+3. **Medium-term** (1+ month): What needs development or cross-team effort? (e.g., build a scoring system, redesign a flow)
+
+**For each action, specify:**
+- What exactly to do (specific, not vague)
+- Who needs to be involved (which team, which role)
+- What resources are required (time, people, tools)
+- How to measure if it worked
+
+**The "survivorship bias" warning:**
+When recommending based on analysis of current users, always flag: "This analysis is based on users who stayed. It doesn't capture what drove people away." If the recommendation optimizes for power users, ask: "Will this make the product harder for new/casual users?"
+
 Common mistakes to prevent:
 - Burying the lead — not stating the conclusion first
 - Presenting findings without "So what?" and "Now what?"
@@ -525,6 +686,7 @@ Common mistakes to prevent:
 - Using jargon with non-technical audiences
 - Not answering the original question from ASK
 - Presenting trade-offs as one-sided recommendations
+- Stopping at insight without providing an execution path
 
 ### Stage 5: EVOLVE (🌱)
 **Core question**: What would change our conclusion — and what should we ask next?
@@ -590,6 +752,7 @@ Common mistakes to prevent:
 - [ ] 🟢/🔴 Have you secured relevant domain knowledge?
 - [ ] 🟢/🔴 Have you created an analysis plan that fits the timeline?
 - [ ] 🟢/🔴 Have you estimated time per scope area?
+- [ ] 🟢/🔴 Is the question actionable? (execution test: will the result change what we do?)
 - [ ] 🟢/🔴 Have you confirmed the data specification and access method?
 - [ ] 🟢/🔴 Have you considered a confusion matrix (if applicable)?
 - [ ] 🟢/🔴 Have you considered appropriate sample size?
@@ -642,6 +805,7 @@ Common mistakes to prevent:
 - [ ] 🟢/🔴 Have you included trade-off analysis for recommendations?
 - [ ] 🟢/🔴 Have you checked guardrail metrics impact?
 - [ ] 🟢/🔴 Are limitations visible (not buried in a footnote)?
+- [ ] 🟢/🔴 Does each recommendation include a concrete execution path (what, who, when)?
 ### Quality
 - [ ] 🟢/🔴 Have you accurately answered the requester's question?
 - [ ] 🟢/🔴 Have you reviewed results with a colleague?
@@ -737,6 +901,8 @@ The AI is a guide and co-analyst, not an auto-generator.
 2. **One stage at a time** — Never skip ahead. Complete the current stage through conversation before moving on.
 3. **User writes the insight, AI structures it** — The user provides domain knowledge and judgment. AI helps organize, challenge, and document.
 4. **Pause at checklists** — Before advancing, walk through the checklist WITH the user. Each item is a conversation, not a checkbox to auto-fill.
+5. **Suggest methods contextually, never prescribe** — The kit contains many analytical methods (quasi-experiments, clustering, simulation, etc.). The AI should surface the right method ONLY when the user's situation naturally calls for it, through conversation. Never dump a list of methods. Instead: "Since you have a clear before/after and a comparison group, we could use a difference-in-differences approach to isolate the effect. Would that be useful here?"
+6. **Diverse perspectives, not rigid rules** — Every analysis is unique. The frameworks in this kit are lenses to look through, not boxes to fill. The AI should offer multiple perspectives ("Have you considered looking at this from the cohort angle?" or "What if we check the trend momentum, not just the current level?") and let the user decide what's relevant.
 
 ### Stage-by-Stage Conversation Flow
 
