@@ -74,6 +74,31 @@ Generate `01_ask.md`:
 - Question:
 - Requester:
 - Background:
+- Trigger: What event/observation prompted this question?
+
+## Framing
+- Type: Causation ("Why did X happen?") / Correlation ("Are X and Y related?")
+- Decision this will inform:
+- Cost of being wrong:
+
+## Hypothesis Tree
+```
+Main question: "{title}"
+├── Internal factors
+│   ├── Product changes:
+│   ├── Channel/acquisition changes:
+│   ├── Cross-service impact:
+│   └── Operations/pricing changes:
+├── External factors
+│   ├── Seasonality/calendar:
+│   ├── Competitor actions:
+│   ├── Market/economic shifts:
+│   └── Platform changes:
+└── Data artifacts
+    ├── Tracking/instrumentation changes:
+    ├── Metric definition changes:
+    └── Population/mix changes:
+```
 
 ## Success Criteria
 - What does "done" look like?
@@ -85,10 +110,12 @@ Generate `01_ask.md`:
 - In scope:
 - Out of scope:
 - Deadline:
+- Multi-lens plan: macro (market) / meso (company) / micro (user)
 
 ## Data Sources
 - Primary:
 - Secondary:
+- Access method: (MCP / file / manual query / BI dashboard)
 
 ---
 {Insert ASK checklist from .analysis/checklists/ask.md}
@@ -120,10 +147,13 @@ Generate `01_ask.md`:
 ## Objective
 - What are you trying to predict / classify / segment?
 - Business impact: Why does this matter?
+- Decision this model will inform:
+- What happens if the model is wrong? (cost of false positives vs false negatives)
 
 ## Success Criteria
 - Target metric (e.g., "AUC > 0.8", "MAPE < 10%")
 - Business success (e.g., "reduce churn by 5% if deployed")
+- Minimum viable performance (below which the model isn't useful):
 
 ## Assumptions
 -
@@ -133,14 +163,19 @@ Generate `01_ask.md`:
 - Candidate features:
 - Training period:
 - Prediction horizon:
+- Expected deployment context (batch / real-time / on-demand):
 
 ## Data Sources
 - Primary:
 - Secondary:
+- External data opportunities: (market data, third-party signals)
+- Cross-service features available:
+- Access method: (MCP / file / manual query)
 
 ## Constraints
-- Must be interpretable? (Yes / No)
-- Real-time requirement? (Yes / No)
+- Must be interpretable? (Yes / No — and for whom?)
+- Real-time requirement? (Yes / No — latency budget?)
+- Fairness constraints: (protected groups, bias concerns)
 - Guardrail metrics to watch: (reference from config.md)
 
 ---
@@ -160,20 +195,33 @@ Generate `assets/README.md` (same as Investigation).
 - Distribution:
 - Class balance (if classification):
 - Missing rate:
+- Temporal patterns:
 
 ## Feature Exploration
-| Feature | Type | Missing % | Notes |
-|---------|------|-----------|-------|
-| | | | |
+| Feature | Type | Missing % | Correlation w/ Target | Leakage Risk | Notes |
+|---------|------|-----------|----------------------|-------------|-------|
+| | | | | | |
 
 ## Data Quality
 - Outliers:
-- Leakage risk:
+- Leakage risk (features that contain future information):
 - Time-based splits needed?
+- Feature staleness (how fresh does each feature need to be?):
+
+## External & Cross-Service Features
+- External data sources worth including? (market, weather, competitor)
+- Cross-service features available? (from adjacent products/services)
+- Feature engineering opportunities:
+
+## Confounding & Bias Check
+- Selection bias in training data?
+- Label quality (how reliable is the target variable?):
+- Population drift risk (will the training population match production?):
 
 ## Sampling Strategy
 - Training / Validation / Test split:
 - Stratification:
+- Temporal ordering preserved?
 
 ---
 {Insert LOOK checklist}
@@ -187,30 +235,46 @@ Generate `assets/README.md` (same as Investigation).
 ## Baseline
 - Naive baseline method:
 - Baseline performance:
+- Why this baseline? (justification):
 
 ## Model Selection
-| Model | Hyperparameters | Train Score | Val Score | Notes |
-|-------|----------------|-------------|-----------|-------|
-| | | | | |
+| Model | Hyperparameters | Train Score | Val Score | Test Score | Overfit? | Notes |
+|-------|----------------|-------------|-----------|-----------|---------|-------|
+| | | | | | | |
 
 ## Best Model
 - Model:
 - Key features (importance / coefficients):
 - Performance vs success criteria:
+- Why this model over alternatives? (interpretability, speed, accuracy trade-off):
 
 ## Validation
 - Cross-validation results:
 - Test set performance:
 - Overfitting check (train vs val gap):
+- Temporal validation (if time-series): does performance degrade over time?
+
+## Sensitivity Analysis
+- Feature ablation: which features can be removed without significant loss?
+- Hyperparameter sensitivity: how much does performance change with different params?
+- Data size sensitivity: how does performance change with less training data?
 
 ## Error Analysis
-- Where does the model fail?
-- Systematic bias?
+- Where does the model fail? (which segments, which examples):
+- Systematic bias? (does it consistently over/under-predict for certain groups):
+- Fairness check: different performance across demographic segments?
+- Edge cases: extreme values, rare classes, boundary conditions:
+
+## Business Validation
+- Does the model output make intuitive business sense?
+- Have domain experts reviewed sample predictions?
+- Sanity check: do feature importances align with domain knowledge?
 
 ## Reproducibility
 - Code location: `assets/`
 - Environment / dependencies:
 - Random seed:
+- Data snapshot / version:
 
 ---
 {Insert INVESTIGATE checklist}
@@ -224,23 +288,43 @@ Generate `assets/README.md` (same as Investigation).
 ## Executive Summary
 (1-3 sentences: what the model does, how well it works, business impact)
 
-## Model Performance
+## So What → Now What
+
+### Model Performance
 - Key metric: {metric} = {value} (target was {target})
 - Comparison to baseline: {improvement}
+- **So What?** What does this performance level mean in business terms?
+- **Now What?** Deploy / iterate / abandon?
 
-## Business Interpretation
+### Business Interpretation
 - What does the model tell us about the business?
-- Top drivers / features:
+- Top drivers / features — do they match domain intuition?
+- Unexpected findings:
 
-## Recommendations
+## Deployment Recommendation
 - Deploy to production? (Yes / No / Conditional)
+- **Confidence**: 🟢 High / 🟡 Medium / 🔴 Low
 - Expected business impact:
-- Monitoring plan:
+- Rollout strategy: (shadow mode → A/B test → full deployment)
+
+## Trade-off Analysis
+- Accuracy vs interpretability:
+- Speed vs performance:
+- Coverage vs precision:
+- Guardrail metrics impact (reference config.md):
+
+## Monitoring Plan
+- Key metrics to track in production:
+- Model drift detection strategy:
+- Retraining trigger conditions:
+- Fallback plan if model degrades:
 
 ## Limitations & Risks
-- Known failure modes:
+(First-class content, not a footnote)
+- Known failure modes and segments:
 - Data freshness requirements:
-- Guardrail metrics impact:
+- What would invalidate this model:
+- Fairness concerns:
 
 ## Audience-specific Messages
 
@@ -265,30 +349,38 @@ Create file: `analyses/active/quick_{ID}_{title-slug}.md`
 
 ## ASK
 - Question / Objective:
-- Background:
+- Framing: Causation / Correlation
+- Top hypotheses: (1) (2) (3)
 - Deadline:
 
 ## LOOK
 - Data source:
+- Key segments checked:
+- External factors considered:
 - Notable findings:
 
 ## INVESTIGATE
 - Method:
+- Hypotheses tested: ✅ / ❌ / ⚠️
 - Result:
+- Confidence: 🟢 High / 🟡 Medium / 🔴 Low
 
 ## VOICE
-- Conclusion (1-2 sentences):
+- So What? (business impact):
+- Now What? (recommended action):
 - Audience:
 
 ## EVOLVE
+- What would change this conclusion?
 - Follow-up needed: Yes / No
 - Next question:
 
 ---
 Check: 🟢 Proceed / 🔴 Stop
-- [ ] Is the purpose clear?
-- [ ] Is the data/method appropriate?
-- [ ] Does the conclusion answer the question?
+- [ ] Is the purpose clear and framed (causal/correlational)?
+- [ ] Was the data segmented (not just aggregated)?
+- [ ] Were alternative hypotheses considered?
+- [ ] Does the conclusion answer the question with confidence level?
 
 ---
 > 💡 If this analysis is getting bigger: `/analysis new --from {ID}`

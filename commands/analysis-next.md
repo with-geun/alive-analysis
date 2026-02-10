@@ -43,12 +43,39 @@ Based on current stage, generate the next file.
 ## Data Sources
 - Primary:
 - Secondary:
+- Access method: (MCP / exported file / manual query / BI dashboard)
 
 ## Data Quality Review
 - Row count:
 - Date range:
 - Missing values:
 - Known issues:
+
+## Segmentation
+Break down BEFORE drawing conclusions:
+- By time:
+- By cohort:
+- By platform:
+- By segment:
+
+Key question: "Does the pattern hold across ALL segments, or is it driven by one?"
+
+## Confounding Variables
+- What else changed at the same time?
+- Population comparison: Are we comparing the same groups?
+- Survivorship bias risk:
+- Simpson's paradox check:
+
+## External Factors
+- Calendar: holidays, seasonality, industry events
+- Competitors: recent launches, pricing changes
+- Platform: iOS/Android policy, algorithm updates
+- Macro: economic indicators, regulation changes
+
+## Cross-Service Check
+- Related services that may be affected:
+- Shared resources (auth, data pipeline, user base):
+- Recent changes in adjacent services:
 
 ## Outliers & Anomalies
 -
@@ -70,25 +97,59 @@ Based on current stage, generate the next file.
 # INVESTIGATE: {title}
 > ID: {ID} | Stage: 🔍 INVESTIGATE | Updated: {YYYY-MM-DD}
 
-## Hypotheses
-1.
-2.
+## Hypothesis Scorecard
+| # | Hypothesis | Evidence For | Evidence Against | Status | Contribution |
+|---|-----------|-------------|-----------------|--------|-------------|
+| 1 | | | | ✅/❌/⚠️ | ~%  |
+| 2 | | | | ✅/❌/⚠️ | ~%  |
+| 3 | | | | ✅/❌/⚠️ | ~%  |
 
-## Methodology
-- Approach:
-- Tools:
+Strategy: Test the easiest-to-disprove hypotheses first.
+
+## Multi-Lens Analysis
+
+### Macro (market/industry)
+- Industry-wide trend?
+- Competitor actions?
+- Economic/regulatory factors?
+
+### Meso (company/product)
+- Cross-service impact?
+- Channel mix shift?
+- Product changes (releases, A/B tests)?
+
+### Micro (user/session)
+- User behavior patterns:
+- Cohort-specific trends:
+- Edge cases:
+
+## Causation vs Correlation
+(Fill if causal claims are being made)
+- Time ordering: Did cause precede effect?
+- Mechanism: Plausible pathway?
+- Dose-response: More cause → more effect?
+- Counterfactual: Control group / unaffected segment?
+- Conclusion: Causal / Correlational / Inconclusive
 
 ## Results
 
 ### Finding 1
 - Description:
 - Evidence:
-- Confidence:
+- Confidence: 🟢 High / 🟡 Medium / 🔴 Low
+- Reasoning:
 
 ### Finding 2
 - Description:
 - Evidence:
-- Confidence:
+- Confidence: 🟢 High / 🟡 Medium / 🔴 Low
+- Reasoning:
+
+## Sensitivity Analysis
+- Date range ±1 week: Same result?
+- Exclude outliers: Same pattern?
+- Different metric definition: Consistent?
+- Minimum actionable effect size:
 
 ## Interpretation
 -
@@ -107,20 +168,33 @@ Based on current stage, generate the next file.
 > ID: {ID} | Stage: 📢 VOICE | Updated: {YYYY-MM-DD}
 
 ## Executive Summary
-(1-3 sentences for leadership)
+(1-3 sentences for leadership — lead with business impact)
 
-## Detailed Findings
-(For the requesting team)
+## So What → Now What
 
-### Key Insight 1
--
+### Finding 1
+- **Finding**:
+- **So What?** (business impact):
+- **Now What?** (options):
+  - Option A: {action} — benefit: {X}, risk: {Y}
+  - Option B: {action} — benefit: {X}, risk: {Y}
+- **Confidence**: 🟢 High / 🟡 Medium / 🔴 Low
+- **Reasoning**:
 
-### Key Insight 2
--
+### Finding 2
+- **Finding**:
+- **So What?**:
+- **Now What?**:
+- **Confidence**: 🟢 High / 🟡 Medium / 🔴 Low
+- **Reasoning**:
 
 ## Recommendations
-1.
-2.
+1. (with trade-off analysis)
+2. (with trade-off analysis)
+
+## Guardrail Impact
+- Does this recommendation affect any guardrail metrics? (reference config.md)
+- Trade-off: improving {metric A} may risk {metric B}
 
 ## Audience-specific Messages
 
@@ -130,10 +204,16 @@ Based on current stage, generate the next file.
 ### For {stakeholder 2}
 -
 
-## Data Sources & Caveats
-- Sources:
-- Limitations:
-- Confidence level:
+## Limitations & Caveats
+(These are first-class content, not a footnote)
+- What we couldn't verify:
+- Where sample was small:
+- Assumptions we made:
+- What would change our conclusion:
+
+## Data Sources
+- Sources used:
+- Query locations: `assets/`
 
 ---
 {Insert VOICE checklist from .analysis/checklists/voice.md}
@@ -144,10 +224,22 @@ Based on current stage, generate the next file.
 # EVOLVE: {title}
 > ID: {ID} | Stage: 🌱 EVOLVE | Updated: {YYYY-MM-DD}
 
+## Conclusion Robustness Check
+- What new data could **disprove** our conclusion?
+- What **assumptions** did we make but not verify?
+- If a colleague challenged this, what would they attack?
+- In 3 months, what would make us say "we were wrong"?
+
 ## Reflection
 - What went well in this analysis?
 - What could be improved?
 - What surprised us?
+
+## Monitoring Setup
+- Metric to track going forward:
+- Threshold for re-investigation:
+- Dashboard / alert: (reference data stack from config.md)
+- Owner:
 
 ## Unanswered Questions
 -
@@ -155,6 +247,17 @@ Based on current stage, generate the next file.
 ## Follow-up Analysis Proposals
 - [ ] {description} → (not yet created)
 - [ ] {description} → (not yet created)
+
+## Knowledge Capture
+- Reusable patterns (SQL templates, segmentation approaches):
+- Data gotchas for future analyses:
+- Saved queries/notebooks: `assets/`
+- Data quality issues to flag:
+
+## North Star Connection
+- How does this connect to {North Star metric from config.md}?
+- Does this change our understanding of what drives it?
+- Should our metric framework be updated?
 
 ## Automation Opportunities
 - Can any part of this analysis be automated/scheduled?
