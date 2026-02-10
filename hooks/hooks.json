@@ -1,0 +1,9 @@
+{
+  "hooks": [
+    {
+      "event": "SessionStart",
+      "command": "bash hooks/session-start.sh",
+      "description": "Welcome message and quick status on session start"
+    }
+  ]
+}
