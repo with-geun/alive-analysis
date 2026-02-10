@@ -201,6 +201,53 @@ Before finalizing findings, test robustness:
 - "If we use a different metric definition, do we get the same result?"
 - "What's the minimum effect size that would be actionable?"
 
+#### Simulation Analysis (when evaluating policies or strategies)
+When the analysis involves "What would happen if we do X?", use simulation methodology.
+Simulation is often more effective than ML prediction because the calculation is transparent and stakeholders can follow every step.
+
+**When to use simulation:**
+- Policy/strategy evaluation ("If we lower delivery fees, what happens to revenue?")
+- Pricing changes, promotion design, business model adjustments
+- Any decision where you need to show the P&L impact of different options
+
+**4-Step Simulation Framework:**
+
+**Step 1: Identify variable accounts**
+- From all financial/business items, select ONLY what changes with the policy
+- Example: delivery fee policy → variable: delivery revenue, promo cost, subscription conversion
+- Everything else (headcount, server cost, fixed marketing) stays constant
+
+**Step 2: Define variable relationships**
+- Map how the policy change cascades to other variables
+- Use historical data or analogous cases as evidence for assumptions
+- Example: "Lowering delivery fee → order volume +X% → non-subscriber conversion +Y%"
+- X, Y should be grounded in past promotion data or competitor benchmarks
+
+**Step 3: Scenario experiments**
+- Run multiple scenarios by adjusting input values
+- **Sensitivity analysis**: Which variable has the biggest impact on the result?
+- **Breakeven analysis**: At what point does P&L flip from positive to negative?
+- Present as: conservative / neutral / aggressive scenarios
+- For 3+ uncertain variables: consider Monte Carlo simulation (assign probability distributions, run 1000+ iterations, present confidence intervals)
+
+**Step 4: Continuous refinement**
+- Simulation is NOT "build once, done forever" — it's a living model
+- Compare simulation predictions vs actual results after policy execution
+- Discover new variables you missed (e.g., "average order value also changed")
+- Version-manage the simulation: track how assumptions evolved
+
+**Handle Bar concept:**
+The analyst's role is not to "give the answer" but to "build the decision tool."
+- Create adjustable inputs (sliders, parameters) that stakeholders can tweak themselves
+- "What if we set the minimum order at 20,000 instead of 15,000?"
+- This empowers the business team and speeds up iteration
+
+**When simulation is less reliable:**
+- Sudden competitor response or regulatory changes
+- High market volatility
+- Unprecedented policy with no analogous data
+- → In these cases, present wider confidence intervals and emphasize worst-case scenarios
+
 #### Mid-Conversation Data Handling
 - When user provides a file: read it, summarize structure, ask what to look for
 - When MCP is available: propose queries, get confirmation, run and discuss results
@@ -214,6 +261,7 @@ Common mistakes to prevent:
 - Ignoring external and cross-service factors
 - Not recording queries/code for reproduction
 - Over-complicating analysis when a simple comparison suffices
+- Running a simulation without grounding assumptions in data
 
 ### Stage 4: VOICE (📢)
 **Core question**: So what — and now what?
@@ -251,6 +299,15 @@ For each recommendation, make the trade-offs explicit:
 - What's the **cost of inaction**?
 - Reference guardrail metrics from config.md: "This recommendation would improve conversion but check impact on refund rate."
 
+#### Presenting Simulation Results
+When the analysis involved simulation (policy/strategy evaluation):
+- Present 3 scenarios: **conservative / neutral / aggressive** — never just one number
+- Show the **breakeven point**: "This policy becomes unprofitable if conversion drops below X%"
+- Highlight the **most sensitive variable**: "The result is most affected by subscription conversion rate"
+- If Monte Carlo was used: "90% probability the result falls between X and Y"
+- For stakeholders, avoid jargon ("confidence interval") → use plain language ("best case / expected / worst case")
+- Offer **handle bars**: "If you want to test different assumptions, here are the adjustable inputs"
+
 #### Audience-Specific Communication
 - **Executives / C-level**: Lead with business impact in one sentence. Numbers, not methodology. "So what does this mean for revenue?"
 - **Product / Engineering**: Include technical detail. "Which feature, which release, which segment." Actionable next steps.
@@ -281,6 +338,14 @@ Before finalizing, stress-test the analysis:
 - "What **assumptions** did we make that we didn't verify?"
 - "If a colleague challenged this, what would they attack first?"
 - "In 3 months, what would make us say 'we were wrong'?"
+
+#### Simulation Refinement (if simulation was used)
+Simulations are living models — they need continuous care:
+- **Actual vs Predicted**: After policy execution, compare simulation predictions to real results
+- **Assumption update**: Which assumptions were off? Update the model
+- **New variable discovery**: Did unexpected factors emerge? (e.g., "average order value also changed")
+- **Version management**: Record how the simulation evolved (v1 assumptions → v2 adjustments → v3 with new variables)
+- **Reusability**: Can this simulation framework be applied to similar future policies?
 
 #### Monitoring Setup
 If the analysis identified a real issue or opportunity:
