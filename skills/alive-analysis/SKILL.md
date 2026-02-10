@@ -126,6 +126,32 @@ Before attributing any pattern, check:
 - Check company context: other team's releases, cross-service changes
 - Reference config.md guardrail metrics — are any of them moving too?
 
+#### Data Specification Gotchas
+Before trusting ANY data, verify these common traps:
+
+**Geographic data:**
+- Verify coordinate system: WGS84 (lat/lng) vs projected (UTM-K, etc.) — mixing them silently corrupts distance/area calculations
+- Administrative district mismatch: 행정동 ≠ 법정동 — same name, different boundaries, M:N relationship between the two
+- Population data is usually 행정동-based, but business addresses are often 법정동 — combining them without matching creates wrong numbers
+- When in doubt, use higher-level geography (시군구) or raw coordinates with spatial joins
+
+**Metric definitions:**
+- Same metric name, different calculation across teams (e.g., "GMV" = gross? net? after coupon?)
+- Check if definitions changed over time (metric redefined mid-period → trend break that looks like a real change)
+- Verify with data owners: "Is this the same definition used in the dashboard?"
+
+**Time and date:**
+- Timezone: UTC vs local time — a 9-hour shift (KST) can move an entire day of data
+- Business day vs calendar day (weekends, holidays treated differently)
+- Event timestamps: server time vs client time vs display time
+
+**Units and filters:**
+- Currency: before/after tax, with/without discounts, local vs USD
+- Hidden filters: "active users" might exclude recently churned, test accounts, internal accounts
+- Population drift: the definition of "user" may change as tracking evolves
+
+**When you find a gotcha**: Document it in the analysis as a Data Quality Note — future analyses will thank you.
+
 #### Data Access During Conversation
 - **MCP connected**: AI can run queries directly — ask before executing
 - **User provides files**: Read CSV/Excel/JSON files provided during conversation
@@ -138,6 +164,7 @@ Common mistakes to prevent:
 - Re-verifying already confirmed data
 - Skipping data quality checks
 - Assuming correlation found in LOOK implies causation
+- Mixing data with different specifications without verifying alignment
 
 ### Stage 3: INVESTIGATE (🔍)
 **Core question**: Why is it REALLY happening — can we prove it?
@@ -180,12 +207,77 @@ Micro (user/session level)
 ```
 
 #### Causation Testing (when causal claims are needed)
+
+**Step 1: Draw the causal picture (even informally)**
+Before running any numbers, sketch the relationships:
+- What's the treatment (T)? What's the outcome (Y)?
+- What other variables might affect BOTH T and Y? (these are confounders)
+- Are there mediators in between? (T → M → Y)
+- Watch out for colliders (T → C ← Y) — conditioning on these creates false associations
+
+Three patterns to recognize:
+```
+Chain:    T → M → Y     Conditioning on M blocks the path (breaks the causal flow)
+Fork:     T ← X → Y     Conditioning on X blocks confounding (this is what you WANT)
+Collider: T → C ← Y     Conditioning on C OPENS a false path (this is a TRAP)
+```
+
+**Step 2: Block confounding paths**
+- Identify all "backdoor paths" — paths from T to Y that go through common causes
+- Block them by conditioning on the confounders (compare within similar groups)
+- Example: "Comparing companies that hired consultants vs didn't" — must condition on prior revenue (companies with higher past revenue are more likely to both hire consultants AND have higher future revenue)
+- The goal: make it as if treatment was randomly assigned within each subgroup
+
+**Step 3: Handle unmeasurable confounders**
+Sometimes you can't directly measure the confounder (e.g., "manager quality"):
+- Use **proxy variables**: manager tenure, education level, team turnover rate
+- Proxies aren't perfect but reduce bias significantly
+- Be explicit about what you CAN'T control for — this goes into limitations
+
+**Step 4: Verify comparable groups**
+Before comparing treatment vs control:
+- Were the groups comparable BEFORE the treatment? (check pre-period metrics)
+- If not comparable → the difference is NOT purely due to treatment (bias exists)
+- Within subgroups of similar characteristics, does the treatment effect hold?
+
+**Step 5: Basic causal checklist**
 - **Time ordering**: Did the cause precede the effect?
 - **Mechanism**: Is there a plausible pathway from cause to effect?
 - **Dose-response**: Does more of the cause produce more of the effect?
 - **Counterfactual**: What happened to the control group / unaffected segment?
 - **Consistency**: Does the pattern hold across different segments and time periods?
 - If true experiment isn't possible → quasi-experimental methods (diff-in-diff, regression discontinuity, propensity score matching)
+
+**Common traps:**
+- **Selection bias**: Only surveying people who responded → biased sample (e.g., satisfaction survey only captures motivated respondents)
+- **Collider bias**: Conditioning on an effect of both variables opens a false path (e.g., conditioning on "got promoted" when studying stats skill vs office politics)
+- **Survivorship bias**: Only looking at users who stayed → missing the ones who left
+
+#### Statistical Rigor (when making claims from numbers)
+
+Don't just report numbers — report how reliable they are:
+
+**Sample size awareness:**
+- Small samples → high chance of noise masquerading as signal
+- Ask: "If I repeated this analysis with different data, would I get the same result?"
+- Rule of thumb: be skeptical of conclusions from fewer than ~30 data points per group
+
+**Confidence and significance:**
+- **Confidence interval**: "The true value is likely between X and Y" (not just a point estimate)
+- **Statistical significance**: "Could this difference be random noise?"
+- **For stakeholders** — translate into plain language:
+  - NOT: "p = 0.02, CI [1.2, 3.5]"
+  - YES: "We're quite confident this is a real effect, not noise. The improvement is likely between 1.2% and 3.5%."
+
+**Power and sample size:**
+- Before running an experiment: calculate how many samples you NEED
+- Low statistical power = high chance of missing a real effect
+- More samples → narrower confidence interval → more reliable conclusion
+
+**When comparing groups:**
+- Always check: are the groups comparable before the treatment/event?
+- If confidence intervals of two groups overlap heavily → the difference may not be real
+- Report effect sizes, not just p-values — "statistically significant" ≠ "practically important"
 
 #### Cross-Service Impact Analysis
 In organizations with multiple products/services:
