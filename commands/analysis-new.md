@@ -1,6 +1,6 @@
 # /analysis new
 
-Start a new analysis. Supports `--from {Quick ID}` for Quick-to-Full succession.
+Start a new analysis. Supports `--from {Quick ID}` for Quick-to-Full succession and `--from-alert {Alert ID}` for monitor alert escalation.
 
 ## Instructions
 
@@ -11,6 +11,7 @@ Read config.md to load team context (metrics, stakeholders, data stack).
 
 ### Step 2: Parse arguments
 
+- If `--from-alert {Alert ID}` is provided, this is a monitor alert escalation (skip to Step 2d)
 - If `--from {ID}` is provided, this is a Quick→Full succession (skip to Step 2c)
 - Otherwise, proceed to Step 2a
 
@@ -79,6 +80,34 @@ Use AskUserQuestion:
 - Update the Quick file's Status line to `⬆️ Promoted to Full: {new Full ID}`
 - In status.md, change the Quick row's Stage to `⬆️ Promoted → {new Full ID}`
 - Keep the Quick file in `analyses/active/` for reference — do not archive or delete
+
+### Step 2d: Monitor alert escalation (`--from-alert`)
+
+When a monitor alert triggers an investigation:
+
+1. **Read the alert file**: `.analysis/metrics/alerts/{YYYY-MM}/{alert-id}.md`
+   - Extract: metric name, current value, change amount, comparison basis, severity, counter-metric status
+2. **Read the linked metric definition**: from `.analysis/metrics/definitions/{tier}/{slug}.md`
+   - Extract: metric context, interpretation guide, healthy range, counter-metric
+3. **Read the linked monitor**: from `.analysis/metrics/monitors/{monitor-id}_{slug}.md`
+   - Extract: check history (for trend context), related analyses
+
+4. **Auto-fill the Investigation**:
+   - Mode: **Full** (alert escalations always use Full mode)
+   - Type: **Investigation**
+   - Title: auto-suggest `{metric name} {severity} — {date}` (user can modify)
+   - ASK pre-fill:
+     - Problem Definition: "Why did {metric} hit {severity}? (Alert {alert-id})"
+     - Current value: {value}, Previous: {previous}, Change: {delta} ({delta%})
+     - Comparison basis: {WoW/MoM/etc.}
+     - Counter-metric status at time of alert
+     - Context from alert file (deployments, experiments, campaigns, external events)
+   - Provenance section: `Triggered by alert: {alert-id} from monitor {monitor-id}`
+
+5. **Update the alert file**: Check off the escalation line:
+   - `[x] Escalated to Investigation: {new analysis ID}`
+
+6. **Proceed to Step 3** (Generate ID) with type=Investigation, mode=Full
 
 ### Step 3: Generate ID
 

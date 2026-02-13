@@ -77,6 +77,13 @@ Then ask the agent: "Start a new analysis" — it will pick up the ALIVE skill a
 | `/experiment next` | Advance to the next experiment stage |
 | `/experiment archive` | Archive a completed experiment |
 
+### Monitoring
+| Command | Description |
+|---------|-------------|
+| `/monitor setup` | Register a metric and create a monitor |
+| `/monitor check` | Run a health check on one or all monitors |
+| `/monitor list` | Show all monitors with status dashboard |
+
 ## The ALIVE Loop
 
 ### ASK — Define the question
@@ -146,6 +153,34 @@ For low-risk tests. Single file with abbreviated stages.
 ```
 ab-tests/active/quick_QE-2026-0215-002_button-color.md
 ```
+
+## Metric Monitoring
+
+Track key metrics over time with structured health checks and alerts.
+
+```
+Monitor Setup → Regular Checks → Alerts → Escalation to Investigation
+```
+
+### How it works
+
+1. **Register a metric** — define what it measures, healthy range, and thresholds
+2. **Create a monitor** — set cadence (daily/weekly/monthly) and comparison basis
+3. **Run checks** — evaluate current values against thresholds
+4. **Get alerts** — Warning (🟡) and Critical (🔴) alerts with escalation rules
+
+```
+.analysis/metrics/
+├── definitions/          ← Metric definitions (STEDII validated)
+│   ├── north-star/
+│   ├── leading/
+│   ├── guardrail/
+│   └── diagnostic/
+├── monitors/             ← Active monitors with check history
+└── alerts/               ← Alert records by month
+```
+
+Metrics from EVOLVE proposals flow directly into monitoring: propose a metric during analysis, then `/monitor setup` to track it.
 
 ## Customization
 

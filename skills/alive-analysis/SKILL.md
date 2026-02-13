@@ -972,6 +972,8 @@ Check: 🟢 Proceed / 🔴 Stop
 - **Simulation**: `S-{YYYY}-{MMDD}-{sequence}` (e.g., `S-2026-0210-001`)
 - **Experiment**: `E-{YYYY}-{MMDD}-{sequence}` (e.g., `E-2026-0215-001`)
 - **Quick Experiment**: `QE-{YYYY}-{MMDD}-{sequence}` (e.g., `QE-2026-0215-001`)
+- **Monitor**: `M-{YYYY}-{MMDD}-{sequence}` (e.g., `M-2026-0301-001`)
+- **Alert**: `A-{YYYY}-{MMDD}-{sequence}` (e.g., `A-2026-0305-001`)
 - Sequence resets daily, starts at 001
 
 ---
@@ -1662,3 +1664,203 @@ Monitoring → "Track the launched change over time"
 - From analysis to experiment: `/experiment new` — reference the analysis ID in the Design stage
 - From experiment to analysis: `/analysis new` — reference the experiment ID in the ASK stage
 - From experiment to monitoring: Set up post-launch checkpoints in the Learn stage
+- From alert to analysis: `/analysis new --from-alert {alert-id}` — escalate metric issues to Investigation
+
+---
+
+## Metric Monitoring Guide
+
+### Overview
+
+Monitoring closes the loop: analyses discover insights, experiments validate them, and monitors track them over time.
+
+```
+Analysis → "Metric X matters"
+    ↓
+Monitor Setup → "Track X with thresholds"
+    ↓
+Regular Checks → "Is X healthy?"
+    ↓
+Alert → "X dropped below threshold"
+    ↓
+Investigation → "Why did X drop?" → new analysis
+```
+
+### Metric Tiers
+
+Organize metrics into tiers from `.analysis/config.md`:
+
+| Tier | Icon | Purpose | Typical Cadence |
+|------|------|---------|----------------|
+| North Star | 🌟 | The ONE metric that best captures value delivered to users | Weekly |
+| Leading | 📊 | Predict future North Star movement | Daily / Weekly |
+| Guardrail | 🛡️ | Must NOT degrade (safety metrics) | Daily |
+| Diagnostic | 🔬 | Help debug when other metrics move | On demand |
+
+**Rule of thumb:**
+- 1 North Star, 3-5 Leading, 2-4 Guardrails, unlimited Diagnostics
+- If you can't decide the tier, it's probably Diagnostic
+
+### STEDII Metric Validation
+
+Before registering a metric, validate it with the STEDII framework:
+
+| Criterion | Question | Red Flag |
+|-----------|----------|----------|
+| **Sensitive** | Can it detect real changes? | Metric stays flat when you know something changed |
+| **Trustworthy** | Is the data accurate and definition unambiguous? | Different teams calculate it differently |
+| **Efficient** | Can it be computed practically? | Takes days to refresh or requires manual steps |
+| **Debuggable** | When it moves, can you decompose WHY? | Metric moves but no one knows which lever to pull |
+| **Interpretable** | Can the team understand it without a 5-min explanation? | Only the data team knows what it means |
+| **Inclusive** | Does it fairly represent all user segments? | Dominated by power users, ignores new/small segments |
+
+### Threshold Setting Guide
+
+Setting good thresholds prevents alert fatigue and missed issues:
+
+**For metrics with historical data:**
+1. Calculate the mean and standard deviation over the past 3-6 months
+2. Warning threshold: 1.5-2 standard deviations from mean
+3. Critical threshold: 2-3 standard deviations from mean
+4. Adjust for seasonality (day-of-week, holidays)
+
+**For new metrics without history:**
+1. Start with the team's best guess for "acceptable range"
+2. Set warning wide initially (avoid false alarms)
+3. Tighten thresholds after 4-6 check cycles with real data
+4. Document the rationale so others understand why the threshold was chosen
+
+**Direction matters:**
+- For "higher is better" metrics (e.g., conversion): Warning when it drops, Critical when it drops further
+- For "lower is better" metrics (e.g., error rate): Warning when it rises, Critical when it rises further
+- For "target range" metrics (e.g., response time): Warning on either side, Critical at extremes
+
+### Alert Escalation Logic
+
+```
+Monitor Check
+    ↓
+🟢 Healthy → Update check history, move on
+    ↓
+🟡 Warning → Create alert file, notify owner
+    ↓  ↓ (consecutive warnings ≥ N?)
+    ↓  Yes → Suggest escalation to Investigation
+    ↓
+🔴 Critical → Create alert file, suggest immediate escalation
+    ↓  ↓ (auto-escalate = Yes?)
+    ↓  Yes → `/analysis new --from-alert {alert-id}`
+```
+
+**Cool-down rules:**
+- Don't alert on the same monitor within the cool-down period (default: 1 day for daily, 3 days for weekly)
+- Consecutive warning count only increments if checks are within cadence (a missed check doesn't reset or increment the count)
+
+### Segment-Level Monitoring
+
+Aggregate metrics can mask segment-level problems (Simpson's Paradox applies to monitoring too):
+
+**When to enable auto-segment:**
+- Metric has known segment-dependent behavior (mobile vs desktop, new vs returning)
+- Past analyses revealed segment-specific issues
+- The metric is a guardrail or North Star (high importance)
+
+**How it works:**
+1. When checking a monitor with auto-segment enabled, the AI asks for segment-level values
+2. Each segment is evaluated independently against thresholds
+3. If overall is 🟢 but a segment is 🟡 or 🔴: flag it separately
+4. Example: "Overall DAU is 🟢 Healthy, but mobile DAU is 🟡 Warning (-12% WoW). Worth investigating?"
+
+### Counter-Metric Monitoring
+
+Every metric should have a counter-metric to prevent Goodhart's Law:
+
+| Metric | Risk if gamed | Counter-metric |
+|--------|--------------|----------------|
+| Conversion rate | Lower quality signups | Day-7 retention |
+| Response time | Drop features to speed up | Task completion rate |
+| Revenue per user | Aggressive monetization | Churn rate |
+| DAU | Notification spam | Session quality / time spent |
+
+On every check, the AI should also check the counter-metric (if defined):
+- "Conversion rate is 🟢 improving, but let me check the counter-metric (Day-7 retention)..."
+- "Counter-metric is 🟢 stable → the improvement is real, not gamed."
+- "Counter-metric is 🟡 degrading → the improvement might come at a cost. Investigate."
+
+### Non-Analyst Monitoring Guide
+
+For PMs, marketers, and other non-analysts setting up and using monitors:
+
+**Setting up a monitor:**
+- "What number do you want to keep an eye on?" → metric identification
+- "What's the normal range for this number?" → healthy range (don't say "threshold")
+- "When should we worry?" → warning level (translate: "If it drops more than X%, that's a yellow flag")
+- "When is it an emergency?" → critical level
+- "How often should we check?" → cadence
+
+**AI should simplify for non-analysts:**
+- Don't mention STEDII by name. Instead ask the 6 questions naturally: "Can this number actually detect changes?", "Is the data reliable?", "Can we check it easily?", "If it moves, will we know why?", "Does the team understand it?", "Does it represent all users fairly?"
+- Translate thresholds: "If your number normally bounces between 100 and 120, we'll set warning at 90 and critical at 80."
+- Translate comparison basis: "We'll compare each week to the week before" (not "WoW comparison")
+
+**Reading a check result:**
+- 🟢 = "This looks normal"
+- 🟡 = "This is lower/higher than usual — keep an eye on it"
+- 🔴 = "This needs attention — something may be wrong"
+
+**When an alert fires:**
+- "Your {metric} dropped to {value}. That's {X}% below last week. Here's what to check: recent releases, marketing changes, or external events."
+- "Want to dig deeper? I can start an investigation to find the root cause."
+
+### Monitoring Conversation Adjustments
+
+When the user is working with monitors (detected by `/monitor` commands or `.analysis/metrics/` files):
+
+**Setup:**
+- Guide through metric definition: "Let's validate this metric with STEDII before we start monitoring it."
+- Challenge poor thresholds: "A warning at 5% change would trigger on normal daily fluctuations. Let's look at your historical variance."
+- Always ask about counter-metrics: "What could go wrong if this metric improves artificially?"
+
+**Check:**
+- Start with data quality: "Before we evaluate, is this data from the same source as usual?"
+- Context first: "Any known events this period? (deployments, marketing, holidays)"
+- Segment awareness: "The overall number looks fine, but let me check segments..."
+
+**Alert:**
+- Don't panic: "This is a 🟡 Warning, not a crisis. Let's understand the context before reacting."
+- Check counter-metrics immediately
+- Suggest proportional response: Warning → monitor closely; Critical → investigate
+
+### Connecting Monitors to the Ecosystem
+
+Monitoring is not standalone — it feeds into the full ALIVE loop:
+
+| From | To | How |
+|------|----|-----|
+| Analysis EVOLVE | Monitor Setup | "Set up monitoring for identified issues" → `/monitor setup` |
+| Experiment LEARN | Monitor Setup | "Post-launch monitoring" → `/monitor setup` for experiment metrics |
+| Monitor Alert | Analysis | "Metric X is 🔴" → `/analysis new --from-alert {alert-id}` |
+| Monitor Alert | Experiment | "Metric X dropped after launch" → check experiment impact |
+| Metric Proposal (EVOLVE) | Monitor Setup | "New metric proposed" → `/monitor setup` to register and monitor |
+
+### Folder Structure
+
+```
+.analysis/metrics/
+├── definitions/          ← Metric definitions (truth source)
+│   ├── north-star/
+│   ├── leading/
+│   ├── guardrail/
+│   └── diagnostic/
+├── monitors/             ← Active monitors with check history
+│   ├── M-2026-0301-001_dau.md
+│   └── M-2026-0301-002_conversion-rate.md
+└── alerts/               ← Alert records by month
+    └── 2026-03/
+        ├── A-2026-0305-001.md
+        └── A-2026-0304-001.md
+```
+
+### ID Formats
+
+- **Monitor**: `M-{YYYY}-{MMDD}-{seq}` (e.g., `M-2026-0301-001`)
+- **Alert**: `A-{YYYY}-{MMDD}-{seq}` (e.g., `A-2026-0305-001`)
