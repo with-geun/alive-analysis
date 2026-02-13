@@ -44,6 +44,12 @@ Use AskUserQuestion:
 - Simulation: "What policy or strategy are you evaluating?"
 - This seeds the ASK phase.
 
+**Q5. Tags** (optional)
+- Suggest tags from config.md's Tags list if available
+- Also suggest based on title/description: "Based on your title, relevant tags might be: `retention`, `mobile`"
+- User can accept suggestions, add custom tags, or skip
+- Format: comma-separated, lowercase, no spaces (use hyphens for multi-word: `user-onboarding`)
+
 ### Step 2c: Quick→Full succession
 
 - Read the Quick file referenced by `--from {ID}`

@@ -25,9 +25,9 @@ Format output as a clean dashboard:
 
   Active Analyses (3)
   ───────────────────
-  ❓ F-2026-0210-001  DAU drop investigation     @ye   ASK
-  📢 Q-2026-0210-002  Retention check            @ye   VOICE
-  🌱 F-2026-0208-003  Payment funnel analysis    @kim  EVOLVE
+  ❓ F-2026-0210-001  DAU drop investigation     @ye   ASK     [retention, mobile]
+  📢 Q-2026-0210-002  Retention check            @ye   VOICE   [retention, onboarding]
+  🌱 F-2026-0208-003  Payment funnel analysis    @kim  EVOLVE  [funnel, payment]
 
   Recently Archived (1)
   ─────────────────────

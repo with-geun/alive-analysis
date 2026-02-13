@@ -4,6 +4,12 @@
       "event": "SessionStart",
       "command": "bash hooks/session-start.sh",
       "description": "Welcome message and quick status on session start"
+    },
+    {
+      "event": "PostToolUse",
+      "command": "bash hooks/post-analysis-action.sh",
+      "description": "Remind to update status.md after analysis/experiment/monitor actions",
+      "toolNames": ["Write", "Edit"]
     }
   ]
 }

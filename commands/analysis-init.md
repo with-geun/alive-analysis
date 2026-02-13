@@ -186,6 +186,11 @@ analyses/
 - Analysis Tools: {list}
 - MCP: {connected / not configured}
 
+## Tags
+
+Common tags for connecting related analyses (add/remove as needed):
+- {e.g., retention, onboarding, pricing, mobile, funnel, churn, growth}
+
 ## ID Format
 
 - Full: F-{YYYY}-{MMDD}-{seq}
@@ -207,9 +212,9 @@ Generate status.md (empty state):
 
 ## Active Analyses
 
-| ID | Title | Type | Stage | Owner | Started |
-|----|-------|------|-------|-------|---------|
-| (none) | | | | | |
+| ID | Title | Type | Stage | Owner | Tags | Started |
+|----|-------|------|-------|-------|------|---------|
+| (none) | | | | | | |
 
 ## Recently Archived
 

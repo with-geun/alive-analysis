@@ -68,7 +68,8 @@ Then ask the agent: "Start a new analysis" — it will pick up the ALIVE skill a
 | `/analysis status` | Show current analysis dashboard |
 | `/analysis next` | Advance to the next ALIVE stage |
 | `/analysis archive` | Archive a completed analysis |
-| `/analysis list` | List all analyses (active + archived) |
+| `/analysis list` | List all analyses (active + archived, filter by tag) |
+| `/analysis promote` | Promote a Quick analysis to Full |
 
 ### Experiment
 | Command | Description |
@@ -83,6 +84,11 @@ Then ask the agent: "Start a new analysis" — it will pick up the ALIVE skill a
 | `/monitor setup` | Register a metric and create a monitor |
 | `/monitor check` | Run a health check on one or all monitors |
 | `/monitor list` | Show all monitors with status dashboard |
+
+### Modeling
+| Command | Description |
+|---------|-------------|
+| `/model register` | Register a deployed model with version tracking |
 
 ## The ALIVE Loop
 
@@ -200,7 +206,7 @@ Changes are Git-tracked, so your team conventions evolve naturally.
 ## Roadmap
 
 - **Phase 1** ✅: ALIVE loop, Full/Quick modes, 3 analysis types (Investigation/Modeling/Simulation), checklists, archive, metric proposal conversation
-- **Phase 2 (current)**: A/B test experiments, metric monitoring, automation, analysis ethics
+- **Phase 2 (current)**: A/B test experiments, metric monitoring, Quick→Full promotion, tags, model registry, analysis ethics
 - **Phase 3**: Team dashboard, insight search, auto retrospectives
 
 ## License

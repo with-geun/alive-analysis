@@ -1000,6 +1000,7 @@ Status: `✅ Archived | ⏳ Pending | 🟡 In Progress`
 - Quick analysis file: `quick_{ID}_{title-slug}.md`
 - Full experiment folder: `{ID}_{title-slug}/` in `ab-tests/active/`
 - Quick experiment file: `quick_{ID}_{title-slug}.md` in `ab-tests/active/`
+- Model card: `.analysis/models/{model-slug}_v{version}.md`
 - Title slug: lowercase, hyphens, no special characters
 - Analysis stage files: `01_ask.md`, `02_look.md`, `03_investigate.md`, `04_voice.md`, `05_evolve.md`
 - Experiment stage files: `01_design.md`, `02_validate.md`, `03_analyze.md`, `04_decide.md`, `05_learn.md`
@@ -1665,6 +1666,56 @@ Monitoring → "Track the launched change over time"
 - From experiment to analysis: `/analysis new` — reference the experiment ID in the ASK stage
 - From experiment to monitoring: Set up post-launch checkpoints in the Learn stage
 - From alert to analysis: `/analysis new --from-alert {alert-id}` — escalate metric issues to Investigation
+
+---
+
+## Automation & Workflow
+
+### Quick→Full Promotion
+
+The AI should proactively suggest promoting Quick analyses to Full when complexity signals are detected:
+
+| Signal | How to detect |
+|--------|--------------|
+| Multiple hypotheses | 3+ hypotheses in INVESTIGATE |
+| Multiple data sources | 2+ sources in LOOK |
+| Long INVESTIGATE | 20+ lines of content |
+| Multiple audiences | 2+ stakeholder groups in VOICE |
+| Follow-up spawning | 2+ follow-ups in EVOLVE |
+| Scope creep | "Parked Questions" section exists |
+
+**AI behavior**: When 2+ signals are present, suggest `/analysis promote`. Be helpful, not pushy. If user declines twice, stop suggesting.
+
+### Tags
+
+Tags connect related analyses across time, enabling knowledge reuse and discovery.
+
+**How tags work:**
+- Defined in `config.md` (team-level common tags) + ad-hoc per analysis
+- Stored in `status.md` Tags column and in analysis headers
+- Format: lowercase, hyphenated (`user-onboarding`, `retention`, `pricing`)
+
+**AI should:**
+- Suggest tags from config.md when creating a new analysis
+- Infer tags from title/description: "Based on your title, relevant tags might be: `retention`, `mobile`"
+- When starting a new analysis, check for related tagged analyses: "There are 2 previous analyses tagged `retention`. Want to review them first?"
+- Carry tags forward during Quick→Full promotion
+
+### Model Registry
+
+For Modeling analyses that produce deployed models:
+
+**`.analysis/models/` stores model cards** with:
+- Performance metrics (train/validation/test/production)
+- Feature list and importance
+- Training details and reproducibility
+- Deployment info and monitoring setup
+- Version history
+
+**AI should:**
+- After a Modeling analysis reaches EVOLVE, ask: "Was a model deployed? Want to register it with `/model register`?"
+- When a model's drift monitor fires an alert, link back to the model card
+- On retraining, create a new version card and update the version history
 
 ---
 
