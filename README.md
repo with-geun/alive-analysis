@@ -60,6 +60,7 @@ Then ask the agent: "Start a new analysis" — it will pick up the ALIVE skill a
 
 ## Commands
 
+### Analysis
 | Command | Description |
 |---------|-------------|
 | `/analysis init` | Initialize alive-analysis in your project |
@@ -68,6 +69,13 @@ Then ask the agent: "Start a new analysis" — it will pick up the ALIVE skill a
 | `/analysis next` | Advance to the next ALIVE stage |
 | `/analysis archive` | Archive a completed analysis |
 | `/analysis list` | List all analyses (active + archived) |
+
+### Experiment
+| Command | Description |
+|---------|-------------|
+| `/experiment new` | Start a new A/B test (Full or Quick) |
+| `/experiment next` | Advance to the next experiment stage |
+| `/experiment archive` | Archive a completed experiment |
 
 ## The ALIVE Loop
 
@@ -102,13 +110,42 @@ analyses/active/F-2026-0210-001_dau-drop/
 ```
 
 ### Quick Analysis
-Fast turnaround. Single file with abbreviated ALIVE sections and 4-item checklist.
+Fast turnaround. Single file with abbreviated ALIVE sections and 5-item checklist.
 
 ```
 analyses/active/quick_Q-2026-0210-002_retention-check.md
 ```
 
 If a Quick analysis grows too big: `/analysis new --from Q-2026-0210-002`
+
+## Experiments (A/B Tests)
+
+The ALIVE loop adapted for controlled experiments:
+
+```
+DESIGN → VALIDATE → ANALYZE → DECIDE → LEARN
+  📐        ✅         🔬        🏁       📚
+```
+
+### Full Experiment
+For experiments with business impact. Structured hypothesis testing with pre-registration, sample size calculation, and statistical rigor.
+
+```
+ab-tests/active/E-2026-0215-001_checkout-flow-test/
+├── 01_design.md      ← Hypothesis, metrics, sample size
+├── 02_validate.md    ← SRM check, segment balance, instrumentation
+├── 03_analyze.md     ← Statistical results, segment analysis
+├── 04_decide.md      ← Launch / Kill / Extend / Iterate
+├── 05_learn.md       ← Learnings, follow-up experiments
+└── assets/
+```
+
+### Quick Experiment
+For low-risk tests. Single file with abbreviated stages.
+
+```
+ab-tests/active/quick_QE-2026-0215-002_button-color.md
+```
 
 ## Customization
 
@@ -127,8 +164,8 @@ Changes are Git-tracked, so your team conventions evolve naturally.
 
 ## Roadmap
 
-- **Phase 1 (current)**: ALIVE loop, Full/Quick modes, 3 analysis types (Investigation/Modeling/Simulation), checklists, archive
-- **Phase 2**: AB test module, metric monitoring, auto Quick-to-Full promotion
+- **Phase 1** ✅: ALIVE loop, Full/Quick modes, 3 analysis types (Investigation/Modeling/Simulation), checklists, archive, metric proposal conversation
+- **Phase 2 (current)**: A/B test experiments, metric monitoring, automation, analysis ethics
 - **Phase 3**: Team dashboard, insight search, auto retrospectives
 
 ## License

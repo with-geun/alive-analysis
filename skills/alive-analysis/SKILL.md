@@ -967,19 +967,28 @@ Check: 🟢 Proceed / 🔴 Stop
 
 ## ID Format
 
-- **Full**: `F-{YYYY}-{MMDD}-{sequence}` (e.g., `F-2026-0210-001`)
-- **Quick**: `Q-{YYYY}-{MMDD}-{sequence}` (e.g., `Q-2026-0210-002`)
+- **Full (Investigation/Modeling)**: `F-{YYYY}-{MMDD}-{sequence}` (e.g., `F-2026-0210-001`)
+- **Quick Analysis**: `Q-{YYYY}-{MMDD}-{sequence}` (e.g., `Q-2026-0210-002`)
 - **Simulation**: `S-{YYYY}-{MMDD}-{sequence}` (e.g., `S-2026-0210-001`)
+- **Experiment**: `E-{YYYY}-{MMDD}-{sequence}` (e.g., `E-2026-0215-001`)
+- **Quick Experiment**: `QE-{YYYY}-{MMDD}-{sequence}` (e.g., `QE-2026-0215-001`)
 - Sequence resets daily, starts at 001
 
 ---
 
 ## Stage Icons
 
+Analysis stages:
 ```
 ❓ ASK → 👀 LOOK → 🔍 INVESTIGATE → 📢 VOICE → 🌱 EVOLVE
-✅ Archived | ⏳ Pending | 🟡 In Progress
 ```
+
+Experiment stages:
+```
+📐 DESIGN → ✅ VALIDATE → 🔬 ANALYZE → 🏁 DECIDE → 📚 LEARN
+```
+
+Status: `✅ Archived | ⏳ Pending | 🟡 In Progress`
 
 ---
 
@@ -987,8 +996,11 @@ Check: 🟢 Proceed / 🔴 Stop
 
 - Full analysis folder: `{ID}_{title-slug}/` (e.g., `F-2026-0210-001_dau-drop-investigation/`)
 - Quick analysis file: `quick_{ID}_{title-slug}.md`
+- Full experiment folder: `{ID}_{title-slug}/` in `ab-tests/active/`
+- Quick experiment file: `quick_{ID}_{title-slug}.md` in `ab-tests/active/`
 - Title slug: lowercase, hyphens, no special characters
-- Stage files: `01_ask.md`, `02_look.md`, `03_investigate.md`, `04_voice.md`, `05_evolve.md`
+- Analysis stage files: `01_ask.md`, `02_look.md`, `03_investigate.md`, `04_voice.md`, `05_evolve.md`
+- Experiment stage files: `01_design.md`, `02_validate.md`, `03_analyze.md`, `04_decide.md`, `05_learn.md`
 
 ---
 
@@ -1464,3 +1476,189 @@ When a data quality issue is found, always document in the current stage file:
 - ❌ Present findings without "So What?" and "Now What?"
 - ❌ Skip sensitivity analysis — always check robustness
 - ❌ Run MCP queries or read files without user confirmation
+
+---
+
+## Experiment (A/B Test) Guide
+
+### When to Experiment vs Analyze
+
+| Use | When |
+|-----|------|
+| **Investigation** | "Why did X happen?" — retrospective |
+| **Modeling** | "Can we predict Y?" — predictive |
+| **Simulation** | "What would happen if Z?" — prospective (no real users) |
+| **Experiment** | "Does Z actually work?" — prospective (real users, controlled) |
+
+Rule of thumb: Simulation says "this should work." Experiment says "this does work."
+
+### ALIVE Loop for Experiments
+
+The same thinking framework, adapted to the experiment lifecycle:
+
+| ALIVE | Experiment | Key Question |
+|-------|-----------|-------------|
+| ASK → **DESIGN** | What exactly are we testing? | Is the hypothesis falsifiable? |
+| LOOK → **VALIDATE** | Is the experiment set up correctly? | Is randomization clean? |
+| INVESTIGATE → **ANALYZE** | What do the numbers say? | Is the effect real and meaningful? |
+| VOICE → **DECIDE** | What should we do? | Launch, kill, extend, or iterate? |
+| EVOLVE → **LEARN** | What did we learn? | What's the next experiment? |
+
+### Experiment Design Principles
+
+**1. One question per experiment**
+- Don't bundle multiple changes. If A includes a new button AND new copy AND new color, you won't know which one worked.
+- Exception: MVT (multivariate test) when you explicitly design for interaction effects.
+
+**2. Pre-register your analysis plan**
+- Lock your primary metric, success threshold, and decision criteria BEFORE seeing results.
+- This prevents p-hacking, HARKing (Hypothesizing After Results are Known), and moving goalposts.
+- If you change the plan mid-experiment, document WHY and mark the change.
+
+**3. Respect the sample size**
+- Don't peek at results early and stop when significant ("optional stopping problem").
+- If you must monitor continuously, use sequential testing methods (group sequential, always-valid p-values).
+- Running an underpowered experiment wastes time — better to know your sample size requirement upfront.
+
+**4. Think about interference**
+- SUTVA (Stable Unit Treatment Value Assumption): One user's treatment shouldn't affect another user's outcome.
+- Watch for: social features (sharing), marketplace effects (supply/demand), network effects.
+- If interference is likely, use cluster randomization (randomize by region, team, etc.).
+
+**5. Guardrails are non-negotiable**
+- Every experiment must have at least one guardrail metric.
+- A "successful" experiment that crashes another metric isn't successful.
+- Reference config.md guardrail metrics.
+
+### Statistical Methods Guide
+
+**Choosing the right test:**
+
+| Metric Type | Example | Test |
+|-------------|---------|------|
+| Proportion (binary) | Conversion rate, click rate | Z-test for proportions, Chi-square |
+| Continuous (mean) | Revenue per user, time on page | t-test (Welch's), Mann-Whitney if skewed |
+| Count | Purchases per user, page views | Poisson test, negative binomial |
+| Time-to-event | Time to first purchase | Log-rank test, Cox regression |
+
+**Key concepts the AI should explain in plain language:**
+
+- **p-value**: "If there were truly no difference, how surprised would we be to see this result? Below 0.05 = very surprised = likely a real difference."
+- **Confidence interval**: "We're 95% sure the true effect is somewhere in this range. Narrower = more precise."
+- **Effect size**: "The actual magnitude of the difference. 'Statistically significant' can be tiny — always ask 'is this big enough to matter?'"
+- **Power**: "The probability we'll detect a real effect if it exists. 80% power = 20% chance we miss a real improvement."
+- **MDE**: "The smallest effect worth detecting. If we can't detect effects smaller than this, we're OK with that."
+
+**Multiple comparisons:**
+- If testing >2 variants: Bonferroni (strict) or Holm-Bonferroni (less strict, more power)
+- If testing many secondary metrics: FDR (False Discovery Rate) control
+- Rule: "The more things you test, the more likely you'll find something by chance."
+
+### SRM (Sample Ratio Mismatch)
+
+**What**: When the actual split ratio differs from the intended ratio.
+**Why it matters**: SRM means randomization is broken → results are invalid, no matter how significant.
+
+**Common causes:**
+- Bot filtering applied differently per variant
+- Redirect timing (treatment loads slower → more users bounce before being counted)
+- Initialization bias (variant assignment happens at different points in the user journey)
+- Cache issues (CDN serving wrong variant)
+
+**Detection:**
+- Chi-square goodness-of-fit test comparing expected vs observed counts
+- p < 0.001 → SRM likely present
+
+**Response:**
+- Do NOT proceed with analysis if SRM is detected
+- Investigate root cause with engineering
+- May need to restart the experiment
+
+### p-Hacking Prevention
+
+The AI should actively guard against these:
+
+| Practice | Problem | What AI should do |
+|----------|---------|-------------------|
+| Peeking at results daily | Inflates false positive rate | Remind: "Wait for minimum duration" |
+| Stopping when significant | Optional stopping bias | Enforce pre-registered sample size |
+| Testing many metrics, reporting only significant ones | Multiple comparisons | Ask: "Is this a pre-registered metric?" |
+| Changing the metric definition after seeing results | HARKing | Flag: "This wasn't in the pre-registration" |
+| Excluding segments to find significance | Cherry-picking | Ask: "Was this segment analysis pre-planned?" |
+| Extending experiment when results aren't significant | Inflates false positive rate | Suggest: "If underpowered, redesign with larger MDE" |
+
+**AI conversation guide:**
+- If user asks to change the primary metric mid-experiment: "That's a deviation from the pre-registered plan. We can look at this as a secondary metric, but the decision should still be based on the original primary metric."
+- If user asks to stop early: "The experiment hasn't reached the planned sample size. Stopping now risks a false conclusion. Options: (A) Wait, (B) Stop but mark as 'underpowered', (C) Use sequential testing if available."
+
+### Non-Analyst Experiment Guide
+
+For PMs, marketers, and other non-analysts running Quick Experiments:
+
+**Before the experiment:**
+- "What will you change?" → treatment description
+- "What number tells you if it worked?" → primary metric
+- "What must NOT get worse?" → guardrail metric
+- "How many users will see this per day?" → traffic estimate
+- "How long can you wait?" → max duration
+
+**AI should simplify:**
+- Don't show formulas unless asked. Say: "You need about {n} users per group. At your traffic rate, that's {d} days."
+- Translate p-values: "There's a {X}% chance this result is just random noise. Below 5% is usually considered convincing."
+- Translate effect sizes: "The new version converts {Δ}% more users. For your traffic, that's about {N} extra conversions per week."
+
+**After the experiment:**
+- "Did it work?" → Primary metric check
+- "Did anything break?" → Guardrail check
+- "Is the improvement big enough to be worth it?" → Practical significance
+- "What did you learn?" → Capture for next time
+
+### Experiment Conversation Adjustments
+
+When the user is running an experiment (detected by `/experiment new` or experiment files in `ab-tests/`):
+
+**DESIGN stage:**
+- Be rigorous about the hypothesis — push for specific, falsifiable statements
+- Challenge weak MDE: "You said you want to detect a 0.1% change. That would require {huge n}. Is a 1% change more realistic?"
+- Always bring up guardrails: "What must NOT get worse?"
+
+**VALIDATE stage:**
+- Be paranoid about SRM — this is the most common silent killer of experiments
+- Push for instrumentation validation: "Have you verified the events are logging correctly?"
+- Check for overlapping experiments: "Are there other active experiments on the same users?"
+
+**ANALYZE stage:**
+- Lead with SRM re-check — before looking at ANY metric
+- Present confidence intervals alongside p-values — effect size matters as much as significance
+- Actively flag: "This is statistically significant but the effect is very small. Is it practically meaningful?"
+- If guardrail degraded: Highlight immediately, even if primary metric improved
+
+**DECIDE stage:**
+- Anchor to pre-registered criteria — "Based on your pre-registered plan, the decision is {X}"
+- If the user wants to override: "You're deviating from the pre-registered decision criteria. That's OK if you have a good reason — document it."
+- Push for rollout plan: "How will you ship this? All at once, or gradual?"
+
+**LEARN stage:**
+- Push beyond "it worked/didn't work" — "What would you do differently in the experiment design?"
+- Connect to the broader picture: "Does this change your understanding of user behavior?"
+- Propose next experiments: "Based on these results, what should we test next?"
+
+### Connecting Experiments to Analyses
+
+Experiments and analyses reinforce each other:
+
+```
+Investigation → "We think X causes Y"
+    ↓
+Simulation → "If we change X, Y should improve by ~Z"
+    ↓
+Experiment → "Let's prove it with real users"
+    ↓
+Investigation → "The experiment showed {result}. Why? Let's dig deeper."
+    ↓
+Monitoring → "Track the launched change over time"
+```
+
+- From analysis to experiment: `/experiment new` — reference the analysis ID in the Design stage
+- From experiment to analysis: `/analysis new` — reference the experiment ID in the ASK stage
+- From experiment to monitoring: Set up post-launch checkpoints in the Learn stage
