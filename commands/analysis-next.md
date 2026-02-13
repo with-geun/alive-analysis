@@ -37,7 +37,7 @@ Based on current stage, generate the next file.
 
 **ASK → LOOK** (generate `02_look.md`):
 
-**Note:** If this is a 📈 Modeling analysis, use the Modeling-specific LOOK template defined in `analysis-new.md` instead of the Investigation template below. Same for INVESTIGATE and VOICE stages.
+**Note:** If this is a 📈 Modeling analysis, use the Modeling-specific templates defined in `analysis-new.md` Section 4B instead of the Investigation templates below. This applies to LOOK, INVESTIGATE, VOICE, and EVOLVE stages. If this is a 🔮 Simulation analysis, use the Simulation-specific templates from `analysis-new.md` Section 4D for all stages.
 
 ```markdown
 # LOOK: {title}
@@ -260,7 +260,50 @@ Strategy: Test the easiest-to-disprove hypotheses first.
 ## North Star Connection
 - How does this connect to {North Star metric from config.md}?
 - Does this change our understanding of what drives it?
-- Should our metric framework be updated?
+- Should our metric framework be updated? → If yes, use the section below.
+
+## Proposed New Metrics
+> Fill this section through conversation with the AI. Say "I think we need a metric for {X}" and the AI will guide you through defining it together.
+
+### Metric: {name}
+
+**Background**
+- What gap did this analysis reveal in the current metric framework?
+- Trigger: (the finding, blind spot, or missing visibility that led to this proposal)
+- Replaces or complements: (existing metric, or "new")
+
+**Purpose**
+- Decision this metric informs:
+- Primary audience:
+- Proposed tier: 🌟 North Star / 📊 Leading / 🛡️ Guardrail / 🔬 Diagnostic
+
+**Definition & Logic**
+- Formula / calculation:
+- Data source:
+- Granularity: (daily / weekly / monthly / per-cohort)
+- Refresh cadence:
+- Edge cases handled: (zero denominator, new users, seasonality)
+
+**Interpretation Guide**
+- Healthy range:
+- Alert threshold:
+- Counter-metric: (what to watch so this metric isn't gamed)
+- Plain-language: "When this goes up, it means... When it drops, it means..."
+
+**STEDII Validation**
+- [ ] **Sensitive** — Can it detect real changes?
+- [ ] **Trustworthy** — Is the data accurate and the definition unambiguous?
+- [ ] **Efficient** — Can it be computed in a practical timeframe?
+- [ ] **Debuggable** — When it moves, can you decompose WHY?
+- [ ] **Interpretable** — Does the team understand it without a 5-minute explanation?
+- [ ] **Inclusive** — Does it fairly represent all user segments?
+
+**Action**
+- [ ] Add to `.analysis/config.md` → {tier}
+- [ ] Set up dashboard / alert
+- [ ] Communicate definition to stakeholders
+
+(Copy this block for additional metrics)
 
 ## Automation Opportunities
 - Can any part of this analysis be automated/scheduled?

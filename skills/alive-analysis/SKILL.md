@@ -641,11 +641,23 @@ Simulation is often more effective than ML prediction because the calculation is
 - Discover new variables you missed (e.g., "average order value also changed")
 - Version-manage the simulation: track how assumptions evolved
 
-**Handle Bar concept:**
+**Monte Carlo Simulation (when 3+ variables are uncertain):**
+When a simulation has multiple uncertain inputs, point estimates become misleading. Use Monte Carlo to capture the full range of outcomes:
+- **Spreadsheet approach**: Use Data Table (Excel/Sheets) for 1-2 variable sensitivity, Goal Seek for breakeven analysis. For full Monte Carlo, use add-ins or manual iteration with RAND().
+- **Python approach**: Use `numpy.random` to generate distributions for each uncertain variable, run 1,000-10,000 iterations, and present results as confidence intervals.
+  ```
+  Example: revenue_sim = price * np.random.normal(mean_volume, std_volume, 10000)
+  → "90% probability revenue falls between ₩X and ₩Y"
+  ```
+- Present results as probability distributions, not single numbers: "There's a 70% chance this policy is profitable, with expected value ₩X."
+
+**Handle Bar concept — the bridge from Simulation to decision-making:**
 The analyst's role is not to "give the answer" but to "build the decision tool."
 - Create adjustable inputs (sliders, parameters) that stakeholders can tweak themselves
 - "What if we set the minimum order at 20,000 instead of 15,000?"
 - This empowers the business team and speeds up iteration
+- Handle Bars are the natural output of Simulation analysis — every Simulation should produce at least one adjustable decision lever
+- In a 🔮 Simulation analysis, the Handle Bar IS the deliverable (not a static report)
 
 **When simulation is less reliable:**
 - Sudden competitor response or regulatory changes
@@ -796,12 +808,54 @@ If the analysis identified a real issue or opportunity:
 - Reference the North Star metric from config.md: "How does this analysis connect to {metric}?"
 - "Does this change our understanding of what drives {North Star}?"
 - "Should our metric framework be updated based on these findings?"
+- If the answer is yes → trigger the **Metric Proposal Conversation** below.
+
+#### Metric Proposal Conversation
+
+When an analysis reveals a gap in the current metric framework — a metric that should exist but doesn't — the AI guides the user through defining it together. This is a conversation, not a form to fill.
+
+**When to trigger:**
+- User says "we should track this" or "we need a metric for this"
+- Analysis findings expose a blind spot in the current metric framework
+- A counter-metric doesn't exist yet (identified during VOICE)
+- The user reaches EVOLVE and the North Star Connection section raises metric questions
+
+**Conversation flow (4 stages):**
+
+**1. Background** — "Why do we need this metric?"
+- "What triggered this? What gap did your analysis reveal?"
+- "What are we blind to right now without this metric?"
+- "Does this replace or complement an existing metric?"
+
+**2. Purpose** — "What decisions will it drive?"
+- "When this metric moves, what action should someone take?"
+- "Who's the primary audience — leadership, product, engineering, ops?"
+- "Which tier fits? 🌟 North Star / 📊 Leading / 🛡️ Guardrail / 🔬 Diagnostic"
+- Challenge: "If this metric improved 10% tomorrow, would the team know exactly what happened?"
+
+**3. Logic** — "How do we calculate it?"
+- "Walk me through the formula — what's the numerator, denominator?"
+- "What's the data source? How fresh does it need to be?"
+- "What's the granularity — daily, weekly, per-cohort?"
+- Challenge edge cases: "What happens when the denominator is zero? New users with no history? Seasonal spikes?"
+- "Can another analyst reproduce this number independently?"
+
+**4. Interpretation** — "What does a good/bad value look like?"
+- "What range is 'healthy'? Where does 'alarm' start?"
+- "What's the counter-metric? If we optimize this aggressively, what could go wrong?"
+- "How would you explain a 10% drop in this to a non-analyst stakeholder?"
+- "Are there segments where this metric behaves differently? (e.g., new vs returning users)"
+
+**After the conversation**, the AI fills out the Proposed New Metrics section in the EVOLVE file and runs the STEDII validation (from the Metric Interpretation Guide above).
+
+**Tone:** Collaborative, not interrogative. Think "let's figure this out together" — the AI should offer suggestions ("Based on your analysis, the formula could be X / Y — does that sound right?"), not just ask blank questions.
 
 Common mistakes to prevent:
 - Treating the analysis as "done" without reflection
 - Not capturing follow-up ideas while they're fresh
 - Forgetting to set up monitoring for identified issues
 - Missing the connection between this analysis and the bigger picture
+- Discovering a new metric need but not formalizing it (it stays as a one-liner in EVOLVE and nobody acts on it)
 
 ---
 
@@ -899,13 +953,14 @@ Common mistakes to prevent:
 
 ## Quick Analysis Checklist (Abbreviated)
 
-For Quick mode, use these 4 items:
+For Quick mode, use these 5 items:
 ```markdown
 Check: 🟢 Proceed / 🔴 Stop
-- [ ] Is the purpose clear and framed (causal/correlational)?
-- [ ] Was the data segmented (not just aggregated)?
-- [ ] Were alternative hypotheses considered?
-- [ ] Does the conclusion answer the question with confidence level?
+- [ ] Is the purpose clear and framed (causation/correlation/comparison/evaluation)?
+- [ ] Was the data broken down by groups (not just totals)?
+- [ ] Were alternative explanations considered?
+- [ ] Does the conclusion answer the question with a confidence level?
+- [ ] Is there enough data (rows, time period) to support this conclusion?
 ```
 
 ---
@@ -914,6 +969,7 @@ Check: 🟢 Proceed / 🔴 Stop
 
 - **Full**: `F-{YYYY}-{MMDD}-{sequence}` (e.g., `F-2026-0210-001`)
 - **Quick**: `Q-{YYYY}-{MMDD}-{sequence}` (e.g., `Q-2026-0210-002`)
+- **Simulation**: `S-{YYYY}-{MMDD}-{sequence}` (e.g., `S-2026-0210-001`)
 - Sequence resets daily, starts at 001
 
 ---
@@ -1152,8 +1208,38 @@ AI: "Any follow-up? Should we monitor this? (EVOLVE)"
 User: "Add email auth as fallback. Set up uptime alert for auth API."
 AI: → Writes the complete Quick file with all sections
 AI: "Checklist: purpose clear? ✅ data segmented? ✅ conclusion answers question? ✅
-     hypothesis tested (not just assumed)? ✅"
+     hypothesis tested (not just assumed)? ✅ data volume sufficient? ✅"
 AI: "Archive this, or keep it active?"
+```
+
+#### Quick Comparison Example (PM use case)
+```
+User: "Onboarding flow A vs B — which has higher conversion to paid?"
+AI: "Good question. Let's frame it: is this Comparison (which is better?)
+     or Causation (does A cause higher conversion)? (ASK)"
+User: "Comparison for now — we just want to pick the better one."
+AI: "Makes sense. Framing: Comparison. Are the two groups comparable?
+     Same time period, same traffic source, similar user mix? (LOOK)"
+User: "Both ran last month. A got organic traffic, B got paid ads."
+AI: "⚠️ The groups aren't directly comparable — paid users behave differently
+     from organic. We need to either: (a) compare within the same channel,
+     or (b) adjust for channel mix. Which data do you have?"
+User: "I can split by channel. Let me check..."
+User: "OK — within organic only: A=12%, B=15%. Within paid: A=8%, B=9%."
+AI: "B wins in both segments. Confidence? Sample size matters — how many
+     users in each group? (INVESTIGATE)"
+User: "Organic: A=2000, B=1800. Paid: A=500, B=450."
+AI: "Organic difference (12→15%, n≈2000) looks reliable. Paid difference
+     (8→9%, n≈500) is smaller and noisier — could be chance.
+     🟢 High confidence: B is better for organic.
+     🟡 Medium confidence: B may be better for paid — needs more data."
+AI: "So What: B outperforms A, especially for organic users.
+     Now What: Roll out B for organic. For paid, consider running longer
+     or increasing sample. (VOICE)"
+AI: "Follow-up: Why does B convert better? Worth investigating the specific
+     step where A loses users. (EVOLVE)"
+AI: "Checklist: purpose clear? ✅ segmented? ✅ alternatives considered? ✅
+     confidence assigned? ✅ data volume sufficient? ✅"
 ```
 
 ### Modeling Mode Conversation Adjustments
@@ -1164,6 +1250,15 @@ For 📈 Modeling analyses, the conversation focus shifts at each stage:
 - **INVESTIGATE**: Baseline → model comparison → best model analysis → error analysis → reproducibility
 - **VOICE**: Model performance vs target, business interpretation, deploy recommendation, monitoring plan
 - **EVOLVE**: Model drift risk, retraining schedule, feature pipeline automation, A/B test proposal
+
+### Simulation Mode Conversation Adjustments
+
+For 🔮 Simulation analyses, the conversation focus shifts at each stage:
+- **ASK**: "What policy/strategy are you evaluating?" + variables affected + success criteria + comparison scenarios. Framing is always Evaluative ("What would happen if X?")
+- **LOOK**: Historical analogues for assumptions, baseline values for each variable, data availability per variable, identify which accounts are fixed vs variable
+- **INVESTIGATE**: Map variable relationships → build scenario matrix (conservative/neutral/aggressive) → sensitivity analysis (which variable moves the needle most?) → breakeven analysis → Monte Carlo if 3+ uncertain variables
+- **VOICE**: Present 3-scenario table, highlight breakeven point and most sensitive variable, offer "handle bars" (adjustable inputs for stakeholders)
+- **EVOLVE**: Compare simulation predictions vs actual results after execution, update assumptions, discover new variables, version-manage the simulation model
 
 ### Mid-Conversation Data Handling
 
@@ -1198,6 +1293,13 @@ These situations can happen at ANY stage. The AI should recognize them and respo
 
 Scope creep is the most common analysis killer. Handle it explicitly:
 
+**Refinement vs Expansion — know the difference:**
+Not every scope change is scope creep. Distinguish between:
+- **Refinement** (no protocol needed): Narrowing or sharpening the SAME question. Examples: "all channels → paid channels only", "why drop → why drop in cohort X". Action: accept immediately and update ASK.
+- **Expansion** (apply protocol below): Adding a NEW question on top of the original. Examples: "also analyze why Z increased", "also check service B". Action: trigger the scope creep protocol.
+
+The AI should recognize refinement vs expansion and only flag the protocol for true expansions.
+
 **Detection signals:**
 - Requester adds new questions mid-analysis
 - "While you're at it, can you also check..."
@@ -1220,10 +1322,21 @@ AI: "That's a great question, but it's outside our current scope.
      Which do you prefer?"
 ```
 
+**Effort estimation (relative):**
+- Quick analysis: 1x (baseline)
+- Full single stage: 2-3x
+- Full end-to-end: 5-10x
+- Each expansion adds re-estimation per additional question
+
 **Rules:**
 - Always refer back to the original scope defined in ASK
 - Never silently expand scope — make it visible
-- If user chooses C (expand), update 01_ask.md scope section and re-estimate timeline
+- If user chooses C (expand):
+  1. Update 01_ask.md scope section with the new question
+  2. Add new hypotheses to the hypothesis tree
+  3. Re-estimate timeline (each additional question adds ~1x Quick effort)
+  4. Notify stakeholders of scope change if the timeline extends significantly
+  - For Quick: suggest promoting to Full instead (`/analysis new --from {ID}`)
 - If parking, add to a "Parked Questions" list in the current stage file
 - For Quick analyses: be extra strict — Quick should stay quick
 
@@ -1278,6 +1391,8 @@ AI: "Hold on — let me check where we are.
 
 Discovering bad data mid-analysis is one of the most frustrating situations. Handle it calmly and systematically.
 
+**Empathy first:** Before jumping into solutions, acknowledge the user's effort. Data issues are NOT the fault of the person who discovered them — finding bad data IS valuable work. The AI's tone should be calm and empathetic: "Good catch — let's figure out what we can still work with" rather than "This data is unusable."
+
 **Detection signals:**
 - Numbers that don't add up or contradict known facts
 - Sudden spikes/drops that coincide with tracking changes, not real events
@@ -1307,6 +1422,8 @@ AI: "🚨 Potential data quality issue detected.
         Park the analysis as 'blocked' in status.md
      D. Report with caveat — Complete with current data but flag the quality issue prominently
         Only if the core conclusion is still defensible
+     E. Reframe — Go back to ASK and redefine the question based on what data IS available
+        Record the original question in a "Pivot History" section so context isn't lost
 
      Which approach makes sense here?"
 ```
@@ -1326,6 +1443,8 @@ When a data quality issue is found, always document in the current stage file:
 - Never pretend bad data is fine — always surface it
 - Don't restart the entire analysis unless truly necessary
 - The sunk cost of prior work is real — salvage what you can
+- Before discarding work, inventory what you've learned — even "failed" analysis produces knowledge
+- Negative findings (data limitations, quality issues discovered) are valuable for future analyses — document them explicitly
 - If the data issue affects the core question → the user MUST decide, not the AI
 - Update confidence levels in VOICE to reflect data quality concerns
 

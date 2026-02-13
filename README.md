@@ -24,6 +24,7 @@ alive-analysis helps you:
 | Goal | Deep, systematic analysis | Quick analysis with guided framework |
 | Mode | Full (5 files) | Quick (1 file) |
 | ALIVE loop | Thinking framework | Analysis guide |
+| Types | 🔍 Investigation, 📈 Modeling, 🔮 Simulation | All types available |
 | Checklists | Quality self-check | "Check these and you're good" guardrails |
 
 ## Compatibility
@@ -126,7 +127,7 @@ Changes are Git-tracked, so your team conventions evolve naturally.
 
 ## Roadmap
 
-- **Phase 1 (current)**: ALIVE loop, Full/Quick modes, checklists, archive
+- **Phase 1 (current)**: ALIVE loop, Full/Quick modes, 3 analysis types (Investigation/Modeling/Simulation), checklists, archive
 - **Phase 2**: AB test module, metric monitoring, auto Quick-to-Full promotion
 - **Phase 3**: Team dashboard, insight search, auto retrospectives
 
