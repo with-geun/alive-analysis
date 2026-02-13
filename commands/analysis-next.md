@@ -251,6 +251,19 @@ Strategy: Test the easiest-to-disprove hypotheses first.
 - [ ] {description} → (not yet created)
 - [ ] {description} → (not yet created)
 
+## Impact Tracking
+> Track whether this analysis led to real decisions and outcomes. Revisit this section after 2-4 weeks.
+
+| # | Recommendation | Decision | Owner | Status | Outcome |
+|---|---------------|----------|-------|--------|---------|
+| 1 | {from VOICE} | Accepted / Rejected / Modified | {who} | Not started / In progress / Done | {what happened} |
+| 2 | | | | | |
+
+- **Analysis influenced a decision?** Yes / No / Pending
+- **Decision date**: {when the decision was made}
+- **Outcome check date**: {2-4 weeks after decision — set a reminder}
+- **Retrospective**: Was the recommendation correct? What would we do differently?
+
 ## Knowledge Capture
 - Reusable patterns (SQL templates, segmentation approaches):
 - Data gotchas for future analyses:

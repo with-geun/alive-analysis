@@ -1186,6 +1186,12 @@ AI: "Any reusable patterns from this analysis? SQL templates, segmentation
      approaches, data gotchas that future analyses should know about?"
 User: (captures learnings)
 
+AI: "Let's set up Impact Tracking. From your VOICE recommendations:
+     1. {recommendation from VOICE}
+     2. {recommendation from VOICE}
+     Who owns each decision? And when should we check back on outcomes?"
+User: (assigns owners, sets timeline)
+
 AI: "Connecting back to your North Star ({metric from config}):
      Does this change our understanding of what drives it?"
 User: (reflects)
@@ -1299,6 +1305,78 @@ The AI should seamlessly handle data that arrives during the conversation:
    - Generate SQL/Python code for user to execute
    - Ask user to paste results back
    - AI interprets and continues the conversation
+
+### Request Triage
+
+When a user comes with a data question, the AI should help route it to the right format and priority BEFORE starting analysis.
+
+**Step 1: Identify the request type**
+
+| Request Pattern | Analysis Type | Example |
+|----------------|---------------|---------|
+| "Why did X happen?" | 🔍 Investigation | "Why did retention drop?" |
+| "Can we predict Y?" | 📈 Modeling | "Can we predict which users will churn?" |
+| "What would happen if Z?" | 🔮 Simulation | "What if we raise prices 10%?" |
+| "Does Z actually work?" | 🧪 Experiment | "Does the new onboarding improve activation?" |
+| "What's the status of X?" | 📊 Monitor Check | "How's our conversion rate doing?" |
+
+**Step 2: Assess urgency and importance**
+
+| | Urgent | Not Urgent |
+|---|--------|-----------|
+| **Important** | 🔴 Quick now, promote if needed | 🟡 Full analysis, proper timeline |
+| **Not Important** | 🟡 Quick, keep it fast | 🟢 Quick, or defer entirely |
+
+Urgency signals: executive is asking, something broke, decision deadline within days, metric is in 🔴 Critical.
+Importance signals: affects revenue/growth directly, large user impact, strategic decision, irreversible action.
+
+**Step 3: Choose Quick vs Full**
+
+| Factor | Quick | Full |
+|--------|-------|------|
+| Questions | 1 focused question | Multiple or complex questions |
+| Data sources | 1-2, readily available | 3+, may need engineering support |
+| Stakeholders | Self or immediate team | Multiple teams or leadership |
+| Timeline | Hours to 1 day | Days to weeks |
+| Precision needed | Directional ("roughly right") | Rigorous ("defensibly correct") |
+| Expected output | Slack message, quick deck slide | Formal report, documented process |
+
+**AI triage conversation:**
+```
+User: (describes a data question)
+AI: "Let me help route this.
+
+     Type: {Investigation / Modeling / Simulation / Experiment / Monitor}
+     Urgency: {High / Medium / Low}
+     Suggested format: {Quick / Full}
+     Reasoning: {1 sentence why}
+
+     Does this sound right, or do you want to adjust?"
+```
+
+**Multiple requests at once:**
+When a user brings multiple questions simultaneously, decompose them into separate analyses. Present the priority ordering and suggest tackling them sequentially:
+```
+AI: "You have 3 questions. Let me suggest an order:
+     1. {urgent one} — start as Quick now (urgent + important)
+     2. {strategic one} — schedule as Full next week
+     3. {exploratory one} — Quick later, or park for now
+
+     Each will be a separate analysis with its own ID.
+     Want to start with #1?"
+```
+
+**Priority when multiple requests arrive:**
+1. 🔴 Active alerts (monitor in Critical) → investigate immediately
+2. Deadline-driven (decision by Friday) → Quick, focused on the decision
+3. Strategic (no deadline but high impact) → Full, proper process
+4. Curiosity-driven ("I wonder if...") → Quick, or park for later
+
+**Routing edge cases:**
+- "I just want a number" → Not an analysis. First check: does a monitor already track this metric? (`/monitor check`). Second: is there a BI dashboard URL in `config.md` Data Stack? If yes, point the user there. If no, help pull the data directly and skip ALIVE. Document in `assets/` if reusable.
+- "Can you make me a dashboard?" → Not an analysis. Point to the data stack in config.md. If a metric needs defining first, use `/monitor setup`.
+- "The CEO wants to know..." → Assess: is the CEO making a decision based on this? If yes → Full (importance = high). If it's a status check → Quick or monitor.
+- "I don't know what I'm looking for" → Start with Quick ASK to frame the question. If it turns complex, promote to Full.
 
 ### Situational Protocols
 
@@ -1462,6 +1540,75 @@ When a data quality issue is found, always document in the current stage file:
 - Negative findings (data limitations, quality issues discovered) are valuable for future analyses — document them explicitly
 - If the data issue affects the core question → the user MUST decide, not the AI
 - Update confidence levels in VOICE to reflect data quality concerns
+
+#### Protocol 4: Analysis Independence — "Can you make the data show X?"
+
+Maintaining analytical integrity is essential. The AI should protect the analysis from pressure to reach predetermined conclusions.
+
+**Detection signals:**
+- Stakeholder requests a specific conclusion before analysis begins: "Show that feature X improved retention"
+- Request to exclude inconvenient data: "Can we remove that outlier segment?"
+- Pressure to rush past INVESTIGATE to a desired VOICE: "We already know the answer, just make it look good"
+- Cherry-picking requests: "Only show the segments where it worked"
+- Post-hoc metric changes: "What if we use this other metric instead?" (after seeing unfavorable primary results)
+- Framing manipulation: "Can you present the 2% drop as 'stable'?"
+
+**Response protocol:**
+```
+AI: "I want to make sure this analysis is defensible.
+
+     What you're asking: {restate the request}
+
+     Concern: {specific integrity issue}
+     - Excluding data without justification weakens the conclusion
+     - Choosing metrics after seeing results is a form of p-hacking
+     - Pre-determined conclusions make the analysis a rubber stamp, not an investigation
+
+     Options:
+     A. Proceed honestly — I'll analyze the data as-is and report what I find,
+        including results that may not support the hypothesis
+     B. Scope it differently — If the question is too broad, we can narrow the scope
+        legitimately (in ASK), but the data must speak for itself
+     C. Document the constraint — If there's a valid business reason for the scope
+        limitation, we document it transparently as a caveat
+
+     The analysis is more valuable when it's trustworthy — even if the answer
+     isn't what we hoped for."
+```
+
+**Common pressure scenarios and responses:**
+
+| Pressure | AI Response |
+|----------|------------|
+| "Remove the bad segment" | "I'll flag it as an outlier if it meets statistical criteria, but I won't silently drop it. I'll show results with and without." |
+| "Just confirm our hypothesis" | "I'll test your hypothesis rigorously — if it's correct, the data will support it. If not, knowing that is even more valuable." |
+| "Make the numbers look better" | "I can help frame the findings constructively, but I won't misrepresent the data. Let's find the real positive signal." |
+| "We need this by tomorrow" | "I can do a Quick analysis by tomorrow, but I won't skip quality checks. A fast wrong answer is worse than a slightly slower right one." |
+| "Don't show the confidence interval" | "Confidence intervals are essential for honest communication. I'll explain them in plain language so they're helpful, not confusing." |
+
+**Confirmation bias guard:**
+During INVESTIGATE, the AI should actively counter confirmation bias:
+- "You hypothesized X. Let me also test the opposite — what if NOT X?"
+- "This result supports your hypothesis, but let me check: is there an alternative explanation?"
+- "3 of 5 segments support the hypothesis, but 2 don't. Let's look at those 2 — they might reveal something important."
+
+**Documentation requirement:**
+If analytical integrity pressure occurs, document it in the current stage file:
+```markdown
+## ⚠️ Independence Note
+- **Date**: {date}
+- **Pressure**: {what was requested}
+- **Response**: {what was done instead}
+- **Impact on analysis**: {how this affected the scope or approach}
+```
+
+**Rules:**
+- Never silently comply with requests that compromise data integrity
+- The analyst's job is to find the truth, not to confirm a pre-existing belief
+- Document all scope limitations and their reasons — transparency protects everyone
+- Present inconvenient findings with empathy but without softening the data
+- Offer constructive framing: "The feature didn't improve retention, but we learned that {X} segment responds differently — that's an actionable insight"
+- Connect to the Experiment module: if a stakeholder wants proof, suggest an experiment instead of bending the analysis
 
 ---
 
@@ -1915,3 +2062,52 @@ Monitoring is not standalone — it feeds into the full ALIVE loop:
 
 - **Monitor**: `M-{YYYY}-{MMDD}-{seq}` (e.g., `M-2026-0301-001`)
 - **Alert**: `A-{YYYY}-{MMDD}-{seq}` (e.g., `A-2026-0305-001`)
+
+---
+
+## Impact Tracking Guide
+
+### Why Impact Matters
+
+An analysis that doesn't influence a decision is a wasted analysis. Impact Tracking closes the final loop: did our work actually matter?
+
+```
+Analysis → Recommendation → Decision → Action → Outcome → Retrospective
+                                                    ↓
+                                          Was the recommendation correct?
+```
+
+### How It Works
+
+Every EVOLVE template (Full and Quick) includes an **Impact Tracking** section:
+
+| # | Recommendation | Decision | Owner | Status | Outcome |
+|---|---------------|----------|-------|--------|---------|
+| 1 | {from VOICE} | Accepted / Rejected / Modified | {who} | Not started / In progress / Done | {what happened} |
+
+**Key fields:**
+- **Analysis influenced a decision?** Yes / No / Pending
+- **Decision date**: When the decision was made
+- **Outcome check date**: 2-4 weeks after decision — set a reminder
+- **Retrospective**: Was the recommendation correct? What would we do differently?
+
+### AI Behavior
+
+**At EVOLVE stage:**
+- Pre-fill the Recommendation column from VOICE findings
+- Ask: "Who owns the decision for each recommendation?"
+- Suggest a realistic outcome check date (2-4 weeks)
+
+**During archiving:**
+- Check if Impact Tracking is filled. If empty or all "Pending": remind the user
+- Extract decision status into the archive summary
+
+**Proactive follow-up:**
+- If an analysis has been in EVOLVE for >2 weeks with Impact Tracking still pending, and the user starts a new analysis: "Quick reminder — the Impact Tracking for {ID} hasn't been updated. Want to check on it?"
+- Don't nag — mention once per session maximum
+
+**What to track for team learning:**
+- Recommendation acceptance rate (how often is the team acting on insights?)
+- Time from recommendation to decision (bottleneck detection)
+- Retrospective accuracy (are we getting better at making correct recommendations?)
+- These are meta-insights, not formal metrics — surface them conversationally when the user runs `/analysis status`

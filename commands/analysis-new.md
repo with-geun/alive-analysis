@@ -801,6 +801,7 @@ Create file: `analyses/active/quick_{ID}_{title-slug}.md`
 - What would change this conclusion?
 - Follow-up needed: Yes / No
 - Next question:
+- Impact: Did this analysis lead to a decision? What happened? (revisit in 2-4 weeks)
 - New metric needed? → If yes, tell the AI "I think we need a metric for {X}" to define it together.
   - Name:
   - Why (what gap):
