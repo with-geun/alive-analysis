@@ -249,6 +249,25 @@ All AI responses and generated files follow the language set in `.analysis/confi
 
 ---
 
+## Impact Tracking, Tags & Model Registry
+
+### Impact Tracking
+Track whether recommendations led to real outcomes. Built into EVOLVE stage.
+
+```
+Recommendation → Decision (Accept/Reject/Modify) → Execution → Result
+```
+
+When creating analyses, remind the user to update pending Impact Tracking items. `/analysis retro` aggregates impact data across all analyses.
+
+### Tags
+Connect related analyses with tags (e.g., `retention`, `pricing`). Defined in `config.md` (team-level) or ad-hoc per analysis. AI suggests relevant tags on creation and checks for related work. Tags are preserved during Quick→Full promotion.
+
+### Model Registry
+Track deployed ML models in `.analysis/models/{model-slug}_v{version}.md`. Each model card includes: performance metrics, feature importance, training details, deployment info, and drift monitoring triggers. Versions auto-increment on retraining. Links to originating Modeling analysis and metric monitors.
+
+---
+
 ## Insight Search & Retrospective
 
 ### `/analysis search`

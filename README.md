@@ -135,7 +135,7 @@ alive-analysis is optimized for each platform's agent model:
 | State management | Session memory | File-based (`.analysis/status.md`) |
 | Session welcome | Auto status display on start | Manual: `/analysis status` |
 | Setup | `/analysis init` (guided 10-step) | `/analysis init` (single form) |
-| SKILL.md | Full (~1,660 lines) | Slim (~250 lines) |
+| SKILL.md | Full (~1,660 lines) | Slim (~265 lines) |
 | Install | `bash install.sh` | `bash install.sh --cursor` |
 
 Both platforms share the same core methodology (`core/`) and produce identical analysis outputs.

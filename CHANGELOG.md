@@ -26,8 +26,8 @@ First stable release. All features complete, dual-platform support.
 
 ### Added
 - Platform separation: `platforms/claude-code/` and `platforms/cursor/` with optimized files for each
-- Cursor slim SKILL.md (~250 lines) with batch-oriented methodology summary
-- 14 Cursor-optimized command files with batch question flow and file-based state management
+- Cursor slim SKILL.md (~265 lines) with batch-oriented methodology summary
+- 16 Cursor-optimized command files with batch question flow and file-based state management
 - Cursor `.mdc` agent-requested rule (`alive-analysis.mdc`) for automatic activation
 - `core/` directory as single source of truth for shared methodology
 - `core/references/` for analytical methods, conversation examples, experiment statistics

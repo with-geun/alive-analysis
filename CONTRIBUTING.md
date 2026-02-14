@@ -59,14 +59,14 @@ alive-analysis/
   platforms/
     claude-code/               # Claude Code optimized
       SKILL.md                       # Full version (~1,660 lines)
-      commands/                      # 14 .md files (conversational flow)
+      commands/                      # 16 .md files (conversational flow)
       hooks/
         hooks.json
         session-start.sh
         post-analysis-action.sh
     cursor/                    # Cursor 2.4+ optimized
-      SKILL.md                       # Slim version (~250 lines)
-      commands/                      # 14 .md files (batch-oriented flow)
+      SKILL.md                       # Slim version (~265 lines)
+      commands/                      # 16 .md files (batch-oriented flow)
       rules/
         alive-analysis.mdc           # Agent-requested rule entry point
       hooks/
@@ -85,7 +85,7 @@ alive-analysis/
 
 - **`core/`** -- Shared methodology files referenced by both platform SKILL.md files. The single source of truth for analytical methods, examples, and glossary.
 - **`platforms/claude-code/`** -- Claude Code-specific files. SKILL.md is the full version (~1,660 lines). Commands use conversational (sequential question) flow. Hooks include SessionStart for auto-welcome.
-- **`platforms/cursor/`** -- Cursor-specific files. SKILL.md is a slim version (~250 lines). Commands use batch-oriented flow (all questions at once). Includes `.mdc` rule for agent-requested activation. State is file-based (`.analysis/status.md`).
+- **`platforms/cursor/`** -- Cursor-specific files. SKILL.md is a slim version (~265 lines). Commands use batch-oriented flow (all questions at once). Includes `.mdc` rule for agent-requested activation. State is file-based (`.analysis/status.md`).
 - **`core/references/`** -- Detailed reference material extracted from SKILL.md to keep the core file focused.
 - **`core/examples/`** -- Sample analyses demonstrating Full, Quick, and non-SaaS use cases.
 
