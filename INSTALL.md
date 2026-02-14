@@ -86,6 +86,8 @@ cp alive-analysis/platforms/cursor/rules/alive-analysis.mdc .cursor/rules/
 
 ### Initialize
 
+Open your project in Claude Code or Cursor, then type in the **agent chat** (not the terminal):
+
 ```
 /analysis-init            # Full setup
 /analysis-init --quick    # Quick setup (3 questions)
@@ -102,7 +104,7 @@ claude plugin install alive-analysis
 
 ## Verify Installation
 
-Run `/analysis-status` — you should see the status dashboard.
+Type `/analysis-status` in the agent chat — you should see the status dashboard.
 
 ## Uninstall
 

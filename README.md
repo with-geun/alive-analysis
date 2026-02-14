@@ -97,22 +97,37 @@ Or see [INSTALL.md](INSTALL.md) for manual setup and other options.
 
 ### Initialize & Start
 
-```bash
+Open your project in Claude Code or Cursor, then type in the **agent chat**:
+
+```
 /analysis-init            # Full setup (10 questions)
 /analysis-init --quick    # Quick setup (3 questions)
 /analysis-new             # Start your first analysis
+```
+
+> All `/` commands are typed in the AI agent chat, not the terminal.
+
+### Typical Workflow
+
+```
+/analysis-init            # One-time setup
+/analysis-new             # Start an analysis (Full or Quick)
+/analysis-next            # Move to the next ALIVE stage
+  ... repeat until EVOLVE ...
+/analysis-archive         # Archive when done
+/analysis-status          # Check your dashboard anytime
 ```
 
 ### For PMs and Non-Analysts
 
 Don't know what a North Star metric is? No problem.
 
-```bash
+```
 /analysis-init --quick    # Just set language, team name, and mode
 /analysis-new             # Pick "Quick" → start analyzing right away
 ```
 
-The AI will guide you through each step. Here's a taste:
+The AI guides you through each step with questions:
 
 ```
 AI: "What's the question? Is this 'why did X happen' or 'are X and Y related'?"
