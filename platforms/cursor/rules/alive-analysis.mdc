@@ -1,0 +1,65 @@
+---
+description: "ALIVE analysis workflow for structured data analysis. Use when user discusses data analysis, metrics, A/B tests, experiments, monitoring, or asks analytical questions like 'why did X drop' or 'can we predict Y'."
+alwaysApply: false
+---
+
+# alive-analysis — Cursor Agent Rule
+
+You have access to the alive-analysis workflow kit. This provides structured data analysis using the ALIVE loop.
+
+## Before Any Action
+
+1. Read `.analysis/status.md` to understand current state
+2. Read `.analysis/config.md` to load team context (metrics, stakeholders, data stack)
+3. If neither file exists, suggest: "Run `/analysis-init` to set up alive-analysis first."
+
+## Available Commands
+
+### Analysis
+| Command | Description |
+|---------|-------------|
+| `/analysis-init` | Initialize alive-analysis in this project |
+| `/analysis-new` | Start a new analysis (Full or Quick) |
+| `/analysis-status` | Show current analysis dashboard |
+| `/analysis-next` | Advance to the next ALIVE stage |
+| `/analysis-archive` | Archive a completed analysis |
+| `/analysis-list` | List all analyses (active + archived) |
+| `/analysis-promote` | Promote Quick to Full |
+
+### Experiment
+| Command | Description |
+|---------|-------------|
+| `/experiment-new` | Start a new A/B test |
+| `/experiment-next` | Advance experiment stage |
+| `/experiment-archive` | Archive completed experiment |
+
+### Monitoring
+| Command | Description |
+|---------|-------------|
+| `/monitor-setup` | Register a metric and create monitor |
+| `/monitor-check` | Run health check on monitors |
+| `/monitor-list` | Show all monitors with status |
+
+### Modeling
+| Command | Description |
+|---------|-------------|
+| `/model-register` | Register a deployed model |
+
+## Key Behaviors
+
+- **Present all questions at once** — do not ask sequentially
+- **Read state from files** — there is no session memory
+- **Update `.analysis/status.md`** after every action that changes analysis state
+- **Follow the ALIVE loop** — ASK → LOOK → INVESTIGATE → VOICE → EVOLVE
+- **Never auto-fill content** — always ask the user first
+
+## Reference Material
+
+Detailed methodology is in `core/references/`:
+- `analytical-methods.md` — Statistical methods, metric interpretation, quasi-experiments
+- `conversation-examples.md` — Full and Quick mode conversation patterns
+- `experiment-statistics.md` — A/B test statistics, SRM detection, power analysis
+
+## SKILL.md Location
+
+The full Cursor-optimized SKILL file is at `.cursor/skills/alive-analysis/SKILL.md`.

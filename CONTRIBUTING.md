@@ -45,36 +45,49 @@ bash /path/to/alive-analysis/install.sh
 
 ```
 alive-analysis/
-  commands/              # One .md file per slash command (e.g. analysis-new.md, experiment-new.md)
-  skills/
-    alive-analysis/
-      SKILL.md           # Core methodology file -- the heart of the plugin
-  hooks/
-    hooks.json           # Claude Code hook configuration (SessionStart, PostToolUse)
-    hooks-cursor.json    # Cursor hook configuration (afterFileEdit)
-    session-start.sh
-    post-analysis-action.sh
-  references/            # Detailed guides extracted from SKILL.md
-    analytical-methods.md      # Metric interpretation, clustering, ANOVA, SHAP, quasi-experimental
-    conversation-examples.md   # Full/Quick mode conversation examples
-    experiment-statistics.md   # Statistical methods, SRM detection, p-hacking prevention
-  examples/              # Sample analyses for learning and testing
-  .gitignore             # Framework files committed, user data excluded
-  CHANGELOG.md           # Version history
-  CODE_OF_CONDUCT.md     # Contributor Covenant
-  CONTRIBUTING.md        # This file
-  GLOSSARY.md            # Key analysis terms defined
-  INSTALL.md             # Installation instructions
-  install.sh             # Automated installer (Claude Code + Cursor)
-  LICENSE                # MIT license
-  README.md              # Project overview
+  core/                        # Shared methodology — single source of truth
+    references/
+      analytical-methods.md          # Metric interpretation, clustering, ANOVA, SHAP
+      conversation-examples.md       # Full/Quick mode conversation examples
+      experiment-statistics.md       # Statistical methods, SRM detection
+    examples/
+      full-investigation/            # 6-file Full analysis example
+      quick-investigation.md
+      quick-logistics.md
+      quick-hr-finance.md
+    GLOSSARY.md
+  platforms/
+    claude-code/               # Claude Code optimized
+      SKILL.md                       # Full version (~1,660 lines)
+      commands/                      # 14 .md files (conversational flow)
+      hooks/
+        hooks.json
+        session-start.sh
+        post-analysis-action.sh
+    cursor/                    # Cursor 2.4+ optimized
+      SKILL.md                       # Slim version (~250 lines)
+      commands/                      # 14 .md files (batch-oriented flow)
+      rules/
+        alive-analysis.mdc           # Agent-requested rule entry point
+      hooks/
+        hooks-cursor.json
+        post-analysis-action.sh
+  install.sh                   # Automated installer with --claude/--cursor/--both
+  README.md
+  INSTALL.md
+  CONTRIBUTING.md              # This file
+  CHANGELOG.md
+  CODE_OF_CONDUCT.md
+  GLOSSARY.md
+  LICENSE
+  .gitignore
 ```
 
-- **`commands/`** -- Each file defines one slash command. The filename maps to the command name (e.g. `analysis-new.md` becomes `/analysis new`).
-- **`skills/alive-analysis/SKILL.md`** -- The core methodology document that powers the ALIVE loop. This is the most important file in the project.
-- **`hooks/`** -- Shell scripts triggered on session events. `session-start.sh` shows a welcome message (Claude Code only); `post-analysis-action.sh` reminds you to update status after actions (both Claude Code and Cursor).
-- **`references/`** -- Detailed reference material (analytical methods, conversation examples, experiment statistics) extracted from SKILL.md to keep the core file focused.
-- **`examples/`** -- Sample analyses demonstrating Full, Quick, and non-SaaS use cases for onboarding and testing.
+- **`core/`** -- Shared methodology files referenced by both platform SKILL.md files. The single source of truth for analytical methods, examples, and glossary.
+- **`platforms/claude-code/`** -- Claude Code-specific files. SKILL.md is the full version (~1,660 lines). Commands use conversational (sequential question) flow. Hooks include SessionStart for auto-welcome.
+- **`platforms/cursor/`** -- Cursor-specific files. SKILL.md is a slim version (~250 lines). Commands use batch-oriented flow (all questions at once). Includes `.mdc` rule for agent-requested activation. State is file-based (`.analysis/status.md`).
+- **`core/references/`** -- Detailed reference material extracted from SKILL.md to keep the core file focused.
+- **`core/examples/`** -- Sample analyses demonstrating Full, Quick, and non-SaaS use cases.
 
 ## SKILL.md Modification Guidelines
 

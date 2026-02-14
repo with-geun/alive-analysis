@@ -226,7 +226,7 @@ Before trusting ANY data, verify these common traps:
 #### Metric Interpretation Guide
 Key concepts: CV (variability check), deviation vs error, STEDII metric validation, risk-adjusted metrics, trend momentum, cohort analysis pitfalls.
 
-> For details, see `references/analytical-methods.md` § Metric Interpretation Guide
+> For details, see `core/references/analytical-methods.md` § Metric Interpretation Guide
 
 #### Data Access During Conversation
 - **MCP connected**: AI can run queries directly — ask before executing
@@ -374,7 +374,7 @@ Method selection quick reference:
 | Is this A/B test real? | Experiment analysis |
 | How spread out / risky? | CV, Sharpe ratio adaptation |
 
-> For details, see `references/analytical-methods.md` § Analytical Methods Toolkit
+> For details, see `core/references/analytical-methods.md` § Analytical Methods Toolkit
 
 #### When A/B Testing Isn't Possible — Quasi-Experimental Methods
 
@@ -385,12 +385,12 @@ Method selection quick reference:
 | PSM (Propensity Score Matching) | Groups inherently different, need fair comparison |
 | IV (Instrumental Variables) | External factor affects treatment only |
 
-> For details, see `references/analytical-methods.md` § Quasi-Experimental Methods
+> For details, see `core/references/analytical-methods.md` § Quasi-Experimental Methods
 
 #### Model Interpretability
 When building prediction models, always pair prediction with explanation (feature importance, SHAP). Never deploy a "black box" — stakeholders need to know which levers to pull.
 
-> For details, see `references/analytical-methods.md` § Model Interpretability
+> For details, see `core/references/analytical-methods.md` § Model Interpretability
 
 #### Time Series Pattern Reading
 When analyzing metrics over time (sales forecasting, trend analysis), focus on patterns and uncertainty, not just point predictions.
@@ -868,20 +868,20 @@ Key behaviors per stage:
 - **VOICE**: "So What → Now What" for every finding, tag confidence levels, tailor to audience
 - **EVOLVE**: Stress-test conclusions, set up monitoring, capture reusable knowledge, impact tracking
 
-> For full conversation examples, see `references/conversation-examples.md`
+> For full conversation examples, see `core/references/conversation-examples.md`
 
 ### Quick Mode Conversation
 
 Quick mode follows the same methodology but compressed into a single file. The AI guides through all 5 lenses in a faster flow, using the 5-item abbreviated checklist.
 
-> For Quick mode examples (investigation + PM comparison), see `references/conversation-examples.md` § Quick Mode
+> For Quick mode examples (investigation + PM comparison), see `core/references/conversation-examples.md` § Quick Mode
 
 ### Mode-Specific Adjustments
 
 - **Modeling (📈)**: Focus on prediction targets, feature exploration, model comparison, drift monitoring
 - **Simulation (🔮)**: Focus on policy evaluation, scenario matrix, sensitivity/breakeven, handle bars for stakeholders
 
-> For mode-specific conversation details, see `references/conversation-examples.md` § Mode-Specific
+> For mode-specific conversation details, see `core/references/conversation-examples.md` § Mode-Specific
 
 ### Mid-Conversation Data Handling
 
@@ -1293,7 +1293,7 @@ The same thinking framework, adapted to the experiment lifecycle:
 
 Key rules: Always check for SRM before analyzing results. Guard against p-hacking (peeking, early stopping, post-hoc metric changes). Multiple comparisons require Bonferroni or FDR correction.
 
-> For details, see `references/experiment-statistics.md`
+> For details, see `core/references/experiment-statistics.md`
 
 ### Non-Analyst Experiment Guide
 

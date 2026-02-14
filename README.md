@@ -53,7 +53,7 @@ Confidence: 🟢 High (organic), 🟡 Medium (paid — smaller sample)
 Follow-up: Does simpler signup affect user quality? Check D30 activation.
 ```
 
-See [`examples/`](examples/) for complete Full and Quick samples.
+See [`core/examples/`](core/examples/) for complete Full and Quick samples.
 
 ## What is this?
 
@@ -80,7 +80,15 @@ alive-analysis helps you:
 ```bash
 # From your project directory (not inside alive-analysis)
 git clone https://github.com/with-geun/alive-analysis.git /tmp/alive-analysis
+
+# Claude Code (default)
 bash /tmp/alive-analysis/install.sh
+
+# Cursor only
+bash /tmp/alive-analysis/install.sh --cursor
+
+# Both platforms
+bash /tmp/alive-analysis/install.sh --both
 ```
 
 Or see [INSTALL.md](INSTALL.md) for manual setup and other options.
@@ -114,19 +122,35 @@ You: "We had a release yesterday"
 AI: "Let's check the data by platform and user type..."
 ```
 
-See [`examples/quick-investigation.md`](examples/quick-investigation.md) for a full PM walkthrough.
+See [`core/examples/quick-investigation.md`](core/examples/quick-investigation.md) for a full PM walkthrough.
+
+## Platform Support
+
+alive-analysis is optimized for each platform's agent model:
+
+| | Claude Code | Cursor 2.4+ |
+|---|---|---|
+| Best for | Deep analysis workflows, multi-turn conversations | Quick analyses integrated into coding workflow |
+| Interaction | Conversational (asks questions one by one) | Batch (presents all questions at once) |
+| State management | Session memory | File-based (`.analysis/status.md`) |
+| Session welcome | Auto status display on start | Manual: `/analysis status` |
+| Setup | `/analysis init` (guided 10-step) | `/analysis init` (single form) |
+| SKILL.md | Full (~1,660 lines) | Slim (~250 lines) |
+| Install | `bash install.sh` | `bash install.sh --cursor` |
+
+Both platforms share the same core methodology (`core/`) and produce identical analysis outputs.
 
 ## Compatibility
 
 `SKILL.md` is an open standard. alive-analysis works across agents that support it.
 
-| Agent | Skills | Commands | Hooks |
-|-------|--------|----------|-------|
-| **Claude Code** | `.claude/skills/` | `.claude/commands/` | `.claude/hooks.json` |
-| **Cursor 2.4+** | `.cursor/skills/` | `.cursor/commands/` | `.cursor/hooks.json` |
-| **Codex** | `.codex/skills/` | — | — |
+| Agent | Skills | Commands | Hooks | Optimized |
+|-------|--------|----------|-------|-----------|
+| **Claude Code** | `.claude/skills/` | `.claude/commands/` | `.claude/hooks.json` | Yes |
+| **Cursor 2.4+** | `.cursor/skills/` | `.cursor/commands/` | `.cursor/hooks.json` + `.cursor/rules/` | Yes |
+| **Codex** | `.codex/skills/` | — | — | Partial |
 
-> The installer auto-detects Cursor and installs to both `.claude/` and `.cursor/`. Use `bash install.sh --cursor` to install for Cursor explicitly. Note: Claude Code and Cursor use different `hooks.json` formats — the installer handles this automatically.
+> The installer auto-detects Cursor and installs to both `.claude/` and `.cursor/`. Use `bash install.sh --cursor` for Cursor only, `--claude` for Claude Code only, or `--both` explicitly.
 
 ## Commands
 

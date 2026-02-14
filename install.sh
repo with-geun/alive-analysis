@@ -1,6 +1,6 @@
 #!/bin/bash
 # alive-analysis installer
-# Copies commands, skills, and hooks to .claude/ and optionally .cursor/ directories
+# Copies platform-specific files from platforms/ and shared references from core/
 # Safe to re-run (idempotent) — merges hooks.json instead of overwriting
 
 set -e
@@ -21,7 +21,7 @@ echo ""
 
 # 0. Validate environment
 # Prevent running from inside the alive-analysis repo itself
-if [ -f "skills/alive-analysis/SKILL.md" ] && [ -f "install.sh" ]; then
+if [ -f "$SCRIPT_DIR/platforms/claude-code/SKILL.md" ] && [ "$(cd "$SCRIPT_DIR" && pwd)" = "$(pwd)" ]; then
     echo -e "${RED}Error: You're inside the alive-analysis repository.${NC}"
     echo ""
     echo "Run this installer from your PROJECT directory instead:"
@@ -34,66 +34,45 @@ if [ -f "skills/alive-analysis/SKILL.md" ] && [ -f "install.sh" ]; then
     exit 1
 fi
 
-# Check that source files exist
-if [ ! -f "$SCRIPT_DIR/skills/alive-analysis/SKILL.md" ]; then
+# Check that source files exist (new structure)
+if [ ! -f "$SCRIPT_DIR/platforms/claude-code/SKILL.md" ]; then
     echo -e "${RED}Error: Cannot find alive-analysis source files at $SCRIPT_DIR${NC}"
     echo "Make sure you're running the install.sh from the alive-analysis repository."
     exit 1
 fi
 
 # Parse arguments
+INSTALL_CLAUDE=true
 INSTALL_CURSOR=false
+CURSOR_ONLY=false
 for arg in "$@"; do
     case "$arg" in
-        --cursor) INSTALL_CURSOR=true ;;
-        --both) INSTALL_CURSOR=true ;;
+        --cursor)
+            INSTALL_CURSOR=true
+            INSTALL_CLAUDE=false
+            CURSOR_ONLY=true
+            ;;
+        --claude)
+            INSTALL_CLAUDE=true
+            INSTALL_CURSOR=false
+            ;;
+        --both)
+            INSTALL_CLAUDE=true
+            INSTALL_CURSOR=true
+            ;;
     esac
 done
 
-# Auto-detect Cursor if .cursor/ directory exists
-if [ -d ".cursor" ] && [ "$INSTALL_CURSOR" = false ]; then
+# Auto-detect Cursor if .cursor/ directory exists and not explicitly --claude only
+if [ -d ".cursor" ] && [ "$CURSOR_ONLY" = false ] && [ "$INSTALL_CURSOR" = false ]; then
     echo -e "${BLUE}Detected .cursor/ directory. Installing for Cursor as well.${NC}"
-    echo "  (Use --cursor flag to install for Cursor only, or --both explicitly)"
+    echo "  (Use --claude for Claude Code only, --cursor for Cursor only, or --both explicitly)"
     INSTALL_CURSOR=true
 fi
 
 # ============================
-# Install for Claude Code
+# Shared merge function
 # ============================
-echo "--- Claude Code ---"
-
-# 1. Create .claude directories if they don't exist
-echo "Creating .claude directories..."
-mkdir -p .claude/commands
-mkdir -p .claude/skills
-mkdir -p .claude/hooks
-
-# 2. Copy commands
-echo "Copying commands..."
-if ls "$SCRIPT_DIR"/commands/*.md 1>/dev/null 2>&1; then
-    cp -r "$SCRIPT_DIR"/commands/*.md .claude/commands/
-    echo -e "  ${GREEN}Commands copied${NC}"
-else
-    echo -e "  ${YELLOW}No command files found — skipping${NC}"
-fi
-
-# 3. Copy skills
-echo "Copying skills..."
-mkdir -p .claude/skills/alive-analysis
-cp "$SCRIPT_DIR"/skills/alive-analysis/SKILL.md .claude/skills/alive-analysis/
-echo -e "  ${GREEN}Skills copied${NC}"
-
-# 4. Copy hook scripts
-echo "Copying hook scripts..."
-cp "$SCRIPT_DIR"/hooks/session-start.sh .claude/hooks/
-cp "$SCRIPT_DIR"/hooks/post-analysis-action.sh .claude/hooks/
-chmod +x .claude/hooks/session-start.sh
-chmod +x .claude/hooks/post-analysis-action.sh
-echo -e "  ${GREEN}Hook scripts copied${NC}"
-
-# 5. Handle hooks.json (merge, not overwrite)
-echo "Configuring hooks.json..."
-
 merge_hooks_json() {
     local TARGET_DIR="$1"
     local SOURCE_FILE="$2"
@@ -149,59 +128,102 @@ except Exception as e:
     fi
 }
 
-if [ -f .claude/hooks.json ]; then
-    if grep -q "session-start.sh" .claude/hooks.json 2>/dev/null; then
-        echo -e "  ${YELLOW}alive-analysis hooks already present in hooks.json — skipping${NC}"
+# ============================
+# Install for Claude Code
+# ============================
+if [ "$INSTALL_CLAUDE" = true ]; then
+    echo "--- Claude Code ---"
+
+    PLATFORM_DIR="$SCRIPT_DIR/platforms/claude-code"
+
+    # 1. Create .claude directories if they don't exist
+    echo "Creating .claude directories..."
+    mkdir -p .claude/commands
+    mkdir -p .claude/skills/alive-analysis
+    mkdir -p .claude/hooks
+
+    # 2. Copy commands
+    echo "Copying commands..."
+    if ls "$PLATFORM_DIR"/commands/*.md 1>/dev/null 2>&1; then
+        cp -r "$PLATFORM_DIR"/commands/*.md .claude/commands/
+        echo -e "  ${GREEN}Commands copied${NC}"
     else
-        if ! merge_hooks_json ".claude" "$SCRIPT_DIR/hooks/hooks.json"; then
-            echo -e "  ${YELLOW}Warning: Could not auto-merge hooks.json (no python3 or jq found).${NC}"
-            echo "  Please manually add the hooks from hooks/hooks.json to .claude/hooks.json"
-        fi
+        echo -e "  ${YELLOW}No command files found — skipping${NC}"
     fi
-else
-    cp "$SCRIPT_DIR"/hooks/hooks.json .claude/hooks.json
-    echo -e "  ${GREEN}hooks.json created${NC}"
-fi
 
-# 6. Copy references
-if [ -d "$SCRIPT_DIR/references" ]; then
-    echo "Copying references..."
-    mkdir -p .claude/skills/alive-analysis/references
-    cp "$SCRIPT_DIR"/references/*.md .claude/skills/alive-analysis/references/ 2>/dev/null || true
-    echo -e "  ${GREEN}References copied${NC}"
-fi
+    # 3. Copy skills
+    echo "Copying skills..."
+    cp "$PLATFORM_DIR"/SKILL.md .claude/skills/alive-analysis/
+    echo -e "  ${GREEN}Skills copied${NC}"
 
-echo -e "${GREEN}Claude Code setup complete.${NC}"
+    # 4. Copy hook scripts
+    echo "Copying hook scripts..."
+    cp "$PLATFORM_DIR"/hooks/session-start.sh .claude/hooks/
+    cp "$PLATFORM_DIR"/hooks/post-analysis-action.sh .claude/hooks/
+    chmod +x .claude/hooks/session-start.sh
+    chmod +x .claude/hooks/post-analysis-action.sh
+    echo -e "  ${GREEN}Hook scripts copied${NC}"
+
+    # 5. Handle hooks.json (merge, not overwrite)
+    echo "Configuring hooks.json..."
+    if [ -f .claude/hooks.json ]; then
+        if grep -q "session-start.sh" .claude/hooks.json 2>/dev/null; then
+            echo -e "  ${YELLOW}alive-analysis hooks already present in hooks.json — skipping${NC}"
+        else
+            if ! merge_hooks_json ".claude" "$PLATFORM_DIR/hooks/hooks.json"; then
+                echo -e "  ${YELLOW}Warning: Could not auto-merge hooks.json (no python3 or jq found).${NC}"
+                echo "  Please manually add the hooks from platforms/claude-code/hooks/hooks.json to .claude/hooks.json"
+            fi
+        fi
+    else
+        cp "$PLATFORM_DIR"/hooks/hooks.json .claude/hooks.json
+        echo -e "  ${GREEN}hooks.json created${NC}"
+    fi
+
+    # 6. Copy core references
+    if [ -d "$SCRIPT_DIR/core/references" ]; then
+        echo "Copying references..."
+        mkdir -p .claude/skills/alive-analysis/core/references
+        cp "$SCRIPT_DIR"/core/references/*.md .claude/skills/alive-analysis/core/references/ 2>/dev/null || true
+        echo -e "  ${GREEN}References copied${NC}"
+    fi
+
+    echo -e "${GREEN}Claude Code setup complete.${NC}"
+fi
 
 # ============================
-# Install for Cursor (if requested or detected)
+# Install for Cursor
 # ============================
 if [ "$INSTALL_CURSOR" = true ]; then
     echo ""
     echo "--- Cursor ---"
 
+    PLATFORM_DIR="$SCRIPT_DIR/platforms/cursor"
+
     # Create .cursor directories
     echo "Creating .cursor directories..."
     mkdir -p .cursor/commands
-    mkdir -p .cursor/skills
+    mkdir -p .cursor/skills/alive-analysis
     mkdir -p .cursor/hooks
+    mkdir -p .cursor/rules
 
-    # Copy commands (same format)
+    # Copy commands (Cursor-optimized versions)
     echo "Copying commands..."
-    if ls "$SCRIPT_DIR"/commands/*.md 1>/dev/null 2>&1; then
-        cp -r "$SCRIPT_DIR"/commands/*.md .cursor/commands/
-        echo -e "  ${GREEN}Commands copied${NC}"
+    if ls "$PLATFORM_DIR"/commands/*.md 1>/dev/null 2>&1; then
+        cp -r "$PLATFORM_DIR"/commands/*.md .cursor/commands/
+        echo -e "  ${GREEN}Commands copied (Cursor-optimized)${NC}"
+    else
+        echo -e "  ${YELLOW}No command files found — skipping${NC}"
     fi
 
-    # Copy skills (same SKILL.md format)
+    # Copy skills (Cursor slim SKILL.md)
     echo "Copying skills..."
-    mkdir -p .cursor/skills/alive-analysis
-    cp "$SCRIPT_DIR"/skills/alive-analysis/SKILL.md .cursor/skills/alive-analysis/
-    echo -e "  ${GREEN}Skills copied${NC}"
+    cp "$PLATFORM_DIR"/SKILL.md .cursor/skills/alive-analysis/
+    echo -e "  ${GREEN}Skills copied (Cursor slim version)${NC}"
 
-    # Copy hook scripts (Cursor has no SessionStart equivalent, so only post-analysis-action)
+    # Copy hook scripts (Cursor has no SessionStart, only post-analysis-action)
     echo "Copying hook scripts..."
-    cp "$SCRIPT_DIR"/hooks/post-analysis-action.sh .cursor/hooks/
+    cp "$PLATFORM_DIR"/hooks/post-analysis-action.sh .cursor/hooks/
     chmod +x .cursor/hooks/post-analysis-action.sh
     echo -e "  ${GREEN}Hook scripts copied${NC}"
 
@@ -211,21 +233,26 @@ if [ "$INSTALL_CURSOR" = true ]; then
         if grep -q "post-analysis-action.sh" .cursor/hooks.json 2>/dev/null; then
             echo -e "  ${YELLOW}alive-analysis hooks already present — skipping${NC}"
         else
-            if ! merge_hooks_json ".cursor" "$SCRIPT_DIR/hooks/hooks-cursor.json"; then
+            if ! merge_hooks_json ".cursor" "$PLATFORM_DIR/hooks/hooks-cursor.json"; then
                 echo -e "  ${YELLOW}Warning: Could not auto-merge .cursor/hooks.json.${NC}"
-                echo "  Please manually add the hooks from hooks/hooks-cursor.json"
+                echo "  Please manually add the hooks from platforms/cursor/hooks/hooks-cursor.json"
             fi
         fi
     else
-        cp "$SCRIPT_DIR"/hooks/hooks-cursor.json .cursor/hooks.json
+        cp "$PLATFORM_DIR"/hooks/hooks-cursor.json .cursor/hooks.json
         echo -e "  ${GREEN}hooks.json created (Cursor format)${NC}"
     fi
 
-    # Copy references
-    if [ -d "$SCRIPT_DIR/references" ]; then
+    # Copy .mdc rule file
+    echo "Copying Cursor rules..."
+    cp "$PLATFORM_DIR"/rules/alive-analysis.mdc .cursor/rules/
+    echo -e "  ${GREEN}Agent rule copied (.cursor/rules/alive-analysis.mdc)${NC}"
+
+    # Copy core references
+    if [ -d "$SCRIPT_DIR/core/references" ]; then
         echo "Copying references..."
-        mkdir -p .cursor/skills/alive-analysis/references
-        cp "$SCRIPT_DIR"/references/*.md .cursor/skills/alive-analysis/references/ 2>/dev/null || true
+        mkdir -p .cursor/skills/alive-analysis/core/references
+        cp "$SCRIPT_DIR"/core/references/*.md .cursor/skills/alive-analysis/core/references/ 2>/dev/null || true
         echo -e "  ${GREEN}References copied${NC}"
     fi
 
@@ -239,8 +266,10 @@ echo ""
 echo -e "${GREEN}=== alive-analysis installed successfully ===${NC}"
 echo ""
 echo "Next steps:"
-if [ "$INSTALL_CURSOR" = true ]; then
+if [ "$INSTALL_CLAUDE" = true ] && [ "$INSTALL_CURSOR" = true ]; then
     echo "  1. Open your project in Claude Code or Cursor"
+elif [ "$INSTALL_CURSOR" = true ]; then
+    echo "  1. Open your project in Cursor"
 else
     echo "  1. Start Claude Code in your project directory"
 fi

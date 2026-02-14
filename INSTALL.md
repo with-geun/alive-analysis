@@ -17,79 +17,79 @@ bash /tmp/alive-analysis/install.sh
 ```
 
 The installer will:
-- Copy commands, skills, and hooks to your `.claude/` directory
-- Auto-detect `.cursor/` and install for Cursor as well (if present)
+- Copy platform-specific commands, skills, and hooks from `platforms/`
+- Copy shared references from `core/references/`
 - Safely merge with existing `hooks.json` if present
+- Auto-detect `.cursor/` and install for Cursor as well (if present)
 
 **Installer flags:**
 - `bash install.sh` — Install for Claude Code (+ Cursor if `.cursor/` exists)
-- `bash install.sh --cursor` — Also install for Cursor explicitly
+- `bash install.sh --claude` — Install for Claude Code only
+- `bash install.sh --cursor` — Install for Cursor only
 - `bash install.sh --both` — Install for both Claude Code and Cursor
 
 ### Option 2: Manual copy
 
-1. Clone this repository:
-```bash
-git clone https://github.com/with-geun/alive-analysis.git
-```
+#### Claude Code
 
-2. Copy the plugin files to your Claude Code configuration:
 ```bash
+# Clone the repository
+git clone https://github.com/with-geun/alive-analysis.git
+
 # Commands
 mkdir -p .claude/commands
-cp alive-analysis/commands/*.md .claude/commands/
+cp alive-analysis/platforms/claude-code/commands/*.md .claude/commands/
 
 # Skills
 mkdir -p .claude/skills/alive-analysis
-cp alive-analysis/skills/alive-analysis/SKILL.md .claude/skills/alive-analysis/
+cp alive-analysis/platforms/claude-code/SKILL.md .claude/skills/alive-analysis/
 
 # References
-mkdir -p .claude/skills/alive-analysis/references
-cp alive-analysis/references/*.md .claude/skills/alive-analysis/references/
+mkdir -p .claude/skills/alive-analysis/core/references
+cp alive-analysis/core/references/*.md .claude/skills/alive-analysis/core/references/
 
 # Hooks
 mkdir -p .claude/hooks
-cp alive-analysis/hooks/hooks.json .claude/hooks.json
-cp alive-analysis/hooks/session-start.sh .claude/hooks/session-start.sh
-cp alive-analysis/hooks/post-analysis-action.sh .claude/hooks/post-analysis-action.sh
+cp alive-analysis/platforms/claude-code/hooks/hooks.json .claude/hooks.json
+cp alive-analysis/platforms/claude-code/hooks/session-start.sh .claude/hooks/session-start.sh
+cp alive-analysis/platforms/claude-code/hooks/post-analysis-action.sh .claude/hooks/post-analysis-action.sh
 chmod +x .claude/hooks/session-start.sh .claude/hooks/post-analysis-action.sh
 ```
 
-3. Initialize in your project:
-```
-/analysis init
-```
-
-For a quick setup with minimal questions:
-```
-/analysis init --quick
-```
-
-### Cursor Setup
-
-If you use Cursor 2.4+, copy the same files to `.cursor/` instead of (or in addition to) `.claude/`:
+#### Cursor
 
 ```bash
-# Skills (same SKILL.md format)
+# Commands (Cursor-optimized, batch-oriented)
+mkdir -p .cursor/commands
+cp alive-analysis/platforms/cursor/commands/*.md .cursor/commands/
+
+# Skills (slim version)
 mkdir -p .cursor/skills/alive-analysis
-cp alive-analysis/skills/alive-analysis/SKILL.md .cursor/skills/alive-analysis/
+cp alive-analysis/platforms/cursor/SKILL.md .cursor/skills/alive-analysis/
 
 # References
-mkdir -p .cursor/skills/alive-analysis/references
-cp alive-analysis/references/*.md .cursor/skills/alive-analysis/references/
-
-# Commands (same format)
-mkdir -p .cursor/commands
-cp alive-analysis/commands/*.md .cursor/commands/
+mkdir -p .cursor/skills/alive-analysis/core/references
+cp alive-analysis/core/references/*.md .cursor/skills/alive-analysis/core/references/
 
 # Hooks (Cursor uses a different hooks.json format, no SessionStart equivalent)
 mkdir -p .cursor/hooks
-cp alive-analysis/hooks/hooks-cursor.json .cursor/hooks.json
-cp alive-analysis/hooks/post-analysis-action.sh .cursor/hooks/post-analysis-action.sh
+cp alive-analysis/platforms/cursor/hooks/hooks-cursor.json .cursor/hooks.json
+cp alive-analysis/platforms/cursor/hooks/post-analysis-action.sh .cursor/hooks/post-analysis-action.sh
 chmod +x .cursor/hooks/post-analysis-action.sh
+
+# Agent-requested rule
+mkdir -p .cursor/rules
+cp alive-analysis/platforms/cursor/rules/alive-analysis.mdc .cursor/rules/
 ```
 
-> **Important**: Claude Code and Cursor use different `hooks.json` formats. Use `hooks/hooks.json` for Claude Code and `hooks/hooks-cursor.json` for Cursor. The automated installer handles this automatically.
+> **Important**: Claude Code and Cursor have different SKILL.md versions (full vs slim) and different command files (conversational vs batch). Use the files from the correct `platforms/` subdirectory. The automated installer handles this automatically.
+
+### Initialize
+
+```
+/analysis init            # Full setup
+/analysis init --quick    # Quick setup (3 questions)
+```
 
 ### Option 3: Plugin install (coming soon)
 
@@ -125,6 +125,7 @@ rm -rf .cursor/commands/monitor-*.md
 rm -rf .cursor/commands/model-*.md
 rm -rf .cursor/skills/alive-analysis/
 rm .cursor/hooks/post-analysis-action.sh
+rm .cursor/rules/alive-analysis.mdc
 # Edit .cursor/hooks.json to remove the alive-analysis hook entries
 
 # Remove analysis data (irreversible!)

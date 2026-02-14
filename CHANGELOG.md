@@ -4,6 +4,29 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.3.0] - 2026-02-14
+
+### Added
+- Platform separation: `platforms/claude-code/` and `platforms/cursor/` with optimized files for each
+- Cursor slim SKILL.md (~250 lines) with batch-oriented methodology summary
+- 14 Cursor-optimized command files with batch question flow and file-based state management
+- Cursor `.mdc` agent-requested rule (`alive-analysis.mdc`) for automatic activation
+- `core/` directory as single source of truth for shared methodology
+- `core/references/` for analytical methods, conversation examples, experiment statistics
+- `core/examples/` for Full and Quick analysis samples
+- Platform comparison section in README.md
+- `--claude` flag for install.sh (Claude Code only)
+
+### Changed
+- Restructured repository: `references/` → `core/references/`, `examples/` → `core/examples/`
+- Moved `skills/alive-analysis/SKILL.md` → `platforms/claude-code/SKILL.md`
+- Moved `commands/` → `platforms/claude-code/commands/`
+- Moved `hooks/` → `platforms/claude-code/hooks/` and `platforms/cursor/hooks/`
+- Updated `install.sh` to copy from `platforms/` structure with `--claude`/`--cursor`/`--both` flags
+- Updated all `references/` paths to `core/references/` in SKILL.md
+- INSTALL.md rewritten with platform-specific manual setup sections
+- CONTRIBUTING.md updated with new project structure
+
 ## [0.2.1] - 2026-02-14
 
 ### Added
