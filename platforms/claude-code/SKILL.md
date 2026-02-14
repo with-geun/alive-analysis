@@ -1665,3 +1665,48 @@ Every EVOLVE template (Full and Quick) includes an **Impact Tracking** section:
 - Time from recommendation to decision (bottleneck detection)
 - Retrospective accuracy (are we getting better at making correct recommendations?)
 - These are meta-insights, not formal metrics — surface them conversationally when the user runs `/analysis status`
+
+---
+
+## Insight Search & Retrospective Guide
+
+### `/analysis search` — Deep Insight Search
+
+Goes beyond `/analysis list --search` by searching the full text of all analysis files (not just titles and insights), displaying matching context with surrounding lines, and performing cross-reference analysis.
+
+**Search dimensions:**
+- Keyword (full-text, case-insensitive)
+- Tag, date range, analysis type, confidence level
+- Scope: active, archived, or both
+
+**Key behaviors:**
+- Show 3-line context snippets around each match with source file and line number
+- Cross-reference: group analyses with similar conclusions, flag conflicting findings
+- Learning suggestions: identify recurring topics for meta-analysis, surface unresolved EVOLVE follow-ups, flag pending Impact Tracking items
+- Max 3 snippets per analysis to keep output scannable
+
+**When to suggest `/analysis search`:**
+- User asks "have we analyzed this before?" or "what did we find about X?"
+- Starting a new analysis on a topic that may have prior work
+- During EVOLVE when connecting to previous findings
+
+### `/analysis retro` — Automatic Retrospective Report
+
+Generates a comprehensive retrospective from archived analyses for a given period.
+
+**Output** (`analyses/.retro/retro_{period}.md`):
+1. **Summary** — 2-3 sentence overview
+2. **Analysis Activity** — counts by type and mode, average duration
+3. **Impact Tracking** — acceptance/rejection rates, top wins, unresolved items
+4. **Patterns** — recurring topics, common findings, confidence distribution
+5. **Unresolved Follow-ups** — EVOLVE proposals that haven't been started
+6. **Recommendations** — data-driven suggestions for the next period
+7. **Appendix** — full analysis list
+
+**Period options:** `--last-month` (default), `--last-quarter`, `--range {from to}`, `--all`
+
+**When to suggest `/analysis retro`:**
+- End of month/quarter
+- User asks "what have we been analyzing?" or "what should we focus on next?"
+- When Impact Tracking shows many pending items
+- Team retrospective or planning meetings

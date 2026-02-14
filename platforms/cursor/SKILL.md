@@ -246,3 +246,19 @@ All AI responses and generated files follow the language set in `.analysis/confi
 | IV | External factor affects treatment only |
 
 > For full details on all methods, see `core/references/analytical-methods.md`
+
+---
+
+## Insight Search & Retrospective
+
+### `/analysis search`
+Deep full-text search across all analyses (active + archived). Shows matching context with surrounding lines, cross-references similar conclusions, and surfaces unresolved follow-ups.
+
+Filters: `--keyword`, `--tag`, `--date`, `--type`, `--confidence`, `--active`/`--archived`/`--both`
+
+### `/analysis retro`
+Generates a retrospective report from archived analyses for a given period. Outputs to `analyses/.retro/retro_{period}.md`.
+
+Sections: Summary, Analysis Activity, Impact Tracking, Patterns, Unresolved Follow-ups, Recommendations, Appendix.
+
+Options: `--last-month` (default), `--last-quarter`, `--range {from to}`, `--all`
