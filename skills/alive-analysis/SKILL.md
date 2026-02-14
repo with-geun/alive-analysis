@@ -827,10 +827,18 @@ Status: `✅ Archived | ⏳ Pending | 🟡 In Progress`
 
 ## Language Support
 
-- Document language is set in `.analysis/config.md`
-- Checklists, templates, and status messages follow the configured language
+**All AI responses and generated files must follow the language set in `.analysis/config.md`.**
+
+- The language is chosen during `/analysis init` (any natural language accepted)
 - Default: English
-- Supported: English, Korean, Japanese (and any natural language the user specifies during init)
+- This applies to:
+  - All conversational responses (questions, suggestions, feedback)
+  - Generated analysis files (ASK, LOOK, INVESTIGATE, VOICE, EVOLVE sections)
+  - Checklist feedback and stage transition messages
+  - Status dashboard and archive summaries
+  - Experiment and monitoring outputs
+- Technical terms (ALIVE, STEDII, SHAP, etc.) remain in English as proper nouns
+- If no config exists yet, respond in the language the user is currently using
 
 ---
 

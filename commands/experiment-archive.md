@@ -90,4 +90,4 @@ Tell the user:
 - If LEARN had follow-up experiments: "Don't forget the follow-up experiments suggested in LEARN"
 - If LEARN had follow-up analyses: "Consider starting these analyses: {list}"
 - If post-launch monitoring is pending: "Remember to check the monitoring checkpoints at weeks 2, 4, and 12"
-- Suggest `/experiment status` to see updated dashboard
+- Suggest `/analysis status` to see updated dashboard

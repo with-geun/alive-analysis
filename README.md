@@ -42,7 +42,7 @@ Framing: Comparison (which is better?)
 
 ## INVESTIGATE
 Flow B outperforms A in every segment (+6-7pp (percentage points)).
-No Simpson's Paradox (overall trend matches every segment).
+No Simpson's Paradox (overall trend matches every segment — no reversal).
 Drop-off at step 3 (phone verification) — Flow B made it optional.
 
 ## VOICE
@@ -240,9 +240,9 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for how to contribute.
 
 New to data analysis terms? See [GLOSSARY.md](GLOSSARY.md) for definitions of key terms like Simpson's Paradox, counter-metric, STEDII, and more.
 
-## Other Languages
+## Language Support
 
-- [한국어 (Korean)](README.ko.md)
+alive-analysis works in any language. Set your preferred language during `/analysis init` — all AI responses, generated files, and checklist feedback will follow that language. Technical terms (ALIVE, STEDII, SHAP) stay in English as proper nouns.
 
 ## License
 

@@ -27,29 +27,11 @@ git clone https://github.com/with-geun/alive-analysis.git
 cd alive-analysis
 ```
 
-2. Copy plugin files into a test project:
+2. Install into a test project:
 
 ```bash
 cd /path/to/your-test-project
-
-# Commands
-cp -r /path/to/alive-analysis/commands/ .claude/commands/
-
-# Skills
-cp -r /path/to/alive-analysis/skills/ .claude/skills/
-
-# Hooks
-cp alive-analysis/hooks/hooks.json .claude/hooks.json
-mkdir -p .claude/hooks
-cp alive-analysis/hooks/session-start.sh .claude/hooks/session-start.sh
-cp alive-analysis/hooks/post-analysis-action.sh .claude/hooks/post-analysis-action.sh
-chmod +x .claude/hooks/session-start.sh .claude/hooks/post-analysis-action.sh
-```
-
-Or use the automated installer:
-
-```bash
-bash install.sh
+bash /path/to/alive-analysis/install.sh
 ```
 
 3. Initialize and verify:
@@ -63,27 +45,36 @@ bash install.sh
 
 ```
 alive-analysis/
-  commands/          # One .md file per slash command (e.g. analysis-new.md, experiment-new.md)
+  commands/              # One .md file per slash command (e.g. analysis-new.md, experiment-new.md)
   skills/
     alive-analysis/
-      SKILL.md       # Core methodology file -- the heart of the plugin
+      SKILL.md           # Core methodology file -- the heart of the plugin
   hooks/
-    hooks.json       # Hook configuration (SessionStart, PostToolUse)
+    hooks.json           # Claude Code hook configuration (SessionStart, PostToolUse)
+    hooks-cursor.json    # Cursor hook configuration (afterFileEdit)
     session-start.sh
     post-analysis-action.sh
-  references/        # Detailed guides extracted from SKILL.md (metric frameworks, etc.)
-  examples/          # Sample analyses for learning and testing
-  INSTALL.md         # Installation instructions
-  README.md          # Project overview
-  CHANGELOG.md       # Version history
-  LICENSE            # MIT license
+  references/            # Detailed guides extracted from SKILL.md
+    analytical-methods.md      # Metric interpretation, clustering, ANOVA, SHAP, quasi-experimental
+    conversation-examples.md   # Full/Quick mode conversation examples
+    experiment-statistics.md   # Statistical methods, SRM detection, p-hacking prevention
+  examples/              # Sample analyses for learning and testing
+  .gitignore             # Framework files committed, user data excluded
+  CHANGELOG.md           # Version history
+  CODE_OF_CONDUCT.md     # Contributor Covenant
+  CONTRIBUTING.md        # This file
+  GLOSSARY.md            # Key analysis terms defined
+  INSTALL.md             # Installation instructions
+  install.sh             # Automated installer (Claude Code + Cursor)
+  LICENSE                # MIT license
+  README.md              # Project overview
 ```
 
 - **`commands/`** -- Each file defines one slash command. The filename maps to the command name (e.g. `analysis-new.md` becomes `/analysis new`).
 - **`skills/alive-analysis/SKILL.md`** -- The core methodology document that powers the ALIVE loop. This is the most important file in the project.
-- **`hooks/`** -- Shell scripts triggered on session events. `session-start.sh` shows a welcome message; `post-analysis-action.sh` reminds you to update status after actions.
-- **`references/`** -- Detailed reference material (metric interpretation, statistical guides) extracted from SKILL.md to keep the core file focused.
-- **`examples/`** -- Sample analyses demonstrating Full and Quick modes for onboarding and testing.
+- **`hooks/`** -- Shell scripts triggered on session events. `session-start.sh` shows a welcome message (Claude Code only); `post-analysis-action.sh` reminds you to update status after actions (both Claude Code and Cursor).
+- **`references/`** -- Detailed reference material (analytical methods, conversation examples, experiment statistics) extracted from SKILL.md to keep the core file focused.
+- **`examples/`** -- Sample analyses demonstrating Full, Quick, and non-SaaS use cases for onboarding and testing.
 
 ## SKILL.md Modification Guidelines
 

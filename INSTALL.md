@@ -82,12 +82,11 @@ cp alive-analysis/references/*.md .cursor/skills/alive-analysis/references/
 mkdir -p .cursor/commands
 cp alive-analysis/commands/*.md .cursor/commands/
 
-# Hooks (Cursor uses a different hooks.json format)
+# Hooks (Cursor uses a different hooks.json format, no SessionStart equivalent)
 mkdir -p .cursor/hooks
 cp alive-analysis/hooks/hooks-cursor.json .cursor/hooks.json
-cp alive-analysis/hooks/session-start.sh .cursor/hooks/session-start.sh
 cp alive-analysis/hooks/post-analysis-action.sh .cursor/hooks/post-analysis-action.sh
-chmod +x .cursor/hooks/session-start.sh .cursor/hooks/post-analysis-action.sh
+chmod +x .cursor/hooks/post-analysis-action.sh
 ```
 
 > **Important**: Claude Code and Cursor use different `hooks.json` formats. Use `hooks/hooks.json` for Claude Code and `hooks/hooks-cursor.json` for Cursor. The automated installer handles this automatically.
@@ -125,7 +124,6 @@ rm -rf .cursor/commands/experiment-*.md
 rm -rf .cursor/commands/monitor-*.md
 rm -rf .cursor/commands/model-*.md
 rm -rf .cursor/skills/alive-analysis/
-rm .cursor/hooks/session-start.sh
 rm .cursor/hooks/post-analysis-action.sh
 # Edit .cursor/hooks.json to remove the alive-analysis hook entries
 

@@ -25,9 +25,9 @@ Use AskUserQuestion:
 - 📈 **Modeling** — "Can we predict/classify/segment?" Statistical modeling, ML, forecasting.
 - 🔮 **Simulation** — "What would happen if we do X?" Policy evaluation, pricing strategy, resource allocation.
 
-(Phase 2 types — not yet available:)
-- 📊 Monitoring — periodic metric health check
-- 🧪 Experiment — A/B test analysis
+(These are available as separate commands:)
+- 📊 Monitoring → `/monitor setup`
+- 🧪 Experiment → `/experiment new`
 
 ### Step 2b: Ask mode and details
 

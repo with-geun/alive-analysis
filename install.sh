@@ -199,11 +199,9 @@ if [ "$INSTALL_CURSOR" = true ]; then
     cp "$SCRIPT_DIR"/skills/alive-analysis/SKILL.md .cursor/skills/alive-analysis/
     echo -e "  ${GREEN}Skills copied${NC}"
 
-    # Copy hook scripts
+    # Copy hook scripts (Cursor has no SessionStart equivalent, so only post-analysis-action)
     echo "Copying hook scripts..."
-    cp "$SCRIPT_DIR"/hooks/session-start.sh .cursor/hooks/
     cp "$SCRIPT_DIR"/hooks/post-analysis-action.sh .cursor/hooks/
-    chmod +x .cursor/hooks/session-start.sh
     chmod +x .cursor/hooks/post-analysis-action.sh
     echo -e "  ${GREEN}Hook scripts copied${NC}"
 
