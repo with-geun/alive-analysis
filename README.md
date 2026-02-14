@@ -252,9 +252,10 @@ Checklists live in `.analysis/checklists/` — edit them to match your team's st
 
 ## Roadmap
 
-- **Phase 1** ✅: ALIVE loop, Full/Quick modes, 3 analysis types, checklists, archive, metric proposal conversation
-- **Phase 2** ✅: A/B test experiments, metric monitoring, Quick→Full promotion, tags, model registry, analysis ethics
-- **Phase 3**: Team dashboard, insight search, auto retrospectives
+- **v1.0** ✅: ALIVE loop, Full/Quick modes, 3 analysis types, checklists, archive, metric proposal
+- **v1.0** ✅: A/B test experiments, metric monitoring, Quick→Full promotion, tags, model registry
+- **v1.0** ✅: Claude Code + Cursor 2.4+ dual-platform optimization
+- **Next**: Team dashboard, insight search, auto retrospectives
 
 ## Contributing
 

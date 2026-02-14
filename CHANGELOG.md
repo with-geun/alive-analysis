@@ -4,6 +4,17 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.0.0] - 2026-02-14
+
+First stable release. All Phase 1 and Phase 2 features complete, dual-platform support.
+
+### Highlights
+- ALIVE loop with Full/Quick modes, 3 analysis types (Investigation, Modeling, Simulation)
+- A/B test experiments, metric monitoring, model registry
+- Claude Code + Cursor 2.4+ dual-platform optimization
+- 14 commands, quality checklists, archive system
+- 40+ QA simulation tests across diverse roles, industries, and languages
+
 ## [0.3.0] - 2026-02-14
 
 ### Added
