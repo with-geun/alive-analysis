@@ -1,0 +1,36 @@
+# ===========================================
+# alive-analysis .gitignore
+# ===========================================
+# This file controls what gets committed vs ignored.
+# Framework files (checklists, config templates) ARE committed.
+# User-generated data (analyses, experiments, raw data) are NOT.
+
+# --- User analysis data (generated per-project) ---
+analyses/
+ab-tests/
+
+# --- Raw data files ---
+*.csv
+*.xlsx
+*.xls
+*.parquet
+*.json.gz
+
+# --- Environment & secrets ---
+.env
+.env.*
+
+# --- OS files ---
+.DS_Store
+Thumbs.db
+
+# --- Temp files ---
+*.tmp
+*.bak
+*.swp
+
+# --- Note: .analysis/ is NOT ignored ---
+# .analysis/config.md, .analysis/checklists/, .analysis/status.md
+# are framework files that SHOULD be committed to share team conventions.
+# Only .analysis/metrics/monitors/ contains per-project data that
+# teams may choose to commit or ignore based on preference.

@@ -1,3 +1,8 @@
+---
+name: alive-analysis
+description: Data analysis workflow kit using the ALIVE loop (Ask, Look, Investigate, Voice, Evolve)
+---
+
 # alive-analysis Skill
 
 > Data analysis workflow kit based on the ALIVE loop.
@@ -219,76 +224,9 @@ Before trusting ANY data, verify these common traps:
 **When you find a gotcha**: Document it in the analysis as a Data Quality Note — future analyses will thank you.
 
 #### Metric Interpretation Guide
-Before analyzing metrics, understand what you're actually measuring:
+Key concepts: CV (variability check), deviation vs error, STEDII metric validation, risk-adjusted metrics, trend momentum, cohort analysis pitfalls.
 
-**Don't trust averages alone — check variability:**
-- **Coefficient of Variation (CV) = σ / μ**: Measures how spread out the data is relative to its mean
-- CV lets you compare variability across different scales (e.g., "Is revenue more volatile than user count?")
-- High CV (>1) = very spread out, average is misleading → segment the data further
-- Low CV (<0.3) = data is consistent, average is reliable
-- Example: Two stores both averaging 100 orders/day, but Store A has CV=0.1 (steady) and Store B has CV=0.8 (wild swings). Very different stories.
-
-**Deviation vs Error — know the difference:**
-- **Deviation** = how far individual data points spread from the mean (individual vs group)
-- **Error** = how far your estimate/prediction is from the true value (estimate vs truth)
-- Standard deviation tells you about spread. Standard error tells you how reliable your estimate is.
-- When reporting to stakeholders: deviation describes "how consistent is this?", error describes "how confident are we?"
-
-**Metric Quality Check (STEDII — Microsoft Research):**
-Before trusting any metric in your analysis, verify it passes the STEDII test:
-- **Sensitive**: Can it detect real changes? (If your experiment moves the needle but the metric doesn't budge, it's not sensitive enough)
-- **Trustworthy**: Is the data accurate and aligned with what you think it measures? (Check for tracking bugs, definition drift)
-- **Efficient**: Is it practical to compute? (A metric requiring 6 hours of data processing isn't useful for daily decisions)
-- **Debuggable**: When it moves, can you decompose WHY? (A good metric can be broken down by segments, time, and sub-components)
-- **Interpretable**: Does everyone on the team understand what it means and whether "up" is good? (If you need a 5-minute explanation, it's too complex)
-- **Inclusive**: Does it fairly represent all user segments? (Metrics based only on power users miss the majority)
-
-Quick practical test: "If this metric improved 10%, would the team know exactly what happened and what to do next?" If no → the metric needs redesign.
-
-**Risk-adjusted metrics (Sharpe Ratio concept):**
-- Raw performance numbers can be misleading without considering risk/volatility
-- **Sharpe Ratio idea**: (return - baseline) / volatility — "how much performance per unit of risk?"
-- Apply this thinking: "Channel A has higher conversion but huge variance. Channel B is lower but stable. Which is actually better?"
-- When comparing options: normalize by variability, not just average performance
-- Especially useful for: campaign comparison, channel evaluation, pricing strategy assessment
-
-#### Trend Momentum — Don't Just Look at Levels, Look at Velocity
-A metric can be "high" but falling fast, or "low" but rising rapidly. Looking only at current values misses the story.
-
-**When reviewing time-series metrics, always ask:**
-- "Is this metric accelerating, decelerating, or stable?"
-- "How many consecutive periods has it been rising/falling?"
-- "Is the rate of change increasing or slowing down?"
-
-Practical approach (inspired by RSI — Relative Strength Index):
-- Compare recent gains vs recent losses over a window (e.g., last 14 days or 4 weeks)
-- If mostly gains → strong upward momentum → the trend is likely to continue
-- If mostly losses → strong downward momentum → don't assume it will bounce back on its own
-- Mixed signals → flat or transitional period → investigate what's changing
-
-**Why this matters in practice:**
-- A brand/product with high momentum but low absolute sales = **early opportunity** (catch rising stars)
-- A brand/product with declining momentum but still high absolute sales = **early warning** (don't wait for the crash)
-- Helps prioritize: "Which segments need attention NOW?" vs "Which are fine on autopilot?"
-
-#### Cohort Analysis Pitfalls
-When looking at cohort data (retention, LTV curves), watch for these common traps:
-
-**Age vs Period vs Cohort confusion:**
-- **Age effect**: Users naturally become less active over time (normal decay curve)
-- **Period effect**: Something happened in a specific month that affected ALL cohorts (holiday, outage, promotion)
-- **Cohort effect**: A specific group of users was inherently different (acquired via different channel, onboarding changed)
-- If you don't separate these three, you'll misattribute: "This cohort has bad retention" when really "December was bad for everyone" (period effect)
-
-**How to disentangle (practical approach):**
-1. First normalize by period: divide each cohort's metric by the overall monthly metric → removes calendar/promo effects
-2. Then compare cohorts at the same Age → reveals true cohort quality differences
-3. If a cohort looks bad → check: was there an onboarding change, channel shift, or different user mix?
-
-**Censoring trap — recent cohorts always look worse:**
-- The newest cohort hasn't had time to reach Month 6, so it LOOKS like retention is dropping
-- Always compare cohorts at the same maximum Age they've all reached
-- Don't panic about "declining retention" if you're comparing 12-month cohorts to 2-month cohorts
+> For details, see `references/analytical-methods.md` § Metric Interpretation Guide
 
 #### Data Access During Conversation
 - **MCP connected**: AI can run queries directly — ask before executing
@@ -425,160 +363,34 @@ In organizations with multiple products/services:
 - Check infrastructure: shared API, CDN, DB performance impacts
 
 #### Analytical Methods Toolkit
-Choose the right method for the question. This is a practical decision guide, not a statistics textbook.
+Method selection quick reference:
 
-**"Which groups are different?" → Group Comparison**
-- 2 groups → t-test (or simple mean comparison with confidence intervals)
-- 3+ groups → ANOVA (Analysis of Variance)
-  - ANOVA answers: "Is at least one group meaningfully different from the others?"
-  - If ANOVA is significant → post-hoc tests tell you WHICH groups differ
-  - Example: "Do conversion rates differ across 5 acquisition channels?" → ANOVA
-  - Caution: ANOVA assumes similar variance across groups and roughly normal distributions. For very skewed data (e.g., revenue), consider non-parametric alternatives or log-transformation.
+| Question | Method |
+|----------|--------|
+| Which groups are different? | t-test (2 groups), ANOVA (3+) |
+| Which users are similar? | K-Means clustering |
+| What appears together? | Association rules (Lift) |
+| Can we predict an outcome? | LTV models, time series |
+| Is this A/B test real? | Experiment analysis |
+| How spread out / risky? | CV, Sharpe ratio adaptation |
 
-**"Which users are similar?" → Segmentation / Clustering**
-- K-Means clustering: Groups users by similarity in multiple dimensions
-  - Practical guide: Start with 3-5 clusters, increase until segments stop being interpretable
-  - Critical: **Standardize variables first** — otherwise high-magnitude variables (revenue in ₩) dominate over low-magnitude ones (visit count)
-  - Always validate clusters with domain sense: "Do these segments make business sense?"
-  - Name the clusters with business language ("Price-sensitive bargain hunters", not "Cluster 3")
-
-**"What tends to appear together?" → Association Rules**
-- Market basket analysis: "Users who did X also tend to do Y"
-- Key metrics: Support (how common), Confidence (how reliable), Lift (how much more likely than random)
-- **Lift > 1** = positive association, **Lift = 1** = no relationship, **Lift < 1** = negative association
-- Use cases beyond shopping carts: feature usage patterns, content consumption sequences, error co-occurrence
-- Caution: Association ≠ causation. "Users who buy A also buy B" doesn't mean A causes B purchases.
-
-**"Can we predict a future outcome?" → Prediction Models**
-- **LTV (Lifetime Value) prediction**: Critical for acquisition and retention decisions
-  - Simple approach: Average revenue × expected lifespan (good enough for many cases)
-  - Better: Cohort-based LTV curves (track actual revenue by acquisition month)
-  - Advanced: Probabilistic models (BG/NBD, Gamma-Gamma) when you have repeat transaction data
-  - Key insight: **LTV by segment** is far more useful than overall LTV — combine with clustering
-- **Forecasting**: Time series patterns (trend, seasonality, cyclical)
-- When choosing model complexity: "Can I explain this to a stakeholder?" If not, simplify.
-
-**"Is this A/B test result real?" → Experiment Analysis**
-- See the A/B Test Design Guide below for setup; here's the analysis part:
-- Check: Was randomization successful? (compare pre-experiment metrics between groups)
-- Check: Is the sample size sufficient? (see power analysis below)
-- Check: Are there novelty effects? (new feature excitement fades)
-- Check: Are there segment-level effects hidden in the average? (overall flat, but huge for one segment)
-
-**"How spread out / risky is this?" → Variability Analysis**
-- CV (Coefficient of Variation): Compare variability across different scales
-- Sharpe Ratio adaptation: Compare performance options risk-adjusted (see LOOK stage)
-- Percentile analysis: "What does the 90th percentile experience look like vs median?"
-
-#### A/B Test Design Guide
-When the analysis involves designing or evaluating experiments:
-
-**Sample Size Calculation (before running the test):**
-- Required inputs: baseline conversion rate, minimum detectable effect (MDE), significance level (α, usually 0.05), power (1-β, usually 0.8)
-- Rule of thumb: smaller effects need exponentially larger samples
-- If the required sample size is too large for your traffic:
-  - Option A: Accept a larger MDE ("we can only detect 5% improvement, not 2%")
-  - Option B: Run longer (but watch for seasonality and novelty effects)
-  - Option C: Target a high-traffic segment only
-  - Option D: Use a more sensitive metric as primary (e.g., click rate instead of purchase rate)
-
-**Traffic Split Ratio:**
-- Default: 50/50 (maximum statistical power)
-- When to deviate: business risk requires limiting exposure (e.g., 90/10 for risky changes)
-- 90/10 split needs ~3.6x more total traffic than 50/50 for the same power
-- The ratio is a business decision, not just a statistical one
-
-**Common Pitfalls:**
-- Peeking at results too early → inflated false positive rate
-- Stopping early when results "look significant" → confirmation bias
-- Not accounting for multiple comparisons (testing 5 metrics → ~23% chance of at least one false positive)
-- Ignoring practical significance: "statistically significant but only 0.1% improvement" → not worth the engineering cost
-
-**Experiment Trustworthiness Checklist (from Microsoft Research):**
-- **Sample Ratio Mismatch (SRM)**: Are treatment/control groups properly balanced? If the split is 51/49 when it should be 50/50, something went wrong in randomization → results are unreliable
-- **Novelty effects**: Did the metric spike initially then decay? Initial excitement about a new feature fades — wait for the "steady state" before drawing conclusions
-- **Guardrail monitoring**: Set up automated alerts for guardrail metrics DURING the experiment, not just at the end. Auto-stop tests that cause egregious degradation.
-- **Segment analysis**: The overall result can hide opposite effects in different segments (e.g., great for power users, terrible for new users). Always slice by key dimensions.
-- **Metric holism**: Don't just track the primary metric. Use a metric taxonomy: data quality metrics → primary success metric → feature diagnostics → guardrails
-
-**Contaminated Control — when the control group is also affected:**
-Sometimes the control group isn't "clean" — they receive a baseline treatment (common coupon, existing feature) that overlaps with what you're testing. In this case:
-- **Stratified analysis**: Split by whether the baseline treatment was received → compare A's effect within each stratum
-- **Interaction modeling**: Include A, B, and A×B terms to see if the baseline treatment absorbs/amplifies A's effect
-- **3-arm design** (when feasible): Create three groups (A only, B only, A+B) to directly measure each effect and their interaction
-- Key question: "Is the additional treatment being cannibalized by the existing one, or do they create synergy?"
+> For details, see `references/analytical-methods.md` § Analytical Methods Toolkit
 
 #### When A/B Testing Isn't Possible — Quasi-Experimental Methods
-Real-world situations often prevent clean A/B tests (ethical constraints, company-wide promotions, external interference, too few users to randomize). When you need to prove causation without an experiment, consider these approaches.
 
-**The AI should suggest the appropriate method based on the user's situation during conversation.**
+| Method | When to use |
+|--------|------------|
+| DiD (Difference-in-Differences) | Before/after event + comparison group |
+| RDD (Regression Discontinuity) | Clear threshold/cutoff determines treatment |
+| PSM (Propensity Score Matching) | Groups inherently different, need fair comparison |
+| IV (Instrumental Variables) | External factor affects treatment only |
 
-**1. Difference-in-Differences (DiD) — "Compare trends, not just levels"**
-- **When to suggest**: There's a clear before/after event AND a comparison group that wasn't affected
-- **How it works**: Compare the change in the treatment group to the change in the control group → the difference-of-differences is the causal effect
-- **Key assumption**: Both groups were trending similarly BEFORE the event (parallel trends)
-- **Example prompt**: "We launched a new feature for Premium users only. Can we compare their retention change to Free users' retention change over the same period?"
-- **Watch out for**: If the groups were already diverging before the event, DiD won't work
+> For details, see `references/analytical-methods.md` § Quasi-Experimental Methods
 
-**2. Regression Discontinuity (RDD) — "Use a threshold as a natural experiment"**
-- **When to suggest**: There's a clear cutoff/threshold that determines who gets treatment (score ≥ 70 → VIP, purchase ≥ ₩100K → coupon)
-- **How it works**: Users just above and just below the threshold are essentially random → compare their outcomes
-- **Key assumption**: Users can't manipulate their score to cross the threshold
-- **Example prompt**: "Customers with loyalty score ≥ 500 get VIP benefits. Do the benefits actually increase their next-month spending? Let's compare users at 490-510."
-- **Watch out for**: If users know the threshold and game it (e.g., intentionally spending more to qualify), the method breaks down
+#### Model Interpretability
+When building prediction models, always pair prediction with explanation (feature importance, SHAP). Never deploy a "black box" — stakeholders need to know which levers to pull.
 
-**3. Propensity Score Matching (PSM) — "Find fair comparison pairs"**
-- **When to suggest**: You want to compare treated vs untreated, but the groups are inherently different (different demographics, behaviors)
-- **How it works**: Calculate each user's probability of receiving treatment based on their characteristics → match similar users across groups → compare outcomes
-- **Key assumption**: All important differences between groups are captured in the matching variables
-- **Example prompt**: "Coupon recipients were our most active users. Can we find non-recipients with similar activity levels to fairly compare?"
-- **Watch out for**: Hidden variables not captured in matching (unmeasured confounders)
-
-**4. Instrumental Variables (IV) — "Use an external lever"**
-- **When to suggest**: There's an external factor that affects treatment but NOT the outcome directly (hardest to find, use with caution)
-- **How it works**: Find a variable (instrument) that influences whether someone gets treated, but only affects the outcome THROUGH the treatment
-- **Example**: Ad time slot (random) → affects whether user sees the ad → but doesn't directly affect purchase intent
-- **Practical note**: Good instruments are rare in marketing. DiD, RDD, and PSM are usually more practical for most business analyses.
-
-**How to choose (conversational guide for the AI):**
-```
-User wants to prove causation but can't do A/B test →
-
-"Do you have a before/after + comparison group?"
-  → YES → Suggest DiD
-
-"Is there a clear threshold/cutoff?"
-  → YES → Suggest RDD
-
-"Can you find similar untreated users to compare?"
-  → YES → Suggest PSM
-
-"None of the above, but there's an external factor..."
-  → MAYBE → Discuss IV (with caveats)
-
-"None of these fit"
-  → Be honest: "We can establish strong correlation with controls,
-    but proving causation requires one of these structures.
-    Let's document this as a limitation."
-```
-
-#### Model Interpretability — When You Build a Prediction Model
-If the analysis involves building a predictive model (churn prediction, LTV estimation, demand forecasting), always pair prediction with explanation.
-
-**The "black box" trap**: A model that predicts well but can't explain WHY is dangerous for decision-making. Stakeholders need to know which levers to pull.
-
-**During conversation, when a model is built, ask:**
-- "Which features matter most for this prediction?" (feature importance)
-- "For this specific case, what pushed the prediction up or down?" (individual explanation)
-- "Do the important features match your domain intuition?" (sanity check)
-- "Where does the model fail? Which segments does it get wrong?" (error analysis)
-
-**SHAP concept (simplified for conversation):**
-- Every prediction can be broken down into each feature's contribution
-- "The model predicted high churn for this user because: low login frequency (+30%), no purchase in 30 days (+25%), but premium membership (-15%)"
-- This turns "the model says they'll churn" into "HERE'S WHY the model thinks they'll churn — and here's what we might change"
-
-**Business validation**: Always check — do the model's top factors match what domain experts believe? If the model says "color of profile picture" is the #1 churn predictor, something is wrong (likely a proxy or data leakage).
+> For details, see `references/analytical-methods.md` § Model Interpretability
 
 #### Time Series Pattern Reading
 When analyzing metrics over time (sales forecasting, trend analysis), focus on patterns and uncertainty, not just point predictions.
@@ -711,11 +523,7 @@ For each recommendation, make the trade-offs explicit:
 - Reference guardrail metrics from config.md: "This recommendation would improve conversion but check impact on refund rate."
 
 **Counter-metric check (mandatory for every recommendation):**
-- "For every success metric, identify a counter-metric that would reveal if we're just plugging one hole with another"
-- Example: Recommending "increase push notification frequency" → success: DAU up → counter: unsubscribe rate, app delete rate
-- Example: Recommending "lower delivery fee" → success: order volume up → counter: unit economics, delivery capacity
-- If a counter-metric is already in config.md guardrails, reference it explicitly
-- If no counter-metric exists → propose one and suggest adding it to config.md
+For every success metric, identify a counter-metric that reveals if we're just plugging one hole with another. Reference config.md guardrails if defined; if none exists, propose one. See Counter-Metric Monitoring in the Monitoring Guide for the full framework and examples.
 
 #### Presenting Simulation Results
 When the analysis involved simulation (policy/strategy evaluation):
@@ -846,7 +654,7 @@ When an analysis reveals a gap in the current metric framework — a metric that
 - "How would you explain a 10% drop in this to a non-analyst stakeholder?"
 - "Are there segments where this metric behaves differently? (e.g., new vs returning users)"
 
-**After the conversation**, the AI fills out the Proposed New Metrics section in the EVOLVE file and runs the STEDII validation (from the Metric Interpretation Guide above).
+**After the conversation**, the AI fills out the Proposed New Metrics section in the EVOLVE file and runs the STEDII validation (see STEDII definition in Monitoring Guide below).
 
 **Tone:** Collaborative, not interrogative. Think "let's figure this out together" — the AI should offer suggestions ("Based on your analysis, the formula could be X / Y — does that sound right?"), not just ask blank questions.
 
@@ -1043,243 +851,29 @@ The AI is a guide and co-analyst, not an auto-generator.
 
 ### Stage-by-Stage Conversation Flow
 
-#### ASK Stage — Frame the question before touching data
-```
-AI: "What question are you trying to answer?"
-User: (describes the problem)
-AI: "Got it. Before we dive in — is this about WHY something happened (causation),
-     or whether two things are related (correlation)?"
-User: (clarifies intent)
-AI: "Who requested this? What decision will this inform?"
-User: (provides context)
-AI: "Let me build a hypothesis tree. Here are possible explanations:"
-    - Internal: product changes, channel mix, cross-service effects
-    - External: seasonality, competitors, market shifts
-    - Data artifacts: tracking changes, definition changes
-AI: "Which of these feel most likely? Any I should add?"
-User: (prioritizes hypotheses)
-AI: "What's in scope and out of scope? And the deadline?"
-User: (confirms)
-AI: → Writes 01_ask.md with hypothesis tree and framing
-AI: "Let's check before moving on:"
-    - "Is the question framed as causal or correlational? 🟢/🔴"
-    - "Do we have a hypothesis tree, not just one guess? 🟢/🔴"
-    - "Do we know where the data lives? 🟢/🔴"
-AI: "Ready to move to LOOK? Or anything to add?"
-```
+Each ALIVE stage follows a consistent pattern: AI asks questions → user provides domain knowledge → AI structures and documents → checklist review → user confirms before moving on.
 
-#### LOOK Stage — Segment, don't just aggregate
-```
-AI: "What data sources will we use? Do you have MCP access, or will you
-     run queries and share results?"
-User: (describes access)
-[If MCP]: AI proposes query → gets confirmation → runs → discusses results
-[If file]: User shares file → AI reads → summarizes structure → asks what to look for
-[If manual]: AI generates SQL/Python → user runs → shares results
+Key behaviors per stage:
+- **ASK**: Build hypothesis tree collaboratively, frame as causal vs correlational, confirm scope
+- **LOOK**: Segment before aggregating, check external factors and confounders, validate data quality
+- **INVESTIGATE**: Eliminate hypotheses (don't just confirm), apply multi-lens (macro/meso/micro), sensitivity check
+- **VOICE**: "So What → Now What" for every finding, tag confidence levels, tailor to audience
+- **EVOLVE**: Stress-test conclusions, set up monitoring, capture reusable knowledge, impact tracking
 
-AI: "Let's not look at averages yet. How should we segment this?"
-    - "By time period (before/after event)?"
-    - "By user cohort (new vs returning, by channel)?"
-    - "By platform (iOS/Android, web/app)?"
-User: (chooses segmentation)
-AI: "Any external factors to check? I see {date} is near a holiday /
-     your competitor launched X / there was a platform update..."
-User: (confirms or adds context)
-AI: "Let me also check — did anything change in adjacent services?
-     Sometimes changes in service A affect metrics in service B."
-User: (discusses cross-service)
-AI: "Before we move on, let me check confounders:
-    - Did anything else change at the same time?
-    - Are we comparing apples to apples (same population)?
-    - Could this be survivorship bias?"
-User: (validates)
-AI: → Updates 02_look.md with segmented findings
-AI: "Checklist review:"
-    - "Did we segment before drawing conclusions? 🟢/🔴"
-    - "Have we checked for confounders and external factors? 🟢/🔴"
-    - "Is the data quality confirmed? 🟢/🔴"
-```
-
-#### INVESTIGATE Stage — Eliminate, don't just confirm
-```
-AI: "From our hypothesis tree in ASK, let's work through them systematically.
-     Which is easiest to disprove? Let's start there."
-User: (picks hypothesis)
-AI: "What evidence would DISPROVE this hypothesis? Let's look for that first."
-User: (discusses disproving evidence)
-[AI runs queries via MCP or asks user to check]
-
-AI: "Let's look at this from multiple angles:"
-    - "Macro: Is this happening industry-wide, or just us?"
-    - "Meso: Is this specific to one product/channel, or company-wide?"
-    - "Micro: What does user-level behavior look like?"
-User: (discusses each level)
-AI: "Based on what we've found so far, here's the scorecard:
-     ✅ Hypothesis 1 (channel mix): Strong evidence — explains ~70%
-     ❌ Hypothesis 2 (bug): Disproved — no change in error rates
-     ⚠️ Hypothesis 3 (competitor): Inconclusive — need more data"
-User: (validates or challenges)
-
-[If causal claim needed]:
-AI: "You want to say X CAUSED Y. Let's check:
-    - Time ordering: Did X happen before Y? ✅
-    - Mechanism: Is there a plausible pathway?
-    - Dose-response: More X → more Y?
-    - Counterfactual: Unaffected segment stayed stable?"
-User: (works through each)
-
-AI: "Sensitivity check — does this hold if we:
-    - Change the date range by a week?
-    - Exclude outliers?
-    - Use a different metric definition?"
-User: (confirms robustness)
-AI: → Updates 03_investigate.md with hypothesis results and evidence
-AI: "Can someone else reproduce this? Let's save queries to assets/."
-```
-
-#### VOICE Stage — So What, Now What
-```
-AI: "Let's frame each finding with 'So What → Now What'."
-AI: "Finding 1: {summary}. So what does this mean for the business?"
-User: (interprets business impact)
-AI: "Now what? What are the options?"
-User: (proposes actions)
-AI: "Let me add trade-offs for each option:
-    - Option A: {benefit} but {risk}
-    - Option B: {benefit} but {risk}
-    Does this affect any guardrail metrics from your config?"
-User: (evaluates)
-
-AI: "Confidence level on each finding:"
-    - Finding 1: 🟢 High — multiple sources, robust to sensitivity checks
-    - Finding 2: 🟡 Medium — supported but small sample
-AI: "Does that feel right?"
-User: (adjusts)
-
-AI: "Who needs to hear this? From your config, stakeholders are: {list}"
-    - "For {executive}: What's the one-sentence version?"
-    - "For {product team}: What's the technical detail they need?"
-    - "For {marketing}: How does this affect their metrics?"
-User: (tailors messages)
-AI: → Updates 04_voice.md
-AI: "Important — what are the limitations and caveats? Let's make those visible,
-     not buried in a footnote."
-```
-
-#### EVOLVE Stage — Stress-test and look forward
-```
-AI: "Before we close — let's stress-test our conclusion."
-    - "What new data could DISPROVE what we found?"
-    - "What assumptions did we make that we didn't verify?"
-    - "If a colleague challenged this, what would they attack?"
-User: (identifies vulnerabilities)
-
-AI: "Should we set up monitoring for this?"
-    - "What metric should we track going forward?"
-    - "What threshold should trigger re-investigation?"
-    - "Who should own it?"
-User: (sets up monitoring plan)
-
-AI: "What questions came up that we didn't answer?"
-User: (lists open questions)
-AI: "Any reusable patterns from this analysis? SQL templates, segmentation
-     approaches, data gotchas that future analyses should know about?"
-User: (captures learnings)
-
-AI: "Let's set up Impact Tracking. From your VOICE recommendations:
-     1. {recommendation from VOICE}
-     2. {recommendation from VOICE}
-     Who owns each decision? And when should we check back on outcomes?"
-User: (assigns owners, sets timeline)
-
-AI: "Connecting back to your North Star ({metric from config}):
-     Does this change our understanding of what drives it?"
-User: (reflects)
-AI: "One sentence — the single most important takeaway?"
-User: (provides insight)
-AI: → Updates 05_evolve.md
-AI: "Ready to archive? Or want to revisit any stage?"
-```
+> For full conversation examples, see `references/conversation-examples.md`
 
 ### Quick Mode Conversation
 
-Quick mode follows the same methodology but compressed. The AI still guides through each lens but faster:
-```
-AI: "What's the question? Is this a 'why did X happen' or 'are X and Y related'? (ASK)"
-User: "Why did signups drop yesterday?"
-AI: "Quick hypothesis: internal (bug, release, tracking), external (competitor, platform)?
-     Which feels most likely?"
-User: "Probably internal — we had a release yesterday"
+Quick mode follows the same methodology but compressed into a single file. The AI guides through all 5 lenses in a faster flow, using the 5-item abbreviated checklist.
 
-AI: "Where will you look? Let's segment: which platform, which user type? (LOOK)"
-User: "GA4 events and server logs — mobile seems affected"
-AI: "Any external factors? Holiday? Competitor launch?"
-User: "No, nothing I know of"
+> For Quick mode examples (investigation + PM comparison), see `references/conversation-examples.md` § Quick Mode
 
-AI: "What did you find? (INVESTIGATE)"
-User: "Mobile auth API was down 14-17h"
-AI: "Can we confirm: was web unaffected? Does timing match the drop exactly?"
-User: "Yes, web was fine. Drop is exactly 14-17h."
+### Mode-Specific Adjustments
 
-AI: "So what — and now what? (VOICE)"
-User: "API maintenance caused mobile signup failures. We need a fallback."
-AI: "Confidence? 🟢 High — timing matches, web unaffected, clear mechanism."
+- **Modeling (📈)**: Focus on prediction targets, feature exploration, model comparison, drift monitoring
+- **Simulation (🔮)**: Focus on policy evaluation, scenario matrix, sensitivity/breakeven, handle bars for stakeholders
 
-AI: "Any follow-up? Should we monitor this? (EVOLVE)"
-User: "Add email auth as fallback. Set up uptime alert for auth API."
-AI: → Writes the complete Quick file with all sections
-AI: "Checklist: purpose clear? ✅ data segmented? ✅ conclusion answers question? ✅
-     hypothesis tested (not just assumed)? ✅ data volume sufficient? ✅"
-AI: "Archive this, or keep it active?"
-```
-
-#### Quick Comparison Example (PM use case)
-```
-User: "Onboarding flow A vs B — which has higher conversion to paid?"
-AI: "Good question. Let's frame it: is this Comparison (which is better?)
-     or Causation (does A cause higher conversion)? (ASK)"
-User: "Comparison for now — we just want to pick the better one."
-AI: "Makes sense. Framing: Comparison. Are the two groups comparable?
-     Same time period, same traffic source, similar user mix? (LOOK)"
-User: "Both ran last month. A got organic traffic, B got paid ads."
-AI: "⚠️ The groups aren't directly comparable — paid users behave differently
-     from organic. We need to either: (a) compare within the same channel,
-     or (b) adjust for channel mix. Which data do you have?"
-User: "I can split by channel. Let me check..."
-User: "OK — within organic only: A=12%, B=15%. Within paid: A=8%, B=9%."
-AI: "B wins in both segments. Confidence? Sample size matters — how many
-     users in each group? (INVESTIGATE)"
-User: "Organic: A=2000, B=1800. Paid: A=500, B=450."
-AI: "Organic difference (12→15%, n≈2000) looks reliable. Paid difference
-     (8→9%, n≈500) is smaller and noisier — could be chance.
-     🟢 High confidence: B is better for organic.
-     🟡 Medium confidence: B may be better for paid — needs more data."
-AI: "So What: B outperforms A, especially for organic users.
-     Now What: Roll out B for organic. For paid, consider running longer
-     or increasing sample. (VOICE)"
-AI: "Follow-up: Why does B convert better? Worth investigating the specific
-     step where A loses users. (EVOLVE)"
-AI: "Checklist: purpose clear? ✅ segmented? ✅ alternatives considered? ✅
-     confidence assigned? ✅ data volume sufficient? ✅"
-```
-
-### Modeling Mode Conversation Adjustments
-
-For 📈 Modeling analyses, the conversation focus shifts at each stage:
-- **ASK**: "What are you trying to predict/classify?" + business impact + success criteria (AUC, MAPE targets)
-- **LOOK**: Target variable distribution, feature exploration, leakage risk, train/val/test split strategy
-- **INVESTIGATE**: Baseline → model comparison → best model analysis → error analysis → reproducibility
-- **VOICE**: Model performance vs target, business interpretation, deploy recommendation, monitoring plan
-- **EVOLVE**: Model drift risk, retraining schedule, feature pipeline automation, A/B test proposal
-
-### Simulation Mode Conversation Adjustments
-
-For 🔮 Simulation analyses, the conversation focus shifts at each stage:
-- **ASK**: "What policy/strategy are you evaluating?" + variables affected + success criteria + comparison scenarios. Framing is always Evaluative ("What would happen if X?")
-- **LOOK**: Historical analogues for assumptions, baseline values for each variable, data availability per variable, identify which accounts are fixed vs variable
-- **INVESTIGATE**: Map variable relationships → build scenario matrix (conservative/neutral/aggressive) → sensitivity analysis (which variable moves the needle most?) → breakeven analysis → Monte Carlo if 3+ uncertain variables
-- **VOICE**: Present 3-scenario table, highlight breakeven point and most sensitive variable, offer "handle bars" (adjustable inputs for stakeholders)
-- **EVOLVE**: Compare simulation predictions vs actual results after execution, update assumptions, discover new variables, version-manage the simulation model
+> For mode-specific conversation details, see `references/conversation-examples.md` § Mode-Specific
 
 ### Mid-Conversation Data Handling
 
@@ -1680,66 +1274,18 @@ The same thinking framework, adapted to the experiment lifecycle:
 - A "successful" experiment that crashes another metric isn't successful.
 - Reference config.md guardrail metrics.
 
-### Statistical Methods Guide
+### Statistical Methods & Integrity
 
-**Choosing the right test:**
+| Metric Type | Test |
+|-------------|------|
+| Proportion (binary) | Z-test, Chi-square |
+| Continuous (mean) | t-test (Welch's), Mann-Whitney |
+| Count | Poisson, negative binomial |
+| Time-to-event | Log-rank, Cox regression |
 
-| Metric Type | Example | Test |
-|-------------|---------|------|
-| Proportion (binary) | Conversion rate, click rate | Z-test for proportions, Chi-square |
-| Continuous (mean) | Revenue per user, time on page | t-test (Welch's), Mann-Whitney if skewed |
-| Count | Purchases per user, page views | Poisson test, negative binomial |
-| Time-to-event | Time to first purchase | Log-rank test, Cox regression |
+Key rules: Always check for SRM before analyzing results. Guard against p-hacking (peeking, early stopping, post-hoc metric changes). Multiple comparisons require Bonferroni or FDR correction.
 
-**Key concepts the AI should explain in plain language:**
-
-- **p-value**: "If there were truly no difference, how surprised would we be to see this result? Below 0.05 = very surprised = likely a real difference."
-- **Confidence interval**: "We're 95% sure the true effect is somewhere in this range. Narrower = more precise."
-- **Effect size**: "The actual magnitude of the difference. 'Statistically significant' can be tiny — always ask 'is this big enough to matter?'"
-- **Power**: "The probability we'll detect a real effect if it exists. 80% power = 20% chance we miss a real improvement."
-- **MDE**: "The smallest effect worth detecting. If we can't detect effects smaller than this, we're OK with that."
-
-**Multiple comparisons:**
-- If testing >2 variants: Bonferroni (strict) or Holm-Bonferroni (less strict, more power)
-- If testing many secondary metrics: FDR (False Discovery Rate) control
-- Rule: "The more things you test, the more likely you'll find something by chance."
-
-### SRM (Sample Ratio Mismatch)
-
-**What**: When the actual split ratio differs from the intended ratio.
-**Why it matters**: SRM means randomization is broken → results are invalid, no matter how significant.
-
-**Common causes:**
-- Bot filtering applied differently per variant
-- Redirect timing (treatment loads slower → more users bounce before being counted)
-- Initialization bias (variant assignment happens at different points in the user journey)
-- Cache issues (CDN serving wrong variant)
-
-**Detection:**
-- Chi-square goodness-of-fit test comparing expected vs observed counts
-- p < 0.001 → SRM likely present
-
-**Response:**
-- Do NOT proceed with analysis if SRM is detected
-- Investigate root cause with engineering
-- May need to restart the experiment
-
-### p-Hacking Prevention
-
-The AI should actively guard against these:
-
-| Practice | Problem | What AI should do |
-|----------|---------|-------------------|
-| Peeking at results daily | Inflates false positive rate | Remind: "Wait for minimum duration" |
-| Stopping when significant | Optional stopping bias | Enforce pre-registered sample size |
-| Testing many metrics, reporting only significant ones | Multiple comparisons | Ask: "Is this a pre-registered metric?" |
-| Changing the metric definition after seeing results | HARKing | Flag: "This wasn't in the pre-registration" |
-| Excluding segments to find significance | Cherry-picking | Ask: "Was this segment analysis pre-planned?" |
-| Extending experiment when results aren't significant | Inflates false positive rate | Suggest: "If underpowered, redesign with larger MDE" |
-
-**AI conversation guide:**
-- If user asks to change the primary metric mid-experiment: "That's a deviation from the pre-registered plan. We can look at this as a secondary metric, but the decision should still be based on the original primary metric."
-- If user asks to stop early: "The experiment hasn't reached the planned sample size. Stopping now risks a false conclusion. Options: (A) Wait, (B) Stop but mark as 'underpowered', (C) Use sequential testing if available."
+> For details, see `references/experiment-statistics.md`
 
 ### Non-Analyst Experiment Guide
 

@@ -11,11 +11,43 @@ throughout every analysis to make conversations smarter and faster.
 All questions are optional — the user can skip anything they don't know yet.
 Follow these steps in order:
 
+### Quick Setup Mode
+
+> For a quick setup, run `/analysis init --quick`. For full configuration, continue below.
+
+If the user ran `/analysis init --quick`:
+1. Ask only 3 questions:
+   - **Language** (default: English)
+   - **Team/project name**
+   - **Default mode** (default: Quick)
+2. Skip Steps 3-6 (goals, metrics, stakeholders, data stack) entirely
+3. Jump directly to Step 8 (Create folder structure)
+4. Generate config.md with empty sections and a comment: "Fill these in later with `/analysis init --update`"
+5. Proceed to Step 10 and Step 11 as normal
+
 ### Step 1: Check existing setup
+
+> **Tip**: For a quick setup with minimal questions, run `/analysis init --quick`.
 
 Check if `.analysis/` folder already exists.
 - If it exists, warn the user and ask if they want to re-initialize.
-- If not, proceed.
+- If not, check if the `--quick` flag was provided.
+
+**If `--quick` flag detected:**
+1. Ask only 3 questions:
+   - **Q1. Language** — "What language for analysis documents?" (default: English)
+   - **Q2. Team/project name** — Free text
+   - **Q3. Default analysis mode** — Full or Quick (default: Quick)
+2. Skip Steps 3-6 entirely (goals, metrics, stakeholders, data stack)
+3. Jump to Step 8 (Create folder structure)
+4. In Step 9, generate config.md with all skipped sections showing:
+   ```
+   > Not configured yet — run `/analysis init --update` to fill in.
+   ```
+5. Continue to Steps 10-11 as normal
+
+**If no flag (full setup):**
+Continue to Step 2 below.
 
 ### Step 2: Language (ask first)
 

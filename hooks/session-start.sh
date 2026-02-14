@@ -6,7 +6,7 @@ if [ -f ".analysis/config.md" ]; then
     # Count active analyses
     ANALYSIS_COUNT=0
     if [ -d "analyses/active" ]; then
-        FULL_COUNT=$(find analyses/active -maxdepth 1 -type d -name "F-*" -o -name "S-*" 2>/dev/null | wc -l | tr -d ' ')
+        FULL_COUNT=$(find analyses/active -maxdepth 1 \( -type d -name "F-*" -o -type d -name "S-*" \) 2>/dev/null | wc -l | tr -d ' ')
         QUICK_COUNT=$(find analyses/active -maxdepth 1 -type f -name "quick_*" 2>/dev/null | wc -l | tr -d ' ')
         ANALYSIS_COUNT=$((FULL_COUNT + QUICK_COUNT))
     fi
