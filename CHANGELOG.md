@@ -6,14 +6,21 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [1.0.0] - 2026-02-14
 
-First stable release. All Phase 1 and Phase 2 features complete, dual-platform support.
+First stable release. All features complete, dual-platform support.
 
 ### Highlights
 - ALIVE loop with Full/Quick modes, 3 analysis types (Investigation, Modeling, Simulation)
 - A/B test experiments, metric monitoring, model registry
+- Insight search (`/analysis search`) and auto retrospectives (`/analysis retro`)
 - Claude Code + Cursor 2.4+ dual-platform optimization
-- 14 commands, quality checklists, archive system
+- 16 commands, quality checklists, archive system
 - 40+ QA simulation tests across diverse roles, industries, and languages
+
+### Added
+- `/analysis search` command: deep full-text search across all analyses with context snippets, cross-reference analysis, and learning suggestions
+- `/analysis retro` command: automatic retrospective report generation from archived analyses with impact tracking summary, pattern detection, and follow-up tracking
+- `analyses/.retro/` directory for retrospective reports
+- Insight Search & Retrospective section in SKILL.md (both platforms)
 
 ## [0.3.0] - 2026-02-14
 
