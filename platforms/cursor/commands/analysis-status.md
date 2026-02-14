@@ -1,4 +1,4 @@
-# /analysis status
+# /analysis-status
 
 Show current analysis status dashboard.
 
@@ -55,8 +55,8 @@ Pending: waiting
 ### Step 5: Suggestions
 
 Based on the current state, suggest next actions:
-- If any analysis is in VOICE/EVOLVE -> "Consider archiving with `/analysis archive`"
-- If no active analyses -> "Start a new analysis with `/analysis new`"
+- If any analysis is in VOICE/EVOLVE -> "Consider archiving with `/analysis-archive`"
+- If no active analyses -> "Start a new analysis with `/analysis-new`"
 - If analyses are stale (>7 days in same stage) -> "Consider reviewing stalled analyses"
 
 **After executing**: Update `.analysis/status.md` with any state changes.

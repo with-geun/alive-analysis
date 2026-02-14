@@ -258,7 +258,7 @@ Track whether recommendations led to real outcomes. Built into EVOLVE stage.
 Recommendation → Decision (Accept/Reject/Modify) → Execution → Result
 ```
 
-When creating analyses, remind the user to update pending Impact Tracking items. `/analysis retro` aggregates impact data across all analyses.
+When creating analyses, remind the user to update pending Impact Tracking items. `/analysis-retro` aggregates impact data across all analyses.
 
 ### Tags
 Connect related analyses with tags (e.g., `retention`, `pricing`). Defined in `config.md` (team-level) or ad-hoc per analysis. AI suggests relevant tags on creation and checks for related work. Tags are preserved during Quick→Full promotion.
@@ -270,12 +270,12 @@ Track deployed ML models in `.analysis/models/{model-slug}_v{version}.md`. Each 
 
 ## Insight Search & Retrospective
 
-### `/analysis search`
+### `/analysis-search`
 Deep full-text search across all analyses (active + archived). Shows matching context with surrounding lines, cross-references similar conclusions, and surfaces unresolved follow-ups.
 
 Filters: `--keyword`, `--tag`, `--date`, `--type`, `--confidence`, `--active`/`--archived`/`--both`
 
-### `/analysis retro`
+### `/analysis-retro`
 Generates a retrospective report from archived analyses for a given period. Outputs to `analyses/.retro/retro_{period}.md`.
 
 Sections: Summary, Analysis Activity, Impact Tracking, Patterns, Unresolved Follow-ups, Recommendations, Appendix.

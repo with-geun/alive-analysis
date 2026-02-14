@@ -1,4 +1,4 @@
-# /analysis retro
+# /analysis-retro
 
 Generate an automatic retrospective report from archived analyses.
 
@@ -167,7 +167,7 @@ Tell the user:
 - Show the Summary section inline
 - Show the Impact Tracking decision outcomes
 - Show the top recommendation
-- Suggest: "Review the full report and share it with your team. Use `/analysis search` to dig deeper into any pattern."
+- Suggest: "Review the full report and share it with your team. Use `/analysis-search` to dig deeper into any pattern."
 - If unresolved follow-ups exist: "Consider starting one of the {N} unresolved follow-up analyses."
 
 **After executing**: Update `.analysis/status.md` with any state changes.

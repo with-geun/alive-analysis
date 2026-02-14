@@ -37,8 +37,8 @@ bash /path/to/alive-analysis/install.sh
 3. Initialize and verify:
 
 ```
-/analysis init
-/analysis status
+/analysis-init
+/analysis-status
 ```
 
 ## Project Structure
@@ -95,12 +95,12 @@ alive-analysis/
 
 - **Keep it focused.** SKILL.md should contain the methodology, templates, and decision logic. Detailed educational content (e.g. "how to interpret CV" or "when to use ANOVA") belongs in `references/`.
 - **Keep it under ~1,600 lines.** If it grows beyond this, look for content that can be extracted into `references/`.
-- **Test changes end-to-end.** After modifying SKILL.md, run through a full analysis cycle (`/analysis new` through `/analysis next` to completion) to make sure nothing breaks.
+- **Test changes end-to-end.** After modifying SKILL.md, run through a full analysis cycle (`/analysis-new` through `/analysis-next` to completion) to make sure nothing breaks.
 - **Document changes.** Update CHANGELOG.md when making meaningful SKILL.md changes.
 
 ## Checklist Customization
 
-Analysis quality is enforced through checklists stored in `.analysis/checklists/`. These are generated per-project by `/analysis init` and can be customized:
+Analysis quality is enforced through checklists stored in `.analysis/checklists/`. These are generated per-project by `/analysis-init` and can be customized:
 
 - Edit checklist files directly to add, remove, or modify quality gates for your team.
 - Changes to checklists are git-tracked, so teams can review modifications through normal PR workflows.

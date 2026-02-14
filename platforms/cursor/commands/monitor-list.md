@@ -1,4 +1,4 @@
-# /monitor list
+# /monitor-list
 
 Show all metric monitors with their current status.
 
@@ -72,17 +72,17 @@ If overdue, show: `{metric} is overdue for a check (last: {date}, cadence: {cade
 ### Step 5: Optional filters
 
 If the user provides arguments:
-- `/monitor list --status warning` -> show only Warning monitors
-- `/monitor list --status critical` -> show only Critical monitors
-- `/monitor list --overdue` -> show only overdue monitors
-- `/monitor list --alerts` -> show only monitors with unresolved alerts
+- `/monitor-list --status warning` -> show only Warning monitors
+- `/monitor-list --status critical` -> show only Critical monitors
+- `/monitor-list --overdue` -> show only overdue monitors
+- `/monitor-list --alerts` -> show only monitors with unresolved alerts
 
 ### Step 6: Quick actions
 
 After displaying the list, suggest relevant actions:
-- If overdue monitors exist: "Run `/monitor check --all` to update all monitors"
+- If overdue monitors exist: "Run `/monitor-check --all` to update all monitors"
 - If unresolved alerts exist: "Review alerts in `.analysis/metrics/alerts/`"
-- If no monitors exist: "Run `/monitor setup` to create your first monitor"
-- General: "Use `/monitor check {ID}` to check a specific monitor"
+- If no monitors exist: "Run `/monitor-setup` to create your first monitor"
+- General: "Use `/monitor-check {ID}` to check a specific monitor"
 
 **After executing**: Update `.analysis/status.md` with any state changes.

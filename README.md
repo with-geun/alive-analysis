@@ -98,9 +98,9 @@ Or see [INSTALL.md](INSTALL.md) for manual setup and other options.
 ### Initialize & Start
 
 ```bash
-/analysis init            # Full setup (10 questions)
-/analysis init --quick    # Quick setup (3 questions)
-/analysis new             # Start your first analysis
+/analysis-init            # Full setup (10 questions)
+/analysis-init --quick    # Quick setup (3 questions)
+/analysis-new             # Start your first analysis
 ```
 
 ### For PMs and Non-Analysts
@@ -108,8 +108,8 @@ Or see [INSTALL.md](INSTALL.md) for manual setup and other options.
 Don't know what a North Star metric is? No problem.
 
 ```bash
-/analysis init --quick    # Just set language, team name, and mode
-/analysis new             # Pick "Quick" → start analyzing right away
+/analysis-init --quick    # Just set language, team name, and mode
+/analysis-new             # Pick "Quick" → start analyzing right away
 ```
 
 The AI will guide you through each step. Here's a taste:
@@ -133,8 +133,8 @@ alive-analysis is optimized for each platform's agent model:
 | Best for | Deep analysis workflows, multi-turn conversations | Quick analyses integrated into coding workflow |
 | Interaction | Conversational (asks questions one by one) | Batch (presents all questions at once) |
 | State management | Session memory | File-based (`.analysis/status.md`) |
-| Session welcome | Auto status display on start | Manual: `/analysis status` |
-| Setup | `/analysis init` (guided 10-step) | `/analysis init` (single form) |
+| Session welcome | Auto status display on start | Manual: `/analysis-status` |
+| Setup | `/analysis-init` (guided 10-step) | `/analysis-init` (single form) |
 | SKILL.md | Full (~1,660 lines) | Slim (~265 lines) |
 | Install | `bash install.sh` | `bash install.sh --cursor` |
 
@@ -157,34 +157,34 @@ Both platforms share the same core methodology (`core/`) and produce identical a
 ### Analysis
 | Command | Description |
 |---------|-------------|
-| `/analysis init` | Initialize alive-analysis in your project |
-| `/analysis new` | Start a new analysis (Full or Quick) |
-| `/analysis status` | Show current analysis dashboard |
-| `/analysis next` | Advance to the next ALIVE stage |
-| `/analysis archive` | Archive a completed analysis |
-| `/analysis list` | List all analyses (active + archived, filter by tag) |
-| `/analysis promote` | Promote a Quick analysis to Full |
-| `/analysis search` | Deep search across all analyses (full-text, context, patterns) |
-| `/analysis retro` | Generate automatic retrospective report from archived analyses |
+| `/analysis-init` | Initialize alive-analysis in your project |
+| `/analysis-new` | Start a new analysis (Full or Quick) |
+| `/analysis-status` | Show current analysis dashboard |
+| `/analysis-next` | Advance to the next ALIVE stage |
+| `/analysis-archive` | Archive a completed analysis |
+| `/analysis-list` | List all analyses (active + archived, filter by tag) |
+| `/analysis-promote` | Promote a Quick analysis to Full |
+| `/analysis-search` | Deep search across all analyses (full-text, context, patterns) |
+| `/analysis-retro` | Generate automatic retrospective report from archived analyses |
 
 ### Experiment
 | Command | Description |
 |---------|-------------|
-| `/experiment new` | Start a new A/B test (Full or Quick) |
-| `/experiment next` | Advance to the next experiment stage |
-| `/experiment archive` | Archive a completed experiment |
+| `/experiment-new` | Start a new A/B test (Full or Quick) |
+| `/experiment-next` | Advance to the next experiment stage |
+| `/experiment-archive` | Archive a completed experiment |
 
 ### Monitoring
 | Command | Description |
 |---------|-------------|
-| `/monitor setup` | Register a metric and create a monitor |
-| `/monitor check` | Run a health check on one or all monitors |
-| `/monitor list` | Show all monitors with status dashboard |
+| `/monitor-setup` | Register a metric and create a monitor |
+| `/monitor-check` | Run a health check on one or all monitors |
+| `/monitor-list` | Show all monitors with status dashboard |
 
 ### Modeling
 | Command | Description |
 |---------|-------------|
-| `/model register` | Register a deployed model with version tracking |
+| `/model-register` | Register a deployed model with version tracking |
 
 ## Features
 
@@ -204,7 +204,7 @@ Every analysis follows five stages:
 
 **Quick Analysis** — Fast turnaround. Single file with abbreviated ALIVE sections and a 5-item checklist. Ideal for PMs and time-sensitive questions.
 
-**Promote** — When a Quick analysis grows too complex (multiple hypotheses, multiple data sources, scope creep), `/analysis promote` converts it to Full. The AI proactively suggests promotion when it detects complexity signals.
+**Promote** — When a Quick analysis grows too complex (multiple hypotheses, multiple data sources, scope creep), `/analysis-promote` converts it to Full. The AI proactively suggests promotion when it detects complexity signals.
 
 ### Analysis Types
 
@@ -237,7 +237,7 @@ Track key metrics with structured health checks and alert escalation.
 
 ### Insight Search
 
-`/analysis search` — Deep full-text search across all analyses, not just titles.
+`/analysis-search` — Deep full-text search across all analyses, not just titles.
 
 - **Context snippets**: Shows matching lines with surrounding context, file path, and line number
 - **Cross-reference analysis**: Groups analyses with similar conclusions, flags conflicting findings
@@ -247,7 +247,7 @@ Filter by keyword, tag, date range, analysis type, or confidence level.
 
 ### Retrospective Reports
 
-`/analysis retro` — Automatically generates a retrospective report from archived analyses.
+`/analysis-retro` — Automatically generates a retrospective report from archived analyses.
 
 Reports cover a selected period (last month, quarter, or custom range) and include: analysis activity counts, Impact Tracking outcomes (acceptance rate, top wins), recurring patterns and confidence distribution, unresolved EVOLVE follow-ups, and data-driven recommendations. Saved to `analyses/.retro/`.
 
@@ -284,7 +284,7 @@ Checklists live in `.analysis/checklists/` — edit them to match your team's st
 
 - **v1.0** ✅: ALIVE loop, Full/Quick modes, 3 analysis types, checklists, archive, metric proposal
 - **v1.0** ✅: A/B test experiments, metric monitoring, Quick→Full promotion, tags, model registry
-- **v1.0** ✅: Insight search (`/analysis search`), auto retrospectives (`/analysis retro`)
+- **v1.0** ✅: Insight search (`/analysis-search`), auto retrospectives (`/analysis-retro`)
 - **v1.0** ✅: Claude Code + Cursor 2.4+ dual-platform optimization
 - **Next**: Team dashboard
 
@@ -298,7 +298,7 @@ New to data analysis terms? See [GLOSSARY.md](GLOSSARY.md) for definitions of ke
 
 ## Language Support
 
-alive-analysis works in any language. Set your preferred language during `/analysis init` — all AI responses, generated files, and checklist feedback will follow that language. Technical terms (ALIVE, STEDII, SHAP) stay in English as proper nouns.
+alive-analysis works in any language. Set your preferred language during `/analysis-init` — all AI responses, generated files, and checklist feedback will follow that language. Technical terms (ALIVE, STEDII, SHAP) stay in English as proper nouns.
 
 ## License
 

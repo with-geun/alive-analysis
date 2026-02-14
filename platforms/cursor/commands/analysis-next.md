@@ -1,4 +1,4 @@
-# /analysis next
+# /analysis-next
 
 Advance the current analysis to the next ALIVE stage.
 
@@ -12,7 +12,7 @@ Read `.analysis/status.md` to find active analyses.
 
 - If only 1 active Full analysis -> select it automatically
 - If multiple active -> ask user which analysis to advance (show ID + title)
-- Quick analyses don't use `/analysis next` (all sections are in one file)
+- Quick analyses don't use `/analysis-next` (all sections are in one file)
   - If user selects a Quick, remind them to fill sections in order within the file
 
 ### Step 2: Determine current stage
@@ -332,7 +332,7 @@ Strategy: Test the easiest-to-disprove hypotheses first.
 ```
 
 **EVOLVE reached** -> Tell user:
-"This analysis is complete. Run `/analysis archive` to archive it."
+"This analysis is complete. Run `/analysis-archive` to archive it."
 
 ### Step 5: Update status.md
 
@@ -346,6 +346,6 @@ Tell the user:
 - Advanced from {old stage} to {new stage}
 - Show the new file path
 - Remind them to fill in the content and review the checklist
-- If VOICE: "After completing VOICE and EVOLVE, run `/analysis archive`"
+- If VOICE: "After completing VOICE and EVOLVE, run `/analysis-archive`"
 
 **After executing**: Update `.analysis/status.md` with any state changes.

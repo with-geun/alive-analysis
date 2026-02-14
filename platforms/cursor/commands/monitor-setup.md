@@ -1,4 +1,4 @@
-# /monitor setup
+# /monitor-setup
 
 Set up a new metric monitor or register a metric definition.
 
@@ -137,7 +137,7 @@ Monitor ID format: `M-{YYYY}-{MMDD}-{seq}` (e.g., `M-2026-0301-001`)
 
 ## Escalation Rules
 - **Auto-escalate to Investigation**: Yes / No
-  - If yes: `/analysis new --from-alert {alert-id}` will be suggested
+  - If yes: `/analysis-new --from-alert {alert-id}` will be suggested
 - **Consecutive warnings before escalation**: {N} (default: 2)
 - **Cool-down period after alert**: {N days} (avoid alert fatigue)
 
@@ -172,8 +172,8 @@ Tell the user:
 - Metric definition registered at {path}
 - Monitor created at {path}
 - Check cadence: {cadence}
-- "Run `/monitor check` to perform the first check"
-- "Run `/monitor list` to see all active monitors"
+- "Run `/monitor-check` to perform the first check"
+- "Run `/monitor-list` to see all active monitors"
 - If the metric came from an EVOLVE proposal:
   - "Metric from analysis {ID} is now formally registered and monitored"
   - Update the originating analysis's EVOLVE file: check off `[x] Set up dashboard / alert` in the Proposed New Metrics action items

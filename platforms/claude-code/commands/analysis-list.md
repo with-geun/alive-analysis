@@ -1,4 +1,4 @@
-# /analysis list
+# /analysis-list
 
 List all analyses (active + archived).
 
@@ -46,17 +46,17 @@ Format output grouped by status:
 ### Step 4: Optional filters
 
 If the user provides arguments:
-- `/analysis list --active` → show only active
-- `/analysis list --archived` → show only archived
-- `/analysis list --month 2026-02` → filter by month
-- `/analysis list --search {keyword}` → search titles and insights
-- `/analysis list --tag {tag}` → filter by tag (e.g., `--tag retention`)
-- `/analysis list --related {ID}` → show analyses with overlapping tags to {ID}
+- `/analysis-list --active` → show only active
+- `/analysis-list --archived` → show only archived
+- `/analysis-list --month 2026-02` → filter by month
+- `/analysis-list --search {keyword}` → search titles and insights
+- `/analysis-list --tag {tag}` → filter by tag (e.g., `--tag retention`)
+- `/analysis-list --related {ID}` → show analyses with overlapping tags to {ID}
 
 ### Step 5: Quick actions
 
 After displaying the list, suggest:
-- For active analyses: "Use `/analysis next` to advance, `/analysis archive` to complete"
+- For active analyses: "Use `/analysis-next` to advance, `/analysis-archive` to complete"
 - For archived analyses: "Archived analyses are in `analyses/archive/{month}/`"
 - If `--related {ID}` used: show related analyses and suggest: "These analyses share tags with {ID}. Review them for reusable insights or methods."
 

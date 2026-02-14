@@ -273,9 +273,9 @@ elif [ "$INSTALL_CURSOR" = true ]; then
 else
     echo "  1. Start Claude Code in your project directory"
 fi
-echo "  2. Run: /analysis init          (full setup)"
-echo "     Or:  /analysis init --quick   (quick setup)"
-echo "  3. Run: /analysis new            (start your first analysis)"
+echo "  2. Run: /analysis-init          (full setup)"
+echo "     Or:  /analysis-init --quick   (quick setup)"
+echo "  3. Run: /analysis-new            (start your first analysis)"
 echo ""
 echo "For more info: see README.md or INSTALL.md"
 echo ""

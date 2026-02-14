@@ -1,4 +1,4 @@
-# /monitor check
+# /monitor-check
 
 Run a metric health check on one or all monitors.
 
@@ -127,14 +127,14 @@ Alert ID: `A-{YYYY}-{MMDD}-{seq}` (e.g., `A-2026-0301-001`)
 Check escalation rules from the monitor configuration:
 
 - If **auto-escalate = Yes** and status is 🔴 Critical:
-  - Suggest: "This metric hit critical threshold. Want to start an investigation? `/analysis new --from-alert {alert-id}`"
+  - Suggest: "This metric hit critical threshold. Want to start an investigation? `/analysis-new --from-alert {alert-id}`"
   - If user agrees, create a new Investigation analysis with:
     - ASK pre-filled: "Why did {metric} drop to {value}? Alert {alert-id} triggered on {date}."
     - Reference the metric definition and alert context
 
 - If **consecutive warnings** ≥ threshold (from monitor config):
   - Count consecutive 🟡 entries at the bottom of the Check History table (most recent entries)
-  - Suggest: "{metric} has been in Warning for {N} consecutive checks. Want to start an investigation? `/analysis new --from-alert {alert-id}`"
+  - Suggest: "{metric} has been in Warning for {N} consecutive checks. Want to start an investigation? `/analysis-new --from-alert {alert-id}`"
 
 ### Step 7: Update monitor file
 

@@ -87,8 +87,8 @@ cp alive-analysis/platforms/cursor/rules/alive-analysis.mdc .cursor/rules/
 ### Initialize
 
 ```
-/analysis init            # Full setup
-/analysis init --quick    # Quick setup (3 questions)
+/analysis-init            # Full setup
+/analysis-init --quick    # Quick setup (3 questions)
 ```
 
 ### Option 3: Plugin install (coming soon)
@@ -102,7 +102,7 @@ claude plugin install alive-analysis
 
 ## Verify Installation
 
-Run `/analysis status` — you should see the status dashboard.
+Run `/analysis-status` — you should see the status dashboard.
 
 ## Uninstall
 

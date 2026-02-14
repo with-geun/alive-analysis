@@ -1,4 +1,4 @@
-# /analysis archive
+# /analysis-archive
 
 Archive a completed analysis.
 
@@ -86,4 +86,4 @@ Tell the user:
 - Show the key insight from summary
 - If EVOLVE had follow-up proposals: "Don't forget the follow-up analyses suggested in EVOLVE"
 - If Impact Tracking section is empty or all "Pending": "Don't forget to revisit the Impact Tracking section in 2-4 weeks to check if recommendations were acted on."
-- Suggest `/analysis status` to see updated dashboard
+- Suggest `/analysis-status` to see updated dashboard

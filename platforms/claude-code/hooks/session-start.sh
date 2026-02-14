@@ -33,9 +33,9 @@ if [ -f ".analysis/config.md" ]; then
     if [ "$MON_COUNT" -gt 0 ]; then
         STATUS="${STATUS} | Monitors: ${MON_COUNT}"
     fi
-    STATUS="${STATUS} | /analysis status for details"
+    STATUS="${STATUS} | /analysis-status for details"
 
     echo "$STATUS"
 else
-    echo "alive-analysis | Not initialized | Run /analysis init to get started"
+    echo "alive-analysis | Not initialized | Run /analysis-init to get started"
 fi

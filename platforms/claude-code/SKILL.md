@@ -829,7 +829,7 @@ Status: `✅ Archived | ⏳ Pending | 🟡 In Progress`
 
 **All AI responses and generated files must follow the language set in `.analysis/config.md`.**
 
-- The language is chosen during `/analysis init` (any natural language accepted)
+- The language is chosen during `/analysis-init` (any natural language accepted)
 - Default: English
 - This applies to:
   - All conversational responses (questions, suggestions, feedback)
@@ -975,8 +975,8 @@ AI: "You have 3 questions. Let me suggest an order:
 4. Curiosity-driven ("I wonder if...") → Quick, or park for later
 
 **Routing edge cases:**
-- "I just want a number" → Not an analysis. First check: does a monitor already track this metric? (`/monitor check`). Second: is there a BI dashboard URL in `config.md` Data Stack? If yes, point the user there. If no, help pull the data directly and skip ALIVE. Document in `assets/` if reusable.
-- "Can you make me a dashboard?" → Not an analysis. Point to the data stack in config.md. If a metric needs defining first, use `/monitor setup`.
+- "I just want a number" → Not an analysis. First check: does a monitor already track this metric? (`/monitor-check`). Second: is there a BI dashboard URL in `config.md` Data Stack? If yes, point the user there. If no, help pull the data directly and skip ALIVE. Document in `assets/` if reusable.
+- "Can you make me a dashboard?" → Not an analysis. Point to the data stack in config.md. If a metric needs defining first, use `/monitor-setup`.
 - "The CEO wants to know..." → Assess: is the CEO making a decision based on this? If yes → Full (importance = high). If it's a status check → Quick or monitor.
 - "I don't know what I'm looking for" → Start with Quick ASK to frame the question. If it turns complex, promote to Full.
 
@@ -1031,7 +1031,7 @@ AI: "That's a great question, but it's outside our current scope.
   2. Add new hypotheses to the hypothesis tree
   3. Re-estimate timeline (each additional question adds ~1x Quick effort)
   4. Notify stakeholders of scope change if the timeline extends significantly
-  - For Quick: suggest promoting to Full instead (`/analysis new --from {ID}`)
+  - For Quick: suggest promoting to Full instead (`/analysis-new --from {ID}`)
 - If parking, add to a "Parked Questions" list in the current stage file
 - For Quick analyses: be extra strict — Quick should stay quick
 
@@ -1319,7 +1319,7 @@ For PMs, marketers, and other non-analysts running Quick Experiments:
 
 ### Experiment Conversation Adjustments
 
-When the user is running an experiment (detected by `/experiment new` or experiment files in `ab-tests/`):
+When the user is running an experiment (detected by `/experiment-new` or experiment files in `ab-tests/`):
 
 **DESIGN stage:**
 - Be rigorous about the hypothesis — push for specific, falsifiable statements
@@ -1363,10 +1363,10 @@ Investigation → "The experiment showed {result}. Why? Let's dig deeper."
 Monitoring → "Track the launched change over time"
 ```
 
-- From analysis to experiment: `/experiment new` — reference the analysis ID in the Design stage
-- From experiment to analysis: `/analysis new` — reference the experiment ID in the ASK stage
+- From analysis to experiment: `/experiment-new` — reference the analysis ID in the Design stage
+- From experiment to analysis: `/analysis-new` — reference the experiment ID in the ASK stage
 - From experiment to monitoring: Set up post-launch checkpoints in the Learn stage
-- From alert to analysis: `/analysis new --from-alert {alert-id}` — escalate metric issues to Investigation
+- From alert to analysis: `/analysis-new --from-alert {alert-id}` — escalate metric issues to Investigation
 
 ---
 
@@ -1385,7 +1385,7 @@ The AI should proactively suggest promoting Quick analyses to Full when complexi
 | Follow-up spawning | 2+ follow-ups in EVOLVE |
 | Scope creep | "Parked Questions" section exists |
 
-**AI behavior**: When 2+ signals are present, suggest `/analysis promote`. Be helpful, not pushy. If user declines twice, stop suggesting.
+**AI behavior**: When 2+ signals are present, suggest `/analysis-promote`. Be helpful, not pushy. If user declines twice, stop suggesting.
 
 ### Tags
 
@@ -1414,7 +1414,7 @@ For Modeling analyses that produce deployed models:
 - Version history
 
 **AI should:**
-- After a Modeling analysis reaches EVOLVE, ask: "Was a model deployed? Want to register it with `/model register`?"
+- After a Modeling analysis reaches EVOLVE, ask: "Was a model deployed? Want to register it with `/model-register`?"
 - When a model's drift monitor fires an alert, link back to the model card
 - On retraining, create a new version card and update the version history
 
@@ -1500,7 +1500,7 @@ Monitor Check
     ↓
 🔴 Critical → Create alert file, suggest immediate escalation
     ↓  ↓ (auto-escalate = Yes?)
-    ↓  Yes → `/analysis new --from-alert {alert-id}`
+    ↓  Yes → `/analysis-new --from-alert {alert-id}`
 ```
 
 **Cool-down rules:**
@@ -1588,11 +1588,11 @@ Monitoring is not standalone — it feeds into the full ALIVE loop:
 
 | From | To | How |
 |------|----|-----|
-| Analysis EVOLVE | Monitor Setup | "Set up monitoring for identified issues" → `/monitor setup` |
-| Experiment LEARN | Monitor Setup | "Post-launch monitoring" → `/monitor setup` for experiment metrics |
-| Monitor Alert | Analysis | "Metric X is 🔴" → `/analysis new --from-alert {alert-id}` |
+| Analysis EVOLVE | Monitor Setup | "Set up monitoring for identified issues" → `/monitor-setup` |
+| Experiment LEARN | Monitor Setup | "Post-launch monitoring" → `/monitor-setup` for experiment metrics |
+| Monitor Alert | Analysis | "Metric X is 🔴" → `/analysis-new --from-alert {alert-id}` |
 | Monitor Alert | Experiment | "Metric X dropped after launch" → check experiment impact |
-| Metric Proposal (EVOLVE) | Monitor Setup | "New metric proposed" → `/monitor setup` to register and monitor |
+| Metric Proposal (EVOLVE) | Monitor Setup | "New metric proposed" → `/monitor-setup` to register and monitor |
 
 ### Folder Structure
 
@@ -1664,15 +1664,15 @@ Every EVOLVE template (Full and Quick) includes an **Impact Tracking** section:
 - Recommendation acceptance rate (how often is the team acting on insights?)
 - Time from recommendation to decision (bottleneck detection)
 - Retrospective accuracy (are we getting better at making correct recommendations?)
-- These are meta-insights, not formal metrics — surface them conversationally when the user runs `/analysis status`
+- These are meta-insights, not formal metrics — surface them conversationally when the user runs `/analysis-status`
 
 ---
 
 ## Insight Search & Retrospective Guide
 
-### `/analysis search` — Deep Insight Search
+### `/analysis-search` — Deep Insight Search
 
-Goes beyond `/analysis list --search` by searching the full text of all analysis files (not just titles and insights), displaying matching context with surrounding lines, and performing cross-reference analysis.
+Goes beyond `/analysis-list --search` by searching the full text of all analysis files (not just titles and insights), displaying matching context with surrounding lines, and performing cross-reference analysis.
 
 **Search dimensions:**
 - Keyword (full-text, case-insensitive)
@@ -1685,12 +1685,12 @@ Goes beyond `/analysis list --search` by searching the full text of all analysis
 - Learning suggestions: identify recurring topics for meta-analysis, surface unresolved EVOLVE follow-ups, flag pending Impact Tracking items
 - Max 3 snippets per analysis to keep output scannable
 
-**When to suggest `/analysis search`:**
+**When to suggest `/analysis-search`:**
 - User asks "have we analyzed this before?" or "what did we find about X?"
 - Starting a new analysis on a topic that may have prior work
 - During EVOLVE when connecting to previous findings
 
-### `/analysis retro` — Automatic Retrospective Report
+### `/analysis-retro` — Automatic Retrospective Report
 
 Generates a comprehensive retrospective from archived analyses for a given period.
 
@@ -1705,7 +1705,7 @@ Generates a comprehensive retrospective from archived analyses for a given perio
 
 **Period options:** `--last-month` (default), `--last-quarter`, `--range {from to}`, `--all`
 
-**When to suggest `/analysis retro`:**
+**When to suggest `/analysis-retro`:**
 - End of month/quarter
 - User asks "what have we been analyzing?" or "what should we focus on next?"
 - When Impact Tracking shows many pending items

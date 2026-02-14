@@ -1,4 +1,4 @@
-# /analysis promote
+# /analysis-promote
 
 Promote a Quick analysis to Full when it outgrows the Quick format.
 
@@ -51,7 +51,7 @@ AI: "This Quick analysis is showing signs of outgrowing the format:
 If the analysis matches a "When NOT to promote" condition:
 
 - **AI-initiated (proactive suggestion)**: Do NOT suggest promotion. The "When NOT to promote" rules take precedence.
-- **User-initiated (explicit `/analysis promote`)**: Warn the user with the specific reason and explain the trade-off:
+- **User-initiated (explicit `/analysis-promote`)**: Warn the user with the specific reason and explain the trade-off:
   - Nearly done: "This analysis is already in {VOICE/EVOLVE} and nearly complete. Promoting now means restructuring work that's almost done. Want to finish as Quick and archive instead?"
   - User explicitly chose Quick: "You chose Quick for speed. Promoting now adds structure but also overhead. Continue anyway?"
   - If user confirms after the warning, proceed to Step 3.
@@ -64,7 +64,7 @@ If user declines: respect the decision, add a note: "Staying Quick — consider 
 
 ### Step 4: Execute promotion
 
-Run the existing Quick→Full succession logic from `/analysis new --from {ID}`:
+Run the existing Quick→Full succession logic from `/analysis-new --from {ID}`:
 
 1. Generate a new Full ID (same type as the Quick: Investigation/Modeling/Simulation)
 2. Create the Full analysis folder in `analyses/active/{new-ID}_{slug}/`
@@ -91,7 +91,7 @@ Tell the user:
 - "Promoted {Quick ID} → {Full ID}"
 - Show the new folder path
 - Indicate which stage files were generated
-- "Review and expand the content in `{last file}`, then run `/analysis next` to continue."
+- "Review and expand the content in `{last file}`, then run `/analysis-next` to continue."
 - "Original Quick file is preserved at {path} for reference."
 
 ## Proactive Promotion (AI Behavior)
@@ -106,5 +106,5 @@ The AI should monitor Quick analyses during the conversation and proactively sug
 **How to suggest:**
 - Be helpful, not pushy — the user chose Quick for a reason
 - Show the specific signals, not just "this is complex"
-- Make it easy: "Just say `/analysis promote` and I'll handle the rest"
+- Make it easy: "Just say `/analysis-promote` and I'll handle the rest"
 - If user declines twice for the same analysis, stop suggesting

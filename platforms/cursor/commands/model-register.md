@@ -1,4 +1,4 @@
-# /model register
+# /model-register
 
 Register a deployed model from a Modeling analysis into the model registry.
 
@@ -121,7 +121,7 @@ If the model came from an analysis:
 Tell the user:
 - Model card created at {path}
 - Version: v{N}, Status: {status}
-- "Set up drift monitoring with `/monitor setup` to track model performance over time"
-- "When you retrain, run `/model register` again to create a new version"
+- "Set up drift monitoring with `/monitor-setup` to track model performance over time"
+- "When you retrain, run `/model-register` again to create a new version"
 
 **After executing**: Update `.analysis/status.md` with any state changes.

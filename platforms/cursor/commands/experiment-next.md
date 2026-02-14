@@ -1,4 +1,4 @@
-# /experiment next
+# /experiment-next
 
 Advance the current experiment to the next stage.
 
@@ -12,7 +12,7 @@ Read `.analysis/status.md` to find active experiments (Type: Experiment).
 
 - If only 1 active Full experiment -> select it automatically
 - If multiple active -> ask user which experiment to advance (show ID + title)
-- Quick experiments don't use `/experiment next` (all sections are in one file)
+- Quick experiments don't use `/experiment-next` (all sections are in one file)
   - If user selects a Quick, remind them to fill sections in order within the file
 
 ### Step 2: Determine current stage
@@ -320,8 +320,8 @@ If the experiment was stopped before the minimum duration, add a warning banner 
 - [ ] {experiment idea} — to test {what}
 
 ## Follow-Up Analyses
-- [ ] {analysis} -> `/analysis new` (e.g., deeper segment investigation)
-- [ ] {analysis} -> `/analysis new`
+- [ ] {analysis} -> `/analysis-new` (e.g., deeper segment investigation)
+- [ ] {analysis} -> `/analysis-new`
 
 ## Proposed New Metrics
 > If this experiment revealed a gap in the metric framework, define it here.
@@ -385,7 +385,7 @@ If the experiment was stopped before the minimum duration, add a warning banner 
 ```
 
 **LEARN reached** -> Tell user:
-"This experiment is complete. Run `/experiment archive` to archive it."
+"This experiment is complete. Run `/experiment-archive` to archive it."
 
 ### Step 5: Update status.md
 

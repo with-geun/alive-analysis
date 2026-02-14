@@ -1,4 +1,4 @@
-# /analysis search
+# /analysis-search
 
 Deep search across all analyses — full-text, context display, and pattern analysis.
 
@@ -130,6 +130,6 @@ Suggestions to generate:
 ### Step 8: Quick actions
 
 After displaying results, suggest:
-- "Use `/analysis list --tag {tag}` to see all analyses with a specific tag"
-- "Use `/analysis new` to start a follow-up analysis on unresolved questions"
+- "Use `/analysis-list --tag {tag}` to see all analyses with a specific tag"
+- "Use `/analysis-new` to start a follow-up analysis on unresolved questions"
 - If many results: "Try narrowing with `--date` or `--type` to focus"

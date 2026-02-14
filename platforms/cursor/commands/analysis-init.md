@@ -1,4 +1,4 @@
-# /analysis init
+# /analysis-init
 
 Initialize alive-analysis in the current project.
 
@@ -15,21 +15,21 @@ Follow these steps in order:
 
 ### Quick Setup Mode
 
-> For a quick setup, run `/analysis init --quick`. For full configuration, continue below.
+> For a quick setup, run `/analysis-init --quick`. For full configuration, continue below.
 
-If the user ran `/analysis init --quick`:
+If the user ran `/analysis-init --quick`:
 1. **Present all questions at once** in a single structured form:
    - **Q1. Language** — "What language for analysis documents?" (default: English)
    - **Q2. Team/project name** — Free text
    - **Q3. Default analysis mode** — Full or Quick (default: Quick)
 2. Skip Steps 3-6 (goals, metrics, stakeholders, data stack) entirely
 3. Jump directly to Step 8 (Create folder structure)
-4. Generate config.md with empty sections and a comment: "Fill these in later with `/analysis init --update`"
+4. Generate config.md with empty sections and a comment: "Fill these in later with `/analysis-init --update`"
 5. Proceed to Step 10 and Step 11 as normal
 
 ### Step 1: Check existing setup
 
-> **Tip**: For a quick setup with minimal questions, run `/analysis init --quick`.
+> **Tip**: For a quick setup with minimal questions, run `/analysis-init --quick`.
 
 Check if `.analysis/` folder already exists.
 - If it exists, warn the user and ask if they want to re-initialize.
@@ -44,7 +44,7 @@ Check if `.analysis/` folder already exists.
 3. Jump to Step 8 (Create folder structure)
 4. In Step 9, generate config.md with all skipped sections showing:
    ```
-   > Not configured yet — run `/analysis init --update` to fill in.
+   > Not configured yet — run `/analysis-init --update` to fill in.
    ```
 5. Continue to Steps 10-11 as normal
 
@@ -274,9 +274,9 @@ Tell the user:
   - Language, team, goals
   - Metrics (how many in each tier, or "skipped")
   - Data stack + MCP status
-- Suggest: "Run `/analysis new` to start your first analysis"
+- Suggest: "Run `/analysis-new` to start your first analysis"
 - Note: "Checklists in `.analysis/checklists/` can be customized per team"
-- If MCP not configured: "To connect later: `/analysis init --mcp`"
+- If MCP not configured: "To connect later: `/analysis-init --mcp`"
 - If metrics skipped: "You can update metrics anytime by editing `.analysis/config.md`"
 
 **After executing**: Update `.analysis/status.md` with any state changes.

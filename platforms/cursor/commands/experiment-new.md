@@ -1,4 +1,4 @@
-# /experiment new
+# /experiment-new
 
 Start a new A/B test experiment.
 
