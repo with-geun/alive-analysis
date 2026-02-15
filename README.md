@@ -16,6 +16,12 @@ Every analysis follows 5 stages (ASK → LOOK → INVESTIGATE → VOICE → EVOL
 
 Works in **Claude Code** and **Cursor 2.4+**. Free and open source.
 
+> **Use this when:** You're doing analysis with AI and don't want your reasoning to disappear in chat history.
+
+```
+AI Agent → ALIVE Loop → Versioned Analysis Files → Searchable Knowledge Base
+```
+
 ---
 
 ## 👥 Who is this for?
@@ -182,6 +188,17 @@ Both platforms share the same `core/` methodology and produce identical outputs.
 - **PM**: `/analysis-new` Quick mode to investigate a feature hypothesis before writing a spec
 - **Data team**: Full analysis for board-level decisions → checklists ensure nothing is missed → Impact Tracking proves ROI
 - **Cross-functional**: PMs do Quick analyses independently, escalate to analysts for Full when needed
+
+---
+
+## 🧪 Early use cases
+
+Currently being tested in:
+- Metric investigations (retention drops, conversion changes)
+- Experiment reviews (A/B test design and post-analysis)
+- Decision memos (structured reasoning for stakeholder alignment)
+
+Real walkthrough coming soon.
 
 ---
 
