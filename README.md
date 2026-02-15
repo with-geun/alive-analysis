@@ -1,48 +1,79 @@
 # alive-analysis
 
-Data analysis workflow kit for AI coding agents.
+**Make every data analysis traceable, repeatable, and team-shareable — inside your AI coding agent.**
 
-Structure your analysis process with the **ALIVE loop** — keep your analyses alive, not just done.
+---
+
+## 🚀 TL;DR
+
+Turn AI into a **structured analysis partner** instead of a one-shot answer machine.
+Every analysis follows 5 stages (ASK → LOOK → INVESTIGATE → VOICE → EVOLVE), gets saved as Git-tracked markdown, and stays searchable forever.
+
+```
+/analysis-init     # One-time setup (3 min)
+/analysis-new      # Start analyzing
+```
+
+Works in **Claude Code** and **Cursor 2.4+**. Free and open source.
+
+---
+
+## 👥 Who is this for?
+
+- **Data Analysts** — Full mode with 5 files, checklists, and quality gates for analyses that inform real decisions
+- **PMs / Non-analysts** — Quick mode (single file) with guided questions so you can analyze without a statistics background
+- **Growth / Marketing teams** — A/B test module, metric monitoring, impact tracking built in
+- **Anyone using AI for analysis** — Stop losing insights in chat history
+
+---
+
+## ❓ Why this exists
+
+When you ask AI to "analyze this data," you get a one-shot answer. No structure, no tracking, no way to revisit your reasoning next month.
+
+| Problem | How alive-analysis fixes it |
+|---|---|
+| Analysis is ad-hoc and different every time | Structured ALIVE loop, same quality every time |
+| Insights vanish in chat history | Git-tracked markdown files, searchable archive |
+| Easy to skip important checks | Stage checklists catch confounders, counter-metrics, sensitivity |
+| Hard to share reasoning with your team | Audience-specific messaging, versioned documents |
+
+---
+
+## 🧠 The ALIVE Loop
+
+Every analysis follows five stages. The AI doesn't generate answers — it **asks you questions** at each stage to structure your thinking.
 
 ```
 ASK → LOOK → INVESTIGATE → VOICE → EVOLVE
  ?      👀       🔍          📢      🌱
 ```
 
-## Why alive-analysis?
+- **ASK** — Define the question. Scope, hypothesis tree, success criteria.
+- **LOOK** — Observe data. Quality checks, segmentation, confounders.
+- **INVESTIGATE** — Analyze. Hypotheses, testing, multi-lens framework.
+- **VOICE** — Communicate. "So what → Now what" for each audience.
+- **EVOLVE** — Next questions. Follow-ups, impact tracking, reflection.
 
-You ask Claude to "analyze this data" and get a one-shot answer. No structure, no tracking, no way to share the reasoning with your team. Next month, you can't even remember what you concluded.
+---
 
-alive-analysis fixes this:
+## ⚡ Quick Demo
 
-| | Without | With alive-analysis |
-|--|---------|-------------------|
-| Process | Ad-hoc, different every time | Structured ALIVE loop, repeatable |
-| Tracking | Lost in chat history | Versioned files, searchable archive |
-| Quality | No self-check, easy to miss things | Stage checklists with quality gates |
-| Team sharing | Copy-paste from chat | Git-tracked documents, audience-specific messages |
+```
+1. /analysis-init --quick        # Set language, team, mode
+2. /analysis-new                 # "Why did D7 retention drop?"
+3. AI asks questions → you answer → ASK stage done
+4. /analysis-next                # Move through LOOK → INVESTIGATE → VOICE → EVOLVE
+5. /analysis-archive             # Done. File saved, searchable, Git-tracked.
+```
 
-## What is this?
+The AI guides every step — you bring the domain knowledge, it brings the structure.
 
-alive-analysis helps you:
-- **Structure** analysis work into clear, repeatable stages
-- **Track** multiple analyses in parallel
-- **Archive** completed work with searchable summaries
-- **Maintain** quality with built-in checklists
+---
 
-## Who is this for?
+## 📄 Example Output
 
-| | Data Analysts | Non-Analyst Roles |
-|--|--|--|
-| Goal | Deep, systematic analysis | Quick analysis with guided framework |
-| Mode | Full (5 files) | Quick (1 file) |
-| ALIVE loop | Thinking framework | Analysis guide |
-| Types | Investigation, Modeling, Simulation | All types available |
-| Checklists | Quality self-check | "Check these and you're good" guardrails |
-
-## Example Output
-
-Here's what a Quick analysis looks like:
+A completed Quick analysis looks like this:
 
 ```markdown
 # Quick Investigation — Signup Rate Comparison
@@ -50,7 +81,6 @@ Here's what a Quick analysis looks like:
 
 ## ASK
 "Onboarding flow A vs B — which has higher signup completion?"
-Framing: Comparison (which is better?)
 
 ## LOOK
 | Segment  | Flow A | Flow B | Users (A/B)    |
@@ -59,262 +89,126 @@ Framing: Comparison (which is better?)
 | Paid     | 28%    | 32%    | 1,500 / 1,200  |
 
 ## INVESTIGATE
-Flow B outperforms A in every segment (+6-7pp (percentage points)).
-No Simpson's Paradox (overall trend matches every segment — no reversal).
-Drop-off at step 3 (phone verification) — Flow B made it optional.
+Flow B outperforms A in every segment (+6-7pp).
+No Simpson's Paradox. Drop-off at step 3 — Flow B made phone verification optional.
 
 ## VOICE
-Ship Flow B. Monitor D7 activation (7-day return rate) as counter-metric.
+Ship Flow B. Monitor D7 activation as counter-metric.
 Confidence: 🟢 High (organic), 🟡 Medium (paid — smaller sample)
 
 ## EVOLVE
 Follow-up: Does simpler signup affect user quality? Check D30 activation.
 ```
 
-See [`core/examples/`](core/examples/) for complete Full and Quick samples.
+See [`core/examples/`](core/examples/) for Full and Quick samples.
 
-## Quick Start
+---
+
+## ⚙️ Quick Start
 
 ### Install
 
 ```bash
-# From your project directory (not inside alive-analysis)
 git clone https://github.com/with-geun/alive-analysis.git /tmp/alive-analysis
 
-# Claude Code (default)
-bash /tmp/alive-analysis/install.sh
-
-# Cursor only
-bash /tmp/alive-analysis/install.sh --cursor
-
-# Both platforms
-bash /tmp/alive-analysis/install.sh --both
+bash /tmp/alive-analysis/install.sh            # Claude Code (default)
+bash /tmp/alive-analysis/install.sh --cursor   # Cursor only
+bash /tmp/alive-analysis/install.sh --both     # Both platforms
 ```
 
-Or see [INSTALL.md](INSTALL.md) for manual setup and other options.
+See [INSTALL.md](INSTALL.md) for manual setup.
 
-> **Plugin install**: Coming soon. Use manual setup for now.
+### Start
 
-### Initialize & Start
-
-Open your project in Claude Code or Cursor, then type in the **agent chat**:
+Open your project in Claude Code or Cursor, then type in the **agent chat** (not the terminal):
 
 ```
-/analysis-init            # Full setup (10 questions)
-/analysis-init --quick    # Quick setup (3 questions)
+/analysis-init            # Full setup (10 questions) or --quick (3 questions)
 /analysis-new             # Start your first analysis
 ```
 
-> All `/` commands are typed in the AI agent chat, not the terminal.
+---
 
-### Typical Workflow
+## ✨ Core Features
 
-```
-/analysis-init            # One-time setup
-/analysis-new             # Start an analysis (Full or Quick)
-/analysis-next            # Move to the next ALIVE stage
-  ... repeat until EVOLVE ...
-/analysis-archive         # Archive when done
-/analysis-status          # Check your dashboard anytime
-```
+**16 commands** across analysis, experiments, monitoring, and modeling:
 
-### For PMs and Non-Analysts
+### Analysis (9 commands)
+`/analysis-init` · `/analysis-new` · `/analysis-status` · `/analysis-next` · `/analysis-archive` · `/analysis-list` · `/analysis-promote` · `/analysis-search` · `/analysis-retro`
 
-Don't know what a North Star metric is? No problem.
+### Experiments (3 commands)
+`/experiment-new` · `/experiment-next` · `/experiment-archive`
 
-```
-/analysis-init --quick    # Just set language, team name, and mode
-/analysis-new             # Pick "Quick" → start analyzing right away
-```
+### Monitoring (3 commands)
+`/monitor-setup` · `/monitor-check` · `/monitor-list`
 
-The AI guides you through each step with questions:
+### Modeling (1 command)
+`/model-register`
 
-```
-AI: "What's the question? Is this 'why did X happen' or 'are X and Y related'?"
-You: "Why did signups drop yesterday?"
-AI: "Quick hypothesis: internal (bug, release) or external (competitor, platform)?"
-You: "We had a release yesterday"
-AI: "Let's check the data by platform and user type..."
-```
+**Key capabilities:**
 
-See [`core/examples/quick-investigation.md`](core/examples/quick-investigation.md) for a full PM walkthrough.
+- **Full & Quick modes** — 5-file deep analysis or single-file fast turnaround. Quick auto-promotes to Full when complexity grows.
+- **3 analysis types** — Investigation ("why did X happen?"), Modeling ("can we predict Y?"), Simulation ("what if Z?")
+- **A/B test experiments** — Design → Validate → Analyze → Decide → Learn. Pre-registration, SRM checks, guardrail metrics.
+- **Metric monitoring** — 4-tier classification (North Star → Leading → Guardrail → Diagnostic). Auto-escalation on consecutive warnings.
+- **Insight search** — Full-text search across all analyses. Cross-reference analysis, conflicting finding detection, learning suggestions.
+- **Auto retrospectives** — Period-based reports with impact outcomes, recurring patterns, and unresolved follow-ups.
+- **Impact tracking** — Recommendation → Decision → Execution → Result. Know if your analyses actually changed anything.
+- **Tags & model registry** — Connect related analyses. Track ML model versions with drift monitoring.
 
-## Platform Support
-
-alive-analysis is optimized for each platform's agent model:
+### Platform support
 
 | | Claude Code | Cursor 2.4+ |
 |---|---|---|
-| Best for | Deep analysis workflows, multi-turn conversations | Quick analyses integrated into coding workflow |
-| Interaction | Conversational (asks questions one by one) | Batch (presents all questions at once) |
-| State management | Session memory | File-based (`.analysis/status.md`) |
-| Session welcome | Auto status display on start | Manual: `/analysis-status` |
-| Setup | `/analysis-init` (guided 10-step) | `/analysis-init` (single form) |
-| SKILL.md | Full (~1,660 lines) | Slim (~265 lines) |
-| Install | `bash install.sh` | `bash install.sh --cursor` |
+| Interaction | Conversational (one question at a time) | Batch (all questions at once) |
+| State | Session memory | File-based (`.analysis/status.md`) |
+| SKILL.md | ~1,660 lines | ~265 lines |
 
-Both platforms share the same core methodology (`core/`) and produce identical analysis outputs.
+Both platforms share the same `core/` methodology and produce identical outputs. `SKILL.md` is an [open standard](https://github.com/anthropics/claude-code) — works with any agent that supports it.
 
-## Compatibility
+---
 
-`SKILL.md` is an open standard. alive-analysis works across agents that support it.
+## 🧩 What this is NOT
 
-| Agent | Skills | Commands | Hooks | Optimized |
-|-------|--------|----------|-------|-----------|
-| **Claude Code** | `.claude/skills/` | `.claude/commands/` | `.claude/hooks.json` | Yes |
-| **Cursor 2.4+** | `.cursor/skills/` | `.cursor/commands/` | `.cursor/hooks.json` + `.cursor/rules/` | Yes |
-| **Codex** | `.codex/skills/` | — | — | Partial |
+- **Not a BI dashboard** — No charts or visualizations. It structures your *thinking*, not your *reporting*.
+- **Not a statistics library** — It doesn't run models or crunch numbers. You bring the data, it brings the process.
+- **Not AI doing analysis for you** — The AI asks questions and enforces structure. You make the analytical judgments.
 
-> The installer auto-detects Cursor and installs to both `.claude/` and `.cursor/`. Use `bash install.sh --cursor` for Cursor only, `--claude` for Claude Code only, or `--both` explicitly.
+---
 
-## Commands
+## 📊 How teams use it
 
-### Analysis
-| Command | Description |
-|---------|-------------|
-| `/analysis-init` | Initialize alive-analysis in your project |
-| `/analysis-new` | Start a new analysis (Full or Quick) |
-| `/analysis-status` | Show current analysis dashboard |
-| `/analysis-next` | Advance to the next ALIVE stage |
-| `/analysis-archive` | Archive a completed analysis |
-| `/analysis-list` | List all analyses (active + archived, filter by tag) |
-| `/analysis-promote` | Promote a Quick analysis to Full |
-| `/analysis-search` | Deep search across all analyses (full-text, context, patterns) |
-| `/analysis-retro` | Generate automatic retrospective report from archived analyses |
+- **Growth team**: Quick analysis on metric drops → finds root cause in one session → archives with action items
+- **PM**: `/analysis-new` Quick mode to investigate a feature hypothesis before writing a spec
+- **Data team**: Full analysis for board-level decisions → checklists ensure nothing is missed → Impact Tracking proves ROI
+- **Cross-functional**: PMs do Quick analyses independently, escalate to analysts for Full when needed
 
-### Experiment
-| Command | Description |
-|---------|-------------|
-| `/experiment-new` | Start a new A/B test (Full or Quick) |
-| `/experiment-next` | Advance to the next experiment stage |
-| `/experiment-archive` | Archive a completed experiment |
+---
 
-### Monitoring
-| Command | Description |
-|---------|-------------|
-| `/monitor-setup` | Register a metric and create a monitor |
-| `/monitor-check` | Run a health check on one or all monitors |
-| `/monitor-list` | Show all monitors with status dashboard |
+## 🗺️ Roadmap
 
-### Modeling
-| Command | Description |
-|---------|-------------|
-| `/model-register` | Register a deployed model with version tracking |
+- **v1.0** ✅ — ALIVE loop, Full/Quick modes, 3 analysis types, experiments, monitoring, search, retrospectives, dual-platform
+- **Next** — Team dashboard
 
-## Features
+---
 
-### The ALIVE Loop
+## 🤝 Contributing
 
-Every analysis follows five stages:
+See [CONTRIBUTING.md](CONTRIBUTING.md). Feedback on checklists and methodology especially welcome.
 
-**ASK** — Define the question. Set the problem, scope, and success criteria.
-**LOOK** — Observe the data. Check quality, outliers, and sampling.
-**INVESTIGATE** — Analyze deeply. Form hypotheses, test them, document results.
-**VOICE** — Communicate findings. Tailor messages to each audience.
-**EVOLVE** — Generate next questions. Reflect, propose follow-ups, track impact.
+---
 
-### Analysis Modes
+## ⭐ If this resonates
 
-**Full Analysis** — For decisions that matter. Creates 5 separate files (one per ALIVE stage) with detailed checklists and quality gates.
+If alive-analysis helps you think more clearly about data, consider giving it a star. It helps others find the project.
 
-**Quick Analysis** — Fast turnaround. Single file with abbreviated ALIVE sections and a 5-item checklist. Ideal for PMs and time-sensitive questions.
+---
 
-**Promote** — When a Quick analysis grows too complex (multiple hypotheses, multiple data sources, scope creep), `/analysis-promote` converts it to Full. The AI proactively suggests promotion when it detects complexity signals.
-
-### Analysis Types
-
-**Investigation** ("Why did X happen?") — Retrospective root cause analysis. Uses hypothesis elimination, multi-lens framework (macro/meso/micro), and causation testing with confounding checks.
-
-**Modeling** ("Can we predict Y?") — Predictive model building. Covers feature exploration, model comparison, SHAP explanations for interpretability, and integrates with the model registry for deployment tracking.
-
-**Simulation** ("What would happen if Z?") — Prospective policy/strategy evaluation. Defines variable relationships, runs scenario experiments with sensitivity and breakeven analysis, and uses Monte Carlo for multiple uncertain variables.
-
-### Experiments (A/B Tests)
-
-The ALIVE loop adapted for controlled experiments:
-
-```
-DESIGN → VALIDATE → ANALYZE → DECIDE → LEARN
-  📐        ✅         🔬        🏁       📚
-```
-
-**When to use**: Testing a product change with measurable impact — feature launches, UX variations, pricing changes.
-
-**Full experiments** (`E-*`) get 5 stage files with pre-registration, sample size calculation, and SRM checks. **Quick experiments** (`QE-*`) get a single file for low-risk tests. Both enforce guardrail metrics and confidence intervals.
-
-### Metric Monitoring
-
-Track key metrics with structured health checks and alert escalation.
-
-**4-tier classification**: 🌟 North Star (1 core metric) → 📊 Leading (3-5 predictive) → 🛡️ Guardrail (safety, must not degrade) → 🔬 Diagnostic (debug on-demand).
-
-**Alert flow**: 🟢 Healthy → 🟡 Warning (alert created, owner notified) → 🔴 Critical (investigation suggested). Consecutive warnings auto-escalate to a new analysis. Every check includes counter-metric status to detect Goodhart's Law gaming.
-
-### Insight Search
-
-`/analysis-search` — Deep full-text search across all analyses, not just titles.
-
-- **Context snippets**: Shows matching lines with surrounding context, file path, and line number
-- **Cross-reference analysis**: Groups analyses with similar conclusions, flags conflicting findings
-- **Learning suggestions**: Detects repeated topics (suggests meta-analysis), tracks unresolved EVOLVE follow-ups, flags pending Impact Tracking items
-
-Filter by keyword, tag, date range, analysis type, or confidence level.
-
-### Retrospective Reports
-
-`/analysis-retro` — Automatically generates a retrospective report from archived analyses.
-
-Reports cover a selected period (last month, quarter, or custom range) and include: analysis activity counts, Impact Tracking outcomes (acceptance rate, top wins), recurring patterns and confidence distribution, unresolved EVOLVE follow-ups, and data-driven recommendations. Saved to `analyses/.retro/`.
-
-### Impact Tracking
-
-Track whether analysis recommendations actually made a difference.
-
-```
-Recommendation → Decision → Execution → Result
-   (VOICE)      (Accept/   (In progress/  (Outcome
-                 Reject/    Done)          notes)
-                 Modify)
-```
-
-Built into the EVOLVE stage. The AI reminds you to update impact status when starting new analyses. Retrospective reports aggregate impact data across all analyses.
-
-### Tags
-
-Connect related analyses across time with tags (e.g., `retention`, `user-onboarding`, `pricing`).
-
-Tags are defined at team level in `config.md` and can also be added ad-hoc per analysis. The AI suggests relevant tags when creating analyses and checks for related tagged work before starting new analysis. Tags are preserved during Quick→Full promotion.
-
-### Model Registry
-
-Track deployed ML models with versioned model cards in `.analysis/models/`.
-
-Each card records performance metrics (train/validation/test/production), feature importance, training details, deployment info, and drift monitoring triggers. Versions auto-increment on retraining, with previous versions marked as retired. Links back to the originating Modeling analysis.
-
-## Customization
-
-Checklists live in `.analysis/checklists/` — edit them to match your team's standards. Changes are Git-tracked, so your team conventions evolve naturally.
-
-## Roadmap
-
-- **v1.0** ✅: ALIVE loop, Full/Quick modes, 3 analysis types, checklists, archive, metric proposal
-- **v1.0** ✅: A/B test experiments, metric monitoring, Quick→Full promotion, tags, model registry
-- **v1.0** ✅: Insight search (`/analysis-search`), auto retrospectives (`/analysis-retro`)
-- **v1.0** ✅: Claude Code + Cursor 2.4+ dual-platform optimization
-- **Next**: Team dashboard
-
-## Contributing
-
-See [CONTRIBUTING.md](CONTRIBUTING.md) for how to contribute.
-
-## Glossary
-
-New to data analysis terms? See [GLOSSARY.md](GLOSSARY.md) for definitions of key terms like Simpson's Paradox, counter-metric, STEDII, and more.
-
-## Language Support
-
-alive-analysis works in any language. Set your preferred language during `/analysis-init` — all AI responses, generated files, and checklist feedback will follow that language. Technical terms (ALIVE, STEDII, SHAP) stay in English as proper nouns.
-
-## License
+## 📜 License
 
 MIT
+
+---
+
+**Glossary**: New to data analysis terms? See [GLOSSARY.md](GLOSSARY.md).
+**Language**: Works in any language — set yours during `/analysis-init`.
