@@ -188,6 +188,28 @@ if [ "$INSTALL_CLAUDE" = true ]; then
         echo -e "  ${GREEN}References copied${NC}"
     fi
 
+    # 7. Copy education scenarios and templates
+    if [ -d "$SCRIPT_DIR/core/education" ]; then
+        echo "Copying education materials..."
+        mkdir -p .claude/skills/alive-analysis/core/education/templates
+        cp "$SCRIPT_DIR"/core/education/*.md .claude/skills/alive-analysis/core/education/ 2>/dev/null || true
+        cp "$SCRIPT_DIR"/core/education/templates/*.md .claude/skills/alive-analysis/core/education/templates/ 2>/dev/null || true
+        # Copy each scenario directory
+        for scenario_dir in "$SCRIPT_DIR"/core/education/scenarios/*/; do
+            if [ -d "$scenario_dir" ]; then
+                scenario_name=$(basename "$scenario_dir")
+                mkdir -p ".claude/skills/alive-analysis/core/education/scenarios/$scenario_name/data"
+                mkdir -p ".claude/skills/alive-analysis/core/education/scenarios/$scenario_name/hints"
+                mkdir -p ".claude/skills/alive-analysis/core/education/scenarios/$scenario_name/solution"
+                cp "$scenario_dir"/*.md ".claude/skills/alive-analysis/core/education/scenarios/$scenario_name/" 2>/dev/null || true
+                cp "$scenario_dir"/data/*.md ".claude/skills/alive-analysis/core/education/scenarios/$scenario_name/data/" 2>/dev/null || true
+                cp "$scenario_dir"/hints/*.md ".claude/skills/alive-analysis/core/education/scenarios/$scenario_name/hints/" 2>/dev/null || true
+                cp "$scenario_dir"/solution/*.md ".claude/skills/alive-analysis/core/education/scenarios/$scenario_name/solution/" 2>/dev/null || true
+            fi
+        done
+        echo -e "  ${GREEN}Education materials copied${NC}"
+    fi
+
     echo -e "${GREEN}Claude Code setup complete.${NC}"
 fi
 
@@ -256,6 +278,27 @@ if [ "$INSTALL_CURSOR" = true ]; then
         echo -e "  ${GREEN}References copied${NC}"
     fi
 
+    # Copy education scenarios and templates
+    if [ -d "$SCRIPT_DIR/core/education" ]; then
+        echo "Copying education materials..."
+        mkdir -p .cursor/skills/alive-analysis/core/education/templates
+        cp "$SCRIPT_DIR"/core/education/*.md .cursor/skills/alive-analysis/core/education/ 2>/dev/null || true
+        cp "$SCRIPT_DIR"/core/education/templates/*.md .cursor/skills/alive-analysis/core/education/templates/ 2>/dev/null || true
+        for scenario_dir in "$SCRIPT_DIR"/core/education/scenarios/*/; do
+            if [ -d "$scenario_dir" ]; then
+                scenario_name=$(basename "$scenario_dir")
+                mkdir -p ".cursor/skills/alive-analysis/core/education/scenarios/$scenario_name/data"
+                mkdir -p ".cursor/skills/alive-analysis/core/education/scenarios/$scenario_name/hints"
+                mkdir -p ".cursor/skills/alive-analysis/core/education/scenarios/$scenario_name/solution"
+                cp "$scenario_dir"/*.md ".cursor/skills/alive-analysis/core/education/scenarios/$scenario_name/" 2>/dev/null || true
+                cp "$scenario_dir"/data/*.md ".cursor/skills/alive-analysis/core/education/scenarios/$scenario_name/data/" 2>/dev/null || true
+                cp "$scenario_dir"/hints/*.md ".cursor/skills/alive-analysis/core/education/scenarios/$scenario_name/hints/" 2>/dev/null || true
+                cp "$scenario_dir"/solution/*.md ".cursor/skills/alive-analysis/core/education/scenarios/$scenario_name/solution/" 2>/dev/null || true
+            fi
+        done
+        echo -e "  ${GREEN}Education materials copied${NC}"
+    fi
+
     echo -e "${GREEN}Cursor setup complete.${NC}"
 fi
 
@@ -276,6 +319,7 @@ fi
 echo "  2. Run: /analysis-init          (full setup)"
 echo "     Or:  /analysis-init --quick   (quick setup)"
 echo "  3. Run: /analysis-new            (start your first analysis)"
+echo "     Or:  /analysis-learn          (start a guided learning scenario)"
 echo ""
 echo "For more info: see README.md or INSTALL.md"
 echo ""

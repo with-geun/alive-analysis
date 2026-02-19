@@ -29,6 +29,7 @@ AI Agent → ALIVE Loop → Versioned Analysis Files → Searchable Knowledge Ba
 - **Data Analysts** — Full mode with 5 files, checklists, and quality gates for analyses that inform real decisions
 - **PMs / Non-analysts** — Quick mode (single file) with guided questions so you can analyze without a statistics background
 - **Growth / Marketing teams** — A/B test module, metric monitoring, impact tracking built in
+- **Students / Aspiring analysts** — Learn mode with 7 practice scenarios, rubric-based scoring, and progressive hints
 - **Anyone using AI for analysis** — Stop losing insights in chat history
 
 ---
@@ -137,7 +138,7 @@ Open your project in Claude Code or Cursor, then type in the **agent chat** (not
 
 ## ✨ Core Features
 
-**16 commands** across analysis, experiments, monitoring, and modeling:
+**20 commands** across analysis, experiments, monitoring, modeling, and education:
 
 ### Analysis (9 commands)
 `/analysis-init` · `/analysis-new` · `/analysis-status` · `/analysis-next` · `/analysis-archive` · `/analysis-list` · `/analysis-promote` · `/analysis-search` · `/analysis-retro`
@@ -151,6 +152,9 @@ Open your project in Claude Code or Cursor, then type in the **agent chat** (not
 ### Modeling (1 command)
 `/model-register`
 
+### Education (4 commands)
+`/analysis-learn` · `/analysis-learn-next` · `/analysis-learn-hint` · `/analysis-learn-review`
+
 **Key capabilities:**
 
 - **Full & Quick modes** — 5-file deep analysis or single-file fast turnaround. Quick auto-promotes to Full when complexity grows.
@@ -161,6 +165,7 @@ Open your project in Claude Code or Cursor, then type in the **agent chat** (not
 - **Auto retrospectives** — Period-based reports with impact outcomes, recurring patterns, and unresolved follow-ups.
 - **Impact tracking** — Recommendation → Decision → Execution → Result. Know if your analyses actually changed anything.
 - **Tags & model registry** — Connect related analyses. Track ML model versions with drift monitoring.
+- **Education mode** — 7 practice scenarios across 4 analysis types. Rubric-based 100-point scoring, 3-level progressive hints, Common Mistakes feedback. Beginner (Quick) and Intermediate (Full) difficulty.
 
 ### Platform support
 
@@ -171,6 +176,43 @@ Open your project in Claude Code or Cursor, then type in the **agent chat** (not
 | SKILL.md | ~1,660 lines | ~265 lines |
 
 Both platforms share the same `core/` methodology and produce identical outputs. `SKILL.md` is an [open standard](https://github.com/anthropics/claude-code) — works with any agent that supports it.
+
+---
+
+## 📚 Education Mode (v1.1)
+
+Learn data analysis thinking through guided practice — no real data needed.
+
+```
+/analysis-learn          # Pick a scenario and start practicing
+/analysis-learn-next     # Get scored, then move to next stage
+/analysis-learn-hint     # Stuck? Get a progressive hint (3 levels)
+/analysis-learn-review   # Finish and get a full rubric review
+```
+
+### 7 Practice Scenarios
+
+| | Scenario | Type | Difficulty |
+|---|---|---|---|
+| b1 | Why did signups drop yesterday? | Investigation | Beginner |
+| b2 | Which onboarding flow is better? | Comparison | Beginner |
+| b3 | How much does turnover cost us? | Quantification | Beginner |
+| i1 | Why did DAU drop 15%? | Investigation | Intermediate |
+| i2 | Should we lower delivery fees? | Simulation | Intermediate |
+| i3 | Did the new checkout flow improve conversion? | Experiment | Intermediate |
+| i4 | Can we predict which users will churn? | Modeling | Intermediate |
+
+### How it works
+
+1. Pick a scenario — you get a realistic business briefing
+2. Work through each ALIVE stage — the AI guides you with educational annotations
+3. Get scored at each stage — rubric-based 100-point scoring with targeted feedback
+4. If you're stuck, ask for hints — they get progressively more specific (3 levels)
+5. At the end, get a full review with key takeaways and next scenario recommendation
+
+**Beginner** scenarios use Quick format (single file, rich explanations). **Intermediate** scenarios use Full format (5 files, minimal guidance — closer to real work).
+
+> **Graduation path**: Complete 2+ Beginner scenarios at 70%+ → try Intermediate. Complete Intermediate at 75%+ → you're ready for real analysis with `/analysis-new`.
 
 ---
 
@@ -205,6 +247,7 @@ Real walkthrough coming soon.
 ## 🗺️ Roadmap
 
 - **v1.0** ✅ — ALIVE loop, Full/Quick modes, 3 analysis types, experiments, monitoring, search, retrospectives, dual-platform
+- **v1.1** ✅ — Education Mode with 7 practice scenarios, rubric scoring, progressive hints, Common Mistakes feedback
 - **Next** — Team dashboard
 
 ---

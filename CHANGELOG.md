@@ -4,6 +4,33 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.1.0] - 2026-02-19
+
+Education Mode — learn data analysis thinking through guided practice scenarios.
+
+### Highlights
+- 7 practice scenarios (3 Beginner + 4 Intermediate) covering all 4 analysis types
+- 4 new commands × 2 platforms: `analysis-learn`, `learn-next`, `learn-hint`, `learn-review`
+- Rubric-based 100-point scoring with Common Mistakes targeted feedback
+- 3-level progressive hints and stage-gated data reveals
+- Graduation path: Beginner → Intermediate → Production analysis
+
+### Added
+- `core/education/` directory with pedagogy guide, templates, and 7 scenario packages
+- Beginner scenarios (Quick format): signup drop investigation (b1), onboarding comparison (b2), turnover cost quantification (b3)
+- Intermediate scenarios (Full format): DAU drop investigation (i1), delivery fee simulation (i2), A/B test checkout experiment (i3), churn prediction modeling (i4)
+- Each scenario includes: metadata, briefing, stage-gated data, 3-level hints (5 stages), reference solution, rubric with Common Mistakes
+- `/analysis-learn` command: start a learning session with difficulty and scenario selection
+- `/analysis-learn-next` command: stage review with rubric scoring + Common Mistakes feedback, then advance
+- `/analysis-learn-hint` command: 3-level progressive hints (direction → specific → near-answer)
+- `/analysis-learn-review` command: full completion review with per-stage scoring, key takeaways, and next scenario recommendation
+- Education Mode sections in both SKILL.md files (Claude Code + Cursor)
+- `.analysis/education/progress.md` for learning progress tracking and Skill Radar
+
+### Changed
+- `install.sh` updated to copy `core/education/` directory with dynamic scenario discovery
+- README.md updated with Education Mode section, command count 16 → 20, roadmap updated
+
 ## [1.0.0] - 2026-02-14
 
 First stable release. All features complete, dual-platform support.

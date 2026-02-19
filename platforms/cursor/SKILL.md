@@ -268,6 +268,43 @@ Track deployed ML models in `.analysis/models/{model-slug}_v{version}.md`. Each 
 
 ---
 
+## Education Mode
+
+Structured learning for the ALIVE methodology through guided scenarios.
+
+**Commands:**
+- `/analysis-learn` — Start a learning session
+- `/analysis-learn-next` — Get feedback and advance to next stage
+- `/analysis-learn-hint` — Request progressive hints (3 levels per stage)
+- `/analysis-learn-review` — Complete with scored review
+
+**Difficulty levels:**
+- **Beginner** (Quick format): Rich annotations, built-in hints, single-cause scenarios, 20-30 min
+- **Intermediate** (Full format): Brief reminders, hints via command only, complex scenarios, 45-60 min
+
+**Scenarios:**
+- b1: "Why did signups drop?" (Beginner, Investigation)
+- b2: "Which onboarding flow is better?" (Beginner, Comparison)
+- b3: "How much does turnover cost us?" (Beginner, Quantification)
+- i1: "Why did DAU drop 15%?" (Intermediate, Investigation)
+- i2: "Should we lower delivery fees?" (Intermediate, Simulation)
+- i3: "Did the new checkout flow improve conversion?" (Intermediate, Experiment)
+- i4: "Can we predict which users will churn?" (Intermediate, Modeling)
+
+**Feedback protocol:** Score each stage using rubric → highlight strengths → identify gaps with explanations → check `## Most Common Mistakes` in rubric.md and present matched patterns as `> **Common Mistake Detected**: {name} — {explanation}` → reveal next-stage data. Adjust tone by learner's role.
+
+**Hints:** 3 progressive levels per stage (Direction → Specific → Near-answer). Tracked in progress.md.
+
+**Progress:** `.analysis/education/progress.md` — scores, Skill Radar, recommended next.
+
+**Graduation:** Beginner → Intermediate (2+ scenarios, 70%+). Education → Production (Intermediate 75%+).
+
+**ID format:** `L-{YYYY}-{MMDD}-{seq}`
+
+**Integration:** Learning sessions show as 📚 in status, excluded from search/retro by default.
+
+---
+
 ## Insight Search & Retrospective
 
 ### `/analysis-search`
