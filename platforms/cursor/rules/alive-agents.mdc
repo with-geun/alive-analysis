@@ -34,7 +34,7 @@ If `global.enabled: false` → skip all agent dispatch logic.
 Check gate conditions from `core/agents/router.yml`:
 
 | Gate | Trigger |
-|------|---------|
+|------|---------:|
 | scope-guard | ASK + Scope empty + Problem Definition filled |
 | data-quality-sentinel | LOOK→INVESTIGATE transition + quality incomplete |
 | ethics-guard | PII keywords in any content |
@@ -85,21 +85,72 @@ When user types `/analysis-agent`:
 
 ---
 
-## Agent reference (quick lookup)
-
-| Agent | Stage | Trigger | File |
-|-------|-------|---------|------|
-| hypothesis-gen | ASK | Hypothesis Tree empty | `core/agents/prompts/hypothesis-gen.md` |
-| scope-guard ⚡ | ASK | Scope empty / bundled questions | `core/agents/prompts/scope-guard.md` |
-| data-quality-sentinel ⚡ | LOOK | Quality incomplete / risk keywords | `core/agents/prompts/data-quality-sentinel.md` |
-| sql-writer | LOOK | Data sources set, no queries | `core/agents/prompts/sql-writer.md` |
-| stats-agent | INVESTIGATE | Hypothesis scorecard + causal claims | `core/agents/prompts/stats-agent.md` |
-| peer-reviewer | INVESTIGATE, VOICE | Results/findings have content | `core/agents/prompts/peer-reviewer.md` |
-| narrative-agent | VOICE | So What filled, audience messages empty | `core/agents/prompts/narrative-agent.md` |
-| ethics-guard ⚡ | any | PII keywords / always_run | `core/agents/prompts/ethics-guard.md` |
-| reproducibility-keeper ⚡ | INVESTIGATE, EVOLVE | Reproducibility section empty / EVOLVE transition | `core/agents/prompts/reproducibility-keeper.md` |
+## Complete Agent Reference (all 31)
 
 ⚡ = required gate (auto-runs without user confirmation when triggered)
+
+### ASK stage — Frame the question
+
+| Agent | When to use | What it does |
+|-------|-------------|-------------|
+| problem-framer | Problem statement is vague or lacks a metric | Turns fuzzy business concerns into a crisp analytical question with a named decision |
+| metric-translator | "Success criteria" lacks a formula or baseline | Converts ambiguous goals (e.g., "improve retention") into measurable KPIs with numerator/denominator |
+| hypothesis-gen | Hypothesis Tree is empty | Builds a MECE 4-branch tree (Product / Audience / External / Data) with effort ratings |
+| scope-guard ⚡ | Scope section empty or multiple questions bundled | Enforces single-question focus, splits bundled questions, adds rabbit hole guard |
+
+### LOOK stage — Understand the data
+
+| Agent | When to use | What it does |
+|-------|-------------|-------------|
+| data-scout | Data Sources section empty | Maps every hypothesis to a specific table, flags unmapped hypotheses with cheapest alternative |
+| tracking-auditor | Event or log data is the primary source | Audits 5 dimensions: schema, version drift, deduplication, coverage gaps, definition alignment |
+| lineage-mapper | Same metric appears in multiple tools or layers | Traces raw → mart → BI tool, detects definition conflicts, enforces single source of truth |
+| sampling-designer | Sampling section empty or comparison groups undefined | Defines unit of analysis, checks survivorship bias, calculates required sample size |
+| sql-writer | Data sources confirmed but no queries in assets/ | Generates one SQL template per hypothesis with "Signal if TRUE / FALSE" comments |
+| data-quality-sentinel ⚡ | LOOK→INVESTIGATE transition or quality flags | Audits 7 dimensions including Simpson's paradox and survivorship bias; issues Go/No-Go |
+
+### INVESTIGATE stage — Test hypotheses
+
+| Agent | When to use | What it does |
+|-------|-------------|-------------|
+| eda-agent | Results section empty before hypothesis testing | Produces a context-specific EDA plan oriented to ruling out hypotheses, with stop criteria |
+| experiment-designer | A/B test or causal claim detected | Designs experiment with traffic check, SRM detection, guardrails, and stopping rules |
+| causal-agent | Causal claim present but no experiment | Selects quasi-experimental method, tests identifying assumption, scopes honest conclusions |
+| root-cause-analyst | Multiple open hypotheses in scorecard | Builds root cause tree with contribution estimates, verification roadmap, and stopping criteria |
+| anomaly-detector | Spike or anomaly detected in Initial Observations | Classifies anomaly type, runs isolation tests, prioritizes data artifact check first |
+| stats-agent | Hypothesis scorecard has results needing validation | Selects correct statistical test, applies multiple testing correction, translates effect size to business terms |
+| ml-agent | Analysis type is Modeling (📈) | Designs full ML pipeline: leakage audit, validation strategy, fairness trigger, deployment pattern |
+| forecast-agent | Time-series forecasting needed | Checks history sufficiency, selects method, maps prediction intervals to operational thresholds |
+| peer-reviewer | Results or findings have substantive content | Scores 5 dimensions, cites exact text for every issue, enforces MECE check for INVESTIGATE |
+| reproducibility-keeper ⚡ | Reproducibility section empty at INVESTIGATE→EVOLVE | Packages queries, snapshots, environment, and step-by-step reproduction instructions |
+
+### VOICE stage — Communicate findings
+
+| Agent | When to use | What it does |
+|-------|-------------|-------------|
+| chart-recommender | Findings present but no visualization guidance | Matches data structure to chart type, enforces finding-as-title rule, matches tool to config |
+| dashboard-designer | Multiple layered metrics need ongoing monitoring | Designs KPI tree dashboard with drill-down logic and alert definitions sourced from config |
+| narrative-agent | Audience-specific Messages section empty | Crafts stakeholder-specific messages with quantified impact, one ask, and anticipated objection |
+| exec-summarizer | Executive Summary is empty or generic | Produces 1-page summary: impact → finding → recommendation → risk → decision requested |
+| decision-memo-writer | Recommendation ready to formalize | Creates decision document with "We will NOT" alternatives, success criteria, and review triggers |
+| peer-reviewer | Findings have content ready for external review | Reviews VOICE stage: So What quantification, Now What concreteness, limitations prominence |
+
+### EVOLVE stage — Institutionalize learning
+
+| Agent | When to use | What it does |
+|-------|-------------|-------------|
+| metric-definer | New metric proposed in analysis | Formalizes with STEDII framework: formula, edge cases, counter-metric, config.md entry |
+| semantic-layer-engineer | Metric finalized and needs to be standardized | Generates dbt/LookML/Cube definition with breaking change assessment and rollout plan |
+| dre-agent | Monitoring Setup section empty | Designs SLO, alert routing, regression safeguard, and investigation runbook with specific SQL |
+| data-product-manager | Reusable dataset or metric created | Plans data product: contract, SLA, adoption tracking, roadmap, and deprecation trigger |
+| governance-steward | New metric or terminology introduced | Updates GLOSSARY.md, assigns named owners, defines access control, sets change management |
+| reproducibility-keeper ⚡ | EVOLVE transition | Verifies full reproducibility package before archiving |
+
+### CROSS-stage (any)
+
+| Agent | When to use | What it does |
+|-------|-------------|-------------|
+| ethics-guard ⚡ | PII keywords detected or Modeling fairness trigger | Audits PII (including quasi-identifiers), analytical bias, and compliance (GDPR/PIPA/HIPAA) |
 
 ---
 
@@ -117,6 +168,29 @@ Every agent appends to the current stage file:
 > Next: {suggested action}
 ---
 ```
+
+---
+
+## Quick help by task
+
+| If you want to... | Run |
+|------------------|-----|
+| Turn a vague question into a crisp one | `/analysis-agent problem-framer` |
+| Define a metric with a formula | `/analysis-agent metric-translator` |
+| Build a hypothesis tree | `/analysis-agent hypothesis-gen` |
+| Map hypotheses to data sources | `/analysis-agent data-scout` |
+| Check tracking quality | `/analysis-agent tracking-auditor` |
+| Write SQL query templates | `/analysis-agent sql-writer` |
+| Run exploratory data analysis | `/analysis-agent eda-agent` |
+| Design an A/B test | `/analysis-agent experiment-designer` |
+| Check statistical rigor | `/analysis-agent stats-agent` |
+| Get a peer review of findings | `/analysis-agent peer-reviewer` |
+| Build stakeholder-specific messages | `/analysis-agent narrative-agent` |
+| Write a 1-page executive summary | `/analysis-agent exec-summarizer` |
+| Formalize a metric with STEDII | `/analysis-agent metric-definer` |
+| Set up monitoring and alerts | `/analysis-agent dre-agent` |
+| Check for privacy / ethics risks | `/analysis-agent ethics-guard` |
+| Package analysis for reproducibility | `/analysis-agent reproducibility-keeper` |
 
 ---
 

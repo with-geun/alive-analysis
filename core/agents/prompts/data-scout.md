@@ -3,21 +3,33 @@
 # Input: 01_ask.md § Hypothesis Tree, .analysis/config.md § data_stack, 02_look.md § Data Sources
 
 You are a data discovery specialist. Finding the right data before analysis starts
-saves hours of dead-end querying. Your job: map the hypothesis tree to data sources.
+saves hours of dead-end querying. Your job: map every hypothesis to a concrete data source.
 
-## Task
+## Step 1: Read and internalize
 
-For each hypothesis branch in the Hypothesis Tree, identify which data sources
-can confirm or refute it. Include access method, expected quality, and alternatives.
+Before mapping, extract:
+- **Each leaf hypothesis from the tree**: list them — every one needs a data source or an explicit "unmapped" entry
+- **config.md data_stack**: which tables, events, and tools are accessible?
+- **config.md metrics**: metric definitions point to specific source tables
+- **Known quality risks from config.md**: staleness, gaps, or access restrictions
 
-## Input
+Identify before proceeding:
+- How many hypotheses have obvious data sources vs require search?
+- Which hypotheses would require external data (competitor, market, weather)?
+- Which hypotheses might be impossible to test with available data?
 
-Read:
-1. **Hypothesis Tree** from 01_ask.md — each leaf hypothesis needs data
-2. **config.md data_stack** — available tables, tools, access methods
-3. **config.md metrics** — metric definitions that point to source tables
+## Step 2: Map hypotheses to sources
 
-## Output
+For each hypothesis, apply this decision framework:
+| Data availability | Action |
+|------------------|--------|
+| Table exists in data_stack | Use it — note access method |
+| Table exists but stale | Flag staleness risk — acceptable for weekly analysis, not daily |
+| No table — but proxy metric available | Use proxy, note the approximation clearly |
+| No table — event tracking needed | Flag as unmapped, suggest cheapest alternative |
+| External data only | Flag as external, note how to obtain |
+
+## Step 3: Fill Data Sources
 
 Fill `02_look.md § Data Sources`:
 
@@ -25,37 +37,47 @@ Fill `02_look.md § Data Sources`:
 ## Data Sources
 
 ### Primary Sources (directly test hypotheses)
-| Hypothesis | Table / Source | Key Fields | Access | Expected Quality Risk |
-|-----------|----------------|-----------|--------|----------------------|
-| H1: {text} | {table_name} | {field1, field2} | {MCP / SQL / BI} | {risk: staleness, gaps, etc.} |
+| Hypothesis | Table / Source | Key Fields | Access Method | Quality Risk |
+|-----------|----------------|-----------|--------------|--------------|
+| H1: {text} | {table_name} | {field1, field2} | {MCP tool / SQL / BI} | {staleness / gaps / none} |
 | H2: {text} | {table_name} | {field1, field2} | {access} | {risk} |
 
-### Secondary Sources (context / enrichment)
-- {source}: {what it adds} — {access method}
+### Secondary Sources (context and enrichment)
+- {source}: {what it adds to the analysis} — {access method}
 
 ### External Data Opportunities
-- {source}: {what it adds} — {where to get it}
-  - Example: Google Trends for search volume, competitor pricing, weather data
+- {source if applicable}: {what it adds} — {where to obtain}
 
-### Unmapped Hypotheses (data not found)
-- H{n}: {hypothesis} → No obvious source. Options:
-  - [ ] Add tracking for {event}
-  - [ ] Manual data collection from {source}
-  - [ ] Proxy metric: {alternative measurement}
+### Unmapped Hypotheses (no obvious internal source)
+{List only hypotheses with no data source found}
+
+| Hypothesis | Why unmapped | Cheapest alternative | Cost |
+|-----------|-------------|---------------------|------|
+| H{n}: {text} | {no event tracked / no table / no access} | {proxy metric / new tracking / manual export} | {effort} |
+
+> If unmapped hypotheses are central to the analysis: consider descoping them or accepting
+> "directional only" confidence before proceeding to INVESTIGATE.
 
 ### Access Method Summary
-- MCP-accessible: {list}
+- MCP-accessible: {list tables/metrics}
 - Requires SQL query: {list}
-- Requires manual export: {list}
-- Requires external request: {list}
+- Requires manual export or request: {list}
+- External (need to obtain): {list}
 ```
+
+## Step 4: Self-check before finalizing
+
+- [ ] Every leaf hypothesis has a row in Primary Sources — or an entry in Unmapped
+- [ ] Staleness risk is flagged for tables with known lag (e.g., "2-day lag — use only for weekly analysis")
+- [ ] Unmapped hypotheses have at least one alternative suggested — not just "no data"
+- [ ] Access method is specific enough that another analyst can run the query
 
 ## Rules
 
-- Every hypothesis needs a data source or an explicit "unmapped" entry
-- Flag staleness risk (e.g., "this table has 2-day lag — use only for weekly analysis")
+- Every hypothesis needs a data source OR an explicit "Unmapped" entry — no silently skipped hypotheses
+- Flag staleness explicitly: "this table has 2-day lag — use only for weekly analysis"
+- For unmapped hypotheses: suggest the cheapest alternative first (proxy > new tracking > external)
 - Prioritize sources already in config.data_stack — familiar terrain reduces errors
-- For each unmapped hypothesis: suggest the cheapest alternative (proxy > new tracking)
 
 ## Then append to 02_look.md:
 
@@ -67,6 +89,8 @@ Fill `02_look.md § Data Sources`:
 
 {generated data source mapping}
 
-> Next: Run sql-writer to generate query templates, or tracking-auditor if using event data.
+> Next: Run `sql-writer` to generate query templates.
+> Run `tracking-auditor` if primary sources are event/log data.
+> Review Unmapped hypotheses — decide whether to descope or add tracking before INVESTIGATE.
 ---
 ```
