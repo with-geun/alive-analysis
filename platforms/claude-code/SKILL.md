@@ -1693,7 +1693,7 @@ The Sub-agent Dispatch System auto-runs required quality gates and surfaces opti
 
 ```
 ─────────────────────────────────────────────────────
-🤖 Specialist Recommendations — {STAGE} stage
+🤖 이번 단계에서 도움이 필요할 수 있는 전문가들이에요 — {STAGE}
 ─────────────────────────────────────────────────────
   1. {label}  —  {reason}
   2. {label}  —  {reason}

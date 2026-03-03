@@ -382,7 +382,7 @@ Apply routing rules from `core/agents/router.yml` for the new stage:
 If recommendations exist:
 ```
 ─────────────────────────────────────────────────────
-🤖 Specialist Recommendations — {NEW STAGE} stage
+🤖 이번 단계에서 도움이 필요할 수 있는 전문가들이에요 — {NEW STAGE}
 ─────────────────────────────────────────────────────
   1. {label}  —  {reason}
   2. {label}  —  {reason}
