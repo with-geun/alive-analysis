@@ -1,0 +1,372 @@
+# Agent Router — alive-analysis Sub-agent Dispatch System
+# version: 2.0.0 — Full catalog routing (31 agents)
+# Deterministic rules-based router. No ML. Pure signal matching + scoring.
+
+version: 2
+
+# ─── Global settings ───────────────────────────────────────────────────────────
+top_k: 3               # max optional recommendations shown in one block
+max_recos_per_stage: 3
+min_score_threshold: 60
+
+# ─── Suppression policy ────────────────────────────────────────────────────────
+suppression:
+  same_agent_same_stage: true
+  unless_content_changed: true  # re-enable if ≥30% new content detected
+  remember_in: ".analysis/agent-state.md"
+
+# ─── Merge / ordering policy ───────────────────────────────────────────────────
+merge:
+  ordering: "required-gates first, then score desc, then id asc"
+  dedup_headings: true
+
+# ─── Required gate definitions ─────────────────────────────────────────────────
+gates:
+  - agent: scope-guard
+    stage: [ask]
+    auto_run_when:
+      - pattern: "(그리고|또한|추가로|also|furthermore|게다가)"
+        source: user_message
+      - condition: "scope_section_empty AND problem_definition_filled"
+    config_override: "agents.scope_guard.auto_run"
+    default: false
+
+  - agent: data-quality-sentinel
+    stage: [look]
+    auto_run_when:
+      - condition: "transitioning_look_to_investigate AND data_quality_incomplete"
+      - pattern: "(결측|missing|NULL|오류|이상값|outlier)"
+        source: [user_message, stage_content]
+    config_override: "agents.data_quality_sentinel.auto_run"
+    default: false
+
+  - agent: ethics-guard
+    stage: [ask, look, investigate, voice, evolve]
+    auto_run_when:
+      - pattern: "(개인정보|주민번호|이름|전화번호|이메일|PII|personal.?data|생년월일|신용카드)"
+        source: [user_message, stage_content]
+      - condition: "config.ethics_guard.always_run == true"
+    config_override: "agents.ethics_guard.auto_run"
+    default: false
+
+  - agent: reproducibility-keeper
+    stage: [investigate, evolve]
+    auto_run_when:
+      - condition: "INVESTIGATE complete AND reproducibility section empty"
+      - condition: "transitioning to EVOLVE"
+    config_override: "agents.reproducibility_keeper.auto_run"
+    default: false
+
+# ─── Routing rules by stage ────────────────────────────────────────────────────
+# Scores are additive. Only top_k above min_score_threshold shown.
+# reason_template: shown in the recommendation block to the user.
+
+rules:
+
+  # ───── ASK ─────
+  ask:
+    - agent: problem-framer
+      base_score: 85
+      conditions:
+        - "problem_definition_vague_or_no_metric_mentioned"
+      bonus:
+        - +10: "user_message matches (뭔가|어떻게|goal|what should|어떤 문제)"
+        - +5: "Success Criteria empty"
+      reason_template: "문제 진술 모호 — 측정 가능한 분석 질문으로 재정의"
+
+    - agent: hypothesis-gen
+      base_score: 90
+      conditions:
+        - "hypothesis_tree_empty OR hypothesis_tree_placeholder_only"
+        - "problem_definition_filled"
+      bonus:
+        - +10: "user_message matches (왜|why|원인|가설|hypothesis)"
+      reason_template: "가설 트리 비어있음 — 문제 진술 기반 자동 생성"
+
+    - agent: metric-translator
+      base_score: 80
+      conditions:
+        - "success_criteria_mentions_vague_verb"   # improve, increase, decrease without metric
+      bonus:
+        - +10: "user_message matches (지표|metric|KPI|어떻게 측정|성공기준)"
+        - +5: "data_sources_empty"
+      reason_template: "성공 기준 모호 — KPI + 가드레일 지표로 변환"
+
+    - agent: scope-guard
+      base_score: 75
+      conditions:
+        - "scope_section_empty"
+      bonus:
+        - +15: "problem_definition_has_2plus_question_marks"
+        - +10: "user_message matches (그리고|또한|추가로)"
+      reason_template: "Scope 미정의 — 범위 명확화 필요"
+
+    - agent: ethics-guard
+      base_score: 65
+      conditions:
+        - "pii_keywords_detected"
+      reason_template: "개인정보/민감 데이터 신호 감지"
+
+  # ───── LOOK ─────
+  look:
+    - agent: data-scout
+      base_score: 90
+      conditions:
+        - "data_sources_empty OR only_placeholder"
+      bonus:
+        - +10: "hypothesis_tree_filled"
+        - +5: "user_message matches (어디서|테이블|소스|data|table|log)"
+      reason_template: "데이터소스 미정의 — 가설 기반 관련 소스 추천"
+
+    - agent: sql-writer
+      base_score: 85
+      conditions:
+        - "data_sources_filled"
+        - "no_sql_in_assets"
+      bonus:
+        - +10: "hypothesis_tree_filled"
+        - +5: "user_message matches (쿼리|sql|query|데이터 뽑)"
+      reason_template: "데이터소스 확인됨 — 가설별 쿼리 초안 생성"
+
+    - agent: data-quality-sentinel
+      base_score: 80
+      conditions:
+        - "data_quality_review_incomplete"
+      bonus:
+        - +15: "transitioning_to_investigate"
+        - +10: "quality_risk_keywords_in_content"
+      reason_template: "Data Quality 미완성 — INVESTIGATE 전 필수 점검"
+
+    - agent: tracking-auditor
+      base_score: 75
+      conditions:
+        - "data_sources_includes_event_logs_or_clickstream"
+      bonus:
+        - +10: "user_message matches (트래킹|tracking|이벤트|event|로깅)"
+        - +5: "stage_content mentions session OR click OR funnel"
+      reason_template: "이벤트 데이터 사용 — 트래킹 스키마 감사 권장"
+
+    - agent: sampling-designer
+      base_score: 70
+      conditions:
+        - "sampling_section_empty"
+        - "segmentation_has_comparison_groups"
+      bonus:
+        - +10: "user_message matches (샘플|sample|단위|기간|몇 명|how many)"
+      reason_template: "분석 단위 미정의 — 샘플링 전략 설계"
+
+    - agent: lineage-mapper
+      base_score: 65
+      conditions:
+        - "data_sources_has_multiple_tables_for_same_metric"
+      bonus:
+        - +15: "config_has_data_warehouse_layer"
+        - +10: "user_message matches (lineage|리니지|dbt|mart|정의가 다르)"
+      reason_template: "다중 소스 동일 지표 — 계보 매핑으로 정의 충돌 확인"
+
+    - agent: ethics-guard
+      base_score: 65
+      conditions:
+        - "pii_keywords_detected"
+      reason_template: "개인정보/민감 데이터 신호 감지"
+
+  # ───── INVESTIGATE ─────
+  investigate:
+    - agent: eda-agent
+      base_score: 85
+      conditions:
+        - "hypothesis_scorecard_has_entries"
+        - "results_section_empty"
+      bonus:
+        - +10: "user_message matches (EDA|탐색|분포|추이|패턴|어떻게 생겼)"
+      reason_template: "가설 검증 전 — EDA로 데이터 전체 구조 파악"
+
+    - agent: stats-agent
+      base_score: 90
+      conditions:
+        - "hypothesis_scorecard_has_entries"
+      bonus:
+        - +10: "causation_section_present"
+        - +10: "user_message matches (통계|유의|p-value|검정|significance)"
+        - +10: "analysis_type is experiment"
+      reason_template: "가설 검증 중 — 통계 방법론 및 유의성 검토"
+
+    - agent: experiment-designer
+      base_score: 85
+      conditions:
+        - "analysis_type is experiment OR causation_section_mentions_experiment"
+      bonus:
+        - +15: "user_message matches (A/B|실험|experiment|randomiz|대조군)"
+      reason_template: "실험 설계 — 무작위 배정 + SRM + 중단 규칙"
+
+    - agent: causal-agent
+      base_score: 80
+      conditions:
+        - "causation_section_claims_causal"
+        - "no_experiment_available"
+      bonus:
+        - +10: "user_message matches (인과|causal|confound|DID|RDD|IV)"
+      reason_template: "인과 주장 + 실험 없음 — 준실험 방법론 설계"
+
+    - agent: root-cause-analyst
+      base_score: 75
+      conditions:
+        - "analysis_type is Investigation"
+        - "multiple_open_hypotheses_in_scorecard"
+      bonus:
+        - +15: "user_message matches (근본원인|root cause|RCA|5why|fishbone)"
+      reason_template: "다중 가설 열려있음 — 근본 원인 트리 구성"
+
+    - agent: anomaly-detector
+      base_score: 75
+      conditions:
+        - "initial_observations_mentions_spike_or_sudden_change"
+      bonus:
+        - +15: "user_message matches (이상|anomaly|spike|급변|갑자기|change point)"
+      reason_template: "급변/이상값 감지 — 변화점 분석 및 원인 경로 제안"
+
+    - agent: ml-agent
+      base_score: 85
+      conditions:
+        - "analysis_type is Modeling"
+      bonus:
+        - +10: "user_message matches (ML|머신러닝|모델|예측|분류)"
+      reason_template: "Modeling 타입 — ML 파이프라인 설계"
+
+    - agent: forecast-agent
+      base_score: 80
+      conditions:
+        - "data_sources_includes_time_series"
+      bonus:
+        - +15: "user_message matches (예측|forecast|시계열|수요|demand)"
+      reason_template: "시계열 데이터 — 예측 모델링 접근법 설계"
+
+    - agent: peer-reviewer
+      base_score: 75
+      conditions:
+        - "results_section_has_content"
+      bonus:
+        - +10: "confidence_levels_assigned"
+        - +15: "user_message matches (리뷰|review|검토|피드백|맞아)"
+      reason_template: "결과 도출 완료 — 시니어 관점 비판적 검토"
+
+    - agent: data-quality-sentinel
+      base_score: 65
+      conditions:
+        - "sentinel_not_run_yet"
+      reason_template: "데이터 품질 점검 미완료"
+
+  # ───── VOICE ─────
+  voice:
+    - agent: exec-summarizer
+      base_score: 90
+      conditions:
+        - "executive_summary_empty_or_generic"
+      bonus:
+        - +10: "user_message matches (요약|summary|1페이지|tldr|경영진|임원)"
+      reason_template: "Executive Summary 미완성 — 1페이지 경영진 요약 생성"
+
+    - agent: narrative-agent
+      base_score: 85
+      conditions:
+        - "so_what_section_filled"
+        - "audience_messages_empty_or_placeholder"
+      bonus:
+        - +10: "config_has_stakeholders_defined"
+        - +5: "user_message matches (경영진|PM|팀장|audience|보고)"
+      reason_template: "So What 완성 — 청중별 메시지 변환"
+
+    - agent: chart-recommender
+      base_score: 80
+      conditions:
+        - "findings_present"
+        - "no_visualization_recommendations"
+      bonus:
+        - +10: "user_message matches (차트|chart|시각화|그래프|how to present)"
+      reason_template: "시각화 미설계 — 데이터 구조 기반 차트 추천"
+
+    - agent: peer-reviewer
+      base_score: 80
+      conditions:
+        - "recommendations_present"
+      bonus:
+        - +15: "user_message matches (리뷰|review|검토|피드백)"
+      reason_template: "권고안 도출됨 — 논리 일관성 + 설득력 검토"
+
+    - agent: decision-memo-writer
+      base_score: 75
+      conditions:
+        - "recommendations_present"
+      bonus:
+        - +15: "user_message matches (의사결정|decision|ADR|결정문서|승인|decide)"
+      reason_template: "권고안 → 구조화된 의사결정 문서 작성"
+
+    - agent: dashboard-designer
+      base_score: 65
+      conditions:
+        - "findings_include_multiple_layered_metrics"
+      bonus:
+        - +15: "user_message matches (대시보드|dashboard|KPI트리|drill|레이아웃)"
+      reason_template: "다층 지표 발견 — KPI 트리 대시보드 설계"
+
+    - agent: ethics-guard
+      base_score: 65
+      conditions:
+        - "limitations_section_empty"
+      reason_template: "Limitations 미작성 — 윤리/리스크 점검 권장"
+
+  # ───── EVOLVE ─────
+  evolve:
+    - agent: metric-definer
+      base_score: 90
+      conditions:
+        - "proposed_new_metrics_has_content"
+      bonus:
+        - +10: "user_message matches (지표|metric|KPI|STEDII|새로운 지표|define)"
+      reason_template: "신규 지표 제안됨 — STEDII 정의 워크플로우"
+
+    - agent: dre-agent
+      base_score: 85
+      conditions:
+        - "monitoring_setup_empty"
+      bonus:
+        - +10: "proposed_new_metrics_finalized"
+        - +10: "user_message matches (SLO|모니터링|alert|알림|회귀|data quality)"
+      reason_template: "모니터링 미설정 — 데이터 SLO + 알림 설계"
+
+    - agent: peer-reviewer
+      base_score: 80
+      conditions:
+        - "conclusion_robustness_check_empty"
+      reason_template: "결론 강건성 미검토 — 반증 가능성 점검"
+
+    - agent: governance-steward
+      base_score: 75
+      conditions:
+        - "new_metric_or_terminology_introduced"
+      bonus:
+        - +10: "user_message matches (거버넌스|governance|소유권|ownership|용어|컴플라이언스)"
+      reason_template: "신규 개념 도입 — 소유권 + 용어 표준화"
+
+    - agent: semantic-layer-engineer
+      base_score: 70
+      conditions:
+        - "metric_definition_finalized"
+        - "config_has_data_warehouse"
+      bonus:
+        - +15: "user_message matches (시맨틱|semantic|SSoT|dbt|단일진실|표준화)"
+      reason_template: "지표 정의 완료 — 시맨틱 레이어 표준화"
+
+    - agent: data-product-manager
+      base_score: 65
+      conditions:
+        - "analysis_produced_reusable_dataset_or_metric"
+      bonus:
+        - +15: "user_message matches (데이터제품|data product|SLA|채택|로드맵)"
+      reason_template: "재사용 가능 데이터 생성 — 데이터 제품 관리 체계"
+
+    - agent: ethics-guard
+      base_score: 60
+      conditions:
+        - "pii_keywords_detected"
+      reason_template: "개인정보 리스크 미검토"

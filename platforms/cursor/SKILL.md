@@ -268,6 +268,24 @@ Track deployed ML models in `.analysis/models/{model-slug}_v{version}.md`. Each 
 
 ---
 
+## Sub-agent Dispatch
+
+Specialist agents auto-run or surface recommendations at each ALIVE stage.
+
+**Commands:**
+- `/analysis-agent` — Show specialist recommendations for current stage
+- `/analysis-agent {number}` — Run a recommended agent directly (e.g., `/analysis-agent 1`)
+- `/analysis-agent "{alias}"` — Run by alias (e.g., `/analysis-agent "통계"`, `/analysis-agent "sql"`)
+
+**Behavior:**
+- Required gates (⚡) auto-run without confirmation: `scope-guard`, `data-quality-sentinel`, `ethics-guard`, `reproducibility-keeper`
+- Optional specialists shown as numbered list (max 3); run after single confirmation
+- Configure in `.analysis/agents.yml` (copy from `core/config/agents.yml`)
+
+> See `core/agents/registry.yml` for full agent catalog (31 agents). See `platforms/cursor/rules/alive-agents.mdc` for dispatch protocol.
+
+---
+
 ## Education Mode
 
 Structured learning for the ALIVE methodology through guided scenarios.

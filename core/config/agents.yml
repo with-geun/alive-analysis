@@ -1,0 +1,190 @@
+# alive-analysis Agent Config — User Overrides
+# Copy to .analysis/agents.yml in your project to customize.
+# All settings here override defaults in core/agents/registry.yml and router.yml.
+
+# ─── Global ──────────────────────────────────────────────────────────────────
+global:
+  enabled: true                 # false = disable all sub-agent features entirely
+  verbosity: normal             # normal | quiet | verbose
+  max_recos_per_stage: 3        # max optional recommendations per /analysis-next
+  ask_confirmation: true        # false = auto-run all recommendations silently
+
+# ─── Required Gates (auto-run, no user confirmation) ─────────────────────────
+# Enabled gates auto-run when their signals fire.
+# auto_run: true = always run (signal-independent, every stage transition).
+
+gates:
+  scope_guard:
+    enabled: true
+    auto_run: false             # true = always run in ASK
+
+  data_quality_sentinel:
+    enabled: true
+    auto_run: false             # true = always run at LOOK→INVESTIGATE
+
+  ethics_guard:
+    enabled: true
+    auto_run: false             # true = run every stage (recommended for PII/healthcare/HR)
+
+  reproducibility_keeper:
+    enabled: true
+    auto_run: false             # true = always run at INVESTIGATE→EVOLVE
+
+# ─── Optional Agents (shown in recommendation block) ─────────────────────────
+# enabled: false → agent never appears in recommendations
+# always_run: true → auto-run without asking (still toggleable)
+
+agents:
+
+  # ASK
+  problem_framer:
+    enabled: true
+    always_run: false
+
+  hypothesis_gen:
+    enabled: true
+    always_run: false
+
+  metric_translator:
+    enabled: true
+    always_run: false
+
+  # LOOK
+  data_scout:
+    enabled: true
+    always_run: false
+
+  tracking_auditor:
+    enabled: true
+    always_run: false
+
+  lineage_mapper:
+    enabled: true
+    always_run: false
+
+  sampling_designer:
+    enabled: true
+    always_run: false
+
+  sql_writer:
+    enabled: true
+    always_run: false
+    dialect: auto               # auto | bigquery | postgres | snowflake | spark | mysql
+
+  # INVESTIGATE
+  eda_agent:
+    enabled: true
+    always_run: false
+
+  stats_agent:
+    enabled: true
+    always_run: false
+
+  experiment_designer:
+    enabled: true
+    always_run: false
+
+  causal_agent:
+    enabled: true
+    always_run: false
+
+  root_cause_analyst:
+    enabled: true
+    always_run: false
+
+  ml_agent:
+    enabled: true
+    always_run: false
+
+  forecast_agent:
+    enabled: true
+    always_run: false
+
+  anomaly_detector:
+    enabled: true
+    always_run: false
+
+  # VOICE
+  chart_recommender:
+    enabled: true
+    always_run: false
+
+  dashboard_designer:
+    enabled: true
+    always_run: false
+
+  narrative_agent:
+    enabled: true
+    always_run: false
+
+  exec_summarizer:
+    enabled: true
+    always_run: false
+
+  decision_memo_writer:
+    enabled: true
+    always_run: false
+
+  # EVOLVE
+  metric_definer:
+    enabled: true
+    always_run: false
+
+  semantic_layer_engineer:
+    enabled: true
+    always_run: false
+
+  dre_agent:
+    enabled: true
+    always_run: false
+
+  data_product_manager:
+    enabled: true
+    always_run: false
+
+  governance_steward:
+    enabled: true
+    always_run: false
+
+  # CROSS-CUTTING
+  peer_reviewer:
+    enabled: true
+    always_run: false
+    strictness: balanced        # lenient | balanced | strict
+
+# ─── Per-stage max recommendations ───────────────────────────────────────────
+stages:
+  ask:
+    max_recos: 2
+  look:
+    max_recos: 3
+  investigate:
+    max_recos: 3
+  voice:
+    max_recos: 2
+  evolve:
+    max_recos: 2
+
+# ─── Example: Power user preset (uncomment to activate) ──────────────────────
+# global:
+#   ask_confirmation: false    # auto-run everything
+# gates:
+#   ethics_guard:
+#     auto_run: true           # always check ethics
+#   reproducibility_keeper:
+#     auto_run: true           # always package reproducibility
+
+# ─── Example: Minimal preset (uncomment for lean workflow) ───────────────────
+# global:
+#   max_recos_per_stage: 1     # only top-1 recommendation
+# agents:
+#   tracking_auditor:
+#     enabled: false           # skip if no event data
+#   lineage_mapper:
+#     enabled: false           # skip if simple data stack
+#   dashboard_designer:
+#     enabled: false           # skip if no dashboard needed
+#   semantic_layer_engineer:
+#     enabled: false           # skip if no semantic layer
+#   data_product_manager:
+#     enabled: false           # skip if one-off analysis

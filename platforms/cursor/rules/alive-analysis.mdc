@@ -21,7 +21,8 @@ You have access to the alive-analysis workflow kit. This provides structured dat
 | `/analysis-init` | Initialize alive-analysis in this project |
 | `/analysis-new` | Start a new analysis (Full or Quick) |
 | `/analysis-status` | Show current analysis dashboard |
-| `/analysis-next` | Advance to the next ALIVE stage |
+| `/analysis-next` | Advance to the next ALIVE stage (includes sub-agent dispatch) |
+| `/analysis-agent` | Run specialist sub-agents for the current stage |
 | `/analysis-archive` | Archive a completed analysis |
 | `/analysis-list` | List all analyses (active + archived) |
 | `/analysis-promote` | Promote Quick to Full |

@@ -1,0 +1,627 @@
+# Agent Registry — alive-analysis Sub-agent Dispatch System
+# version: 2.0.0 — Full catalog (31 agents)
+# Types: optional | required-gate
+#   required-gate: auto-runs when signals match (no user confirmation)
+#   optional: shown in recommendation block (user confirms)
+# suppress_after: times to suppress same agent in same stage (999 = never suppress)
+
+agents:
+
+  # ═══════════════════════════════════════════════════════
+  # ASK STAGE
+  # ═══════════════════════════════════════════════════════
+
+  - id: problem-framer
+    label: "Problem Framer"
+    aliases: ["문제정의", "problem", "framing", "재정의", "목표", "KPI설정", "question"]
+    stage: [ask]
+    type: optional
+    description: >
+      모호한 문제 진술 → 측정 가능한 분석 질문으로 재정의.
+      목표, 제약, 성공 기준을 명확히 하고 framing 타입(causation/correlation/comparison/evaluation)을 확정.
+    signals:
+      - "Problem Definition vague or generic (no specific metric or decision mentioned)"
+      - "user_message matches: 왜|어떻게|뭔가|문제|goal|목표가 뭔지|what should we analyze"
+    input_contract:
+      reads: ["01_ask.md § Problem Definition", "01_ask.md § Framing", ".analysis/config.md"]
+    output_contract:
+      section_header: "### 🔧 Sub-agent: problem-framer"
+      writes_to: "01_ask.md § Problem Definition + Framing (refined)"
+    suppress_after: 1
+
+  - id: hypothesis-gen
+    label: "Hypothesis Generator"
+    aliases: ["가설", "가설트리", "hypothesis", "원인", "why", "tree", "왜"]
+    stage: [ask]
+    type: optional
+    description: >
+      문제 진술 → Internal / External / Data-artifact 3-레이어 가설 트리 생성.
+      검증 우선순위(easy-to-disprove first)와 반증 조건 포함.
+    signals:
+      - "Hypothesis Tree empty or placeholder only"
+      - "Problem Definition filled with at least one sentence"
+      - "user_message matches: 왜|why|원인|가설|hypothesis|tree"
+    input_contract:
+      reads: ["01_ask.md § Problem Definition", "01_ask.md § Framing", ".analysis/config.md"]
+    output_contract:
+      section_header: "### 🔧 Sub-agent: hypothesis-gen"
+      writes_to: "01_ask.md § Hypothesis Tree"
+    suppress_after: 1
+
+  - id: scope-guard
+    label: "Scope Guard"
+    aliases: ["스코프", "scope", "범위", "토끼굴", "rabbit hole", "scope creep", "우선순위"]
+    stage: [ask]
+    type: required-gate
+    description: >
+      ASK 단계 스코프 폭발 신호 탐지 → Scope 섹션 재조정.
+      복수 질문 혼재, "그리고/also" 패턴 반복 시 자동 실행.
+    signals:
+      - "Scope section empty"
+      - "Problem Definition contains 2+ distinct questions"
+      - "user_message matches: 그리고|또한|추가로|also|furthermore|게다가"
+    gates:
+      auto_run_when:
+        - signal: "Scope empty AND Problem Definition filled"
+        - signal: "scope explosion patterns in user_message"
+    input_contract:
+      reads: ["01_ask.md § Problem Definition", "01_ask.md § Scope"]
+    output_contract:
+      section_header: "### 🔧 Sub-agent: scope-guard"
+      writes_to: "01_ask.md § Scope"
+    suppress_after: 1
+
+  - id: metric-translator
+    label: "Metric Translator"
+    aliases: ["지표", "metric", "KPI", "지표정의", "측정", "guardrail", "세그먼트", "measurement"]
+    stage: [ask]
+    type: optional
+    description: >
+      모호한 목표 → 구체적 KPI + 가드레일 지표 + 핵심 세그먼트로 변환.
+      config.md의 기존 지표와 충돌/중복 여부 확인.
+    signals:
+      - "Success Criteria vague or mentions 'improve', 'increase', 'decrease' without metrics"
+      - "Data Sources section empty"
+      - "user_message matches: 지표|metric|KPI|어떻게 측정|how do we measure|성공기준"
+    input_contract:
+      reads: ["01_ask.md § Success Criteria", "01_ask.md § Framing", ".analysis/config.md § metrics"]
+    output_contract:
+      section_header: "### 🔧 Sub-agent: metric-translator"
+      writes_to: "01_ask.md § Success Criteria (with KPI definition)"
+    suppress_after: 1
+
+  # ═══════════════════════════════════════════════════════
+  # LOOK STAGE
+  # ═══════════════════════════════════════════════════════
+
+  - id: data-scout
+    label: "Data Scout"
+    aliases: ["데이터소스", "data source", "테이블", "table", "로그", "log", "어디서", "scout"]
+    stage: [look]
+    type: optional
+    description: >
+      가설 트리 + config.md data_stack → 관련 테이블/로그/외부 데이터 추천.
+      접근 방법, 예상 품질 이슈, 대체 소스 포함.
+    signals:
+      - "Data Sources section empty or incomplete"
+      - "Hypothesis Tree has entries"
+      - "user_message matches: 어디서|데이터|테이블|소스|data|table|log|which table"
+    input_contract:
+      reads: ["01_ask.md § Hypothesis Tree", ".analysis/config.md § data_stack", "02_look.md § Data Sources"]
+    output_contract:
+      section_header: "### 🔧 Sub-agent: data-scout"
+      writes_to: "02_look.md § Data Sources"
+    suppress_after: 1
+
+  - id: tracking-auditor
+    label: "Tracking Auditor"
+    aliases: ["트래킹", "tracking", "이벤트", "event", "schema", "스키마", "로깅", "logging", "instrumentation"]
+    stage: [look]
+    type: optional
+    description: >
+      이벤트/스키마 정의 감사 → 누락 필드, 버전 드리프트, 중복 이벤트 탐지.
+      트래킹 계획 문서 또는 config.md의 이벤트 목록 기반 감사.
+    signals:
+      - "Data Sources includes event logs or clickstream"
+      - "user_message matches: 트래킹|tracking|이벤트|event|로깅|logging|schema|스키마"
+      - "stage_content mentions: session, click, impression, pageview, funnel"
+    input_contract:
+      reads: ["02_look.md § Data Sources", ".analysis/config.md § data_stack", "assets/ (if tracking spec exists)"]
+    output_contract:
+      section_header: "### 🔧 Sub-agent: tracking-auditor"
+      writes_to: "02_look.md § Data Quality Review (tracking audit section)"
+    suppress_after: 1
+
+  - id: lineage-mapper
+    label: "Lineage Mapper"
+    aliases: ["lineage", "리니지", "계보", "mart", "dbt", "파이프라인", "pipeline", "transform", "정의충돌"]
+    stage: [look]
+    type: optional
+    description: >
+      지표 계보(source → transform → mart) 매핑 및 정의 충돌 탐지.
+      동일 지표가 여러 테이블에서 다르게 계산되는 경우를 식별.
+    signals:
+      - "Data Sources mentions multiple tables for same metric"
+      - "user_message matches: lineage|리니지|dbt|mart|파이프라인|정의가 다르|discrepancy"
+      - "config.data_stack has data warehouse layer"
+    input_contract:
+      reads: ["02_look.md § Data Sources", ".analysis/config.md § metrics + data_stack"]
+    output_contract:
+      section_header: "### 🔧 Sub-agent: lineage-mapper"
+      writes_to: "02_look.md § Data Sources (lineage section)"
+    suppress_after: 1
+
+  - id: sampling-designer
+    label: "Sampling Designer"
+    aliases: ["샘플링", "sampling", "단위", "unit of analysis", "필터", "filter", "모집단", "population"]
+    stage: [look]
+    type: optional
+    description: >
+      분석 단위(unit of analysis) 정의 및 샘플링/필터링 전략 설계.
+      샘플 크기, 기간, 계층화 방법, 편향 위험 포함.
+    signals:
+      - "Sampling section empty"
+      - "Segmentation section mentions comparison groups"
+      - "user_message matches: 샘플|sample|단위|unit|필터|filter|기간|period|몇 명|how many"
+    input_contract:
+      reads: ["02_look.md § Segmentation", "02_look.md § Sampling", "01_ask.md § Scope"]
+    output_contract:
+      section_header: "### 🔧 Sub-agent: sampling-designer"
+      writes_to: "02_look.md § Sampling"
+    suppress_after: 1
+
+  - id: sql-writer
+    label: "SQL / Query Writer"
+    aliases: ["쿼리", "sql", "query", "쿼리작성", "데이터추출", "extract", "bigquery", "spark", "snowflake"]
+    stage: [look]
+    type: optional
+    description: >
+      가설 트리 + 데이터소스 → 각 가설 검증용 SQL/쿼리 템플릿 생성.
+      assets/queries/에 파일 저장, 02_look.md에 참조 추가.
+    signals:
+      - "Data Sources filled"
+      - "Hypothesis Tree has entries"
+      - "No SQL files in assets/"
+      - "user_message matches: 쿼리|sql|query|데이터 뽑|extract|테이블|table"
+    input_contract:
+      reads: ["01_ask.md § Hypothesis Tree", "02_look.md § Data Sources", ".analysis/config.md § data_stack"]
+    output_contract:
+      section_header: "### 🔧 Sub-agent: sql-writer"
+      writes_to: "assets/queries/hypothesis-queries.sql (reference in 02_look.md)"
+    suppress_after: 1
+
+  - id: data-quality-sentinel
+    label: "Data Quality Sentinel"
+    aliases: ["데이터품질", "quality", "결측", "missing", "이상값", "outlier", "sentinel", "품질검사"]
+    stage: [look]
+    type: required-gate
+    description: >
+      LOOK→INVESTIGATE 전환 시 데이터 품질 체크리스트 검증.
+      결측, 중복, 이상값, 스키마 변경, 샘플링 편향 진단 및 Go/No-Go 판정.
+    signals:
+      - "Data Quality Review incomplete at LOOK→INVESTIGATE transition"
+      - "user_message or stage_content matches: 결측|missing|NULL|이상값|outlier|이상하다|품질"
+    gates:
+      auto_run_when:
+        - signal: "data quality checklist incomplete AND transitioning to INVESTIGATE"
+        - signal: "quality risk keywords detected"
+    input_contract:
+      reads: ["02_look.md § Data Quality Review", "02_look.md § Sampling", ".analysis/checklists/look.md"]
+    output_contract:
+      section_header: "### 🔧 Sub-agent: data-quality-sentinel"
+      writes_to: "02_look.md § Data Quality Review (sentinel verdict)"
+    suppress_after: 1
+
+  # ═══════════════════════════════════════════════════════
+  # INVESTIGATE STAGE
+  # ═══════════════════════════════════════════════════════
+
+  - id: eda-agent
+    label: "EDA Agent"
+    aliases: ["EDA", "탐색", "exploratory", "분포", "distribution", "시간추이", "trend", "세그먼트분석"]
+    stage: [investigate]
+    type: optional
+    description: >
+      탐색적 데이터 분석(EDA) 구조화.
+      분포, 세그먼트별 추이, 시계열 패턴, 아웃라이어 탐색 계획 제시.
+    signals:
+      - "Hypothesis Scorecard has entries but Results empty"
+      - "user_message matches: EDA|탐색|분포|distribution|추이|trend|패턴|pattern|어떻게 생겼|what does it look like"
+    input_contract:
+      reads: ["03_investigate.md § Hypothesis Scorecard", "02_look.md § Initial Observations"]
+    output_contract:
+      section_header: "### 🔧 Sub-agent: eda-agent"
+      writes_to: "03_investigate.md § EDA Plan (new subsection)"
+    suppress_after: 1
+
+  - id: stats-agent
+    label: "Stats Agent"
+    aliases: ["통계", "stats", "유의성", "significance", "p값", "p-value", "효과크기",
+              "effect size", "검정", "t-test", "anova", "chi-square", "bootstrap", "신뢰구간"]
+    stage: [investigate]
+    type: optional
+    description: >
+      통계 검정 설계, 샘플 크기 검증, 효과 크기 비즈니스 해석.
+      다중 비교(multiple comparison) 처리, 신뢰구간 안내 포함.
+    signals:
+      - "Hypothesis Scorecard has entries"
+      - "Causation vs Correlation section present"
+      - "user_message matches: 통계|유의|p-value|검정|significance|A/B|실험|effect"
+    input_contract:
+      reads: ["03_investigate.md § Hypothesis Scorecard", "03_investigate.md § Causation vs Correlation"]
+    output_contract:
+      section_header: "### 🔧 Sub-agent: stats-agent"
+      writes_to: "03_investigate.md § Statistical Validation (new subsection)"
+    suppress_after: 1
+
+  - id: experiment-designer
+    label: "Experiment Designer"
+    aliases: ["실험설계", "A/B", "AB test", "randomization", "SRM", "실험", "무작위", "대조군", "treatment"]
+    stage: [investigate]
+    type: optional
+    description: >
+      A/B 실험 설계: 무작위 배정, 가드레일 지표, SRM 감지, 중간 멈춤 규칙.
+      실험 타당성 및 오염(contamination) 위험 평가 포함.
+    signals:
+      - "analysis type is Experiment OR Causation section mentions experiment"
+      - "user_message matches: A/B|실험|experiment|randomiz|대조군|treatment|test group"
+    input_contract:
+      reads: ["01_ask.md § Hypothesis Tree", "03_investigate.md § Causation vs Correlation", ".analysis/config.md § metrics"]
+    output_contract:
+      section_header: "### 🔧 Sub-agent: experiment-designer"
+      writes_to: "03_investigate.md § Experiment Design (new subsection)"
+    suppress_after: 1
+
+  - id: causal-agent
+    label: "Causal Inference Agent"
+    aliases: ["인과", "causal", "causal inference", "confound", "교란변수", "준실험", "quasi", "DID", "RDD", "IV"]
+    stage: [investigate]
+    type: optional
+    description: >
+      인과 추론 접근법 설계: 교란변수 식별, 편향 점검, 준실험 방법론 선택.
+      DID / RDD / IV / Matching 중 적합한 방법 추천.
+    signals:
+      - "Causation vs Correlation section claims causal relationship"
+      - "No experiment available but causal claim needed"
+      - "user_message matches: 인과|causal|confound|교란|DID|RDD|IV|matching|propensity"
+    input_contract:
+      reads: ["03_investigate.md § Causation vs Correlation", "01_ask.md § Framing"]
+    output_contract:
+      section_header: "### 🔧 Sub-agent: causal-agent"
+      writes_to: "03_investigate.md § Causal Inference Design (new subsection)"
+    suppress_after: 1
+
+  - id: root-cause-analyst
+    label: "Root Cause Analyst"
+    aliases: ["근본원인", "root cause", "RCA", "원인분석", "5why", "fishbone", "원인트리"]
+    stage: [investigate]
+    type: optional
+    description: >
+      근본 원인 트리 구성 및 검증 계획 수립.
+      5-Why, 어골도(Fishbone), 기여도(Contribution) 분해 방법 안내.
+    signals:
+      - "analysis type is Investigation AND Hypothesis Scorecard has multiple open hypotheses"
+      - "user_message matches: 근본원인|root cause|왜 일어났|RCA|5why|fishbone|원인파악"
+    input_contract:
+      reads: ["01_ask.md § Hypothesis Tree", "03_investigate.md § Hypothesis Scorecard", "03_investigate.md § Results"]
+    output_contract:
+      section_header: "### 🔧 Sub-agent: root-cause-analyst"
+      writes_to: "03_investigate.md § Root Cause Analysis (new subsection)"
+    suppress_after: 1
+
+  - id: ml-agent
+    label: "ML / Modeling Agent"
+    aliases: ["ML", "머신러닝", "machine learning", "모델", "model", "prediction", "예측", "분류", "classification", "피처", "feature"]
+    stage: [investigate]
+    type: optional
+    description: >
+      ML 모델링 파이프라인 설계: 피처 엔지니어링, 검증 전략, 배포 고려사항.
+      분석 타입이 Modeling인 경우 자동 추천.
+    signals:
+      - "analysis type is Modeling (📈)"
+      - "user_message matches: ML|머신러닝|machine learning|모델|model|예측|predict|분류|classify"
+    input_contract:
+      reads: ["01_ask.md (Modeling template)", "02_look.md § Feature Exploration", ".analysis/config.md"]
+    output_contract:
+      section_header: "### 🔧 Sub-agent: ml-agent"
+      writes_to: "03_investigate.md § Model Selection + Validation"
+    suppress_after: 1
+
+  - id: forecast-agent
+    label: "Forecast Agent"
+    aliases: ["예측", "forecast", "시계열", "time series", "ARIMA", "prophet", "수요예측", "seasonality"]
+    stage: [investigate]
+    type: optional
+    description: >
+      시계열 예측 모델링: 계절성, 트렌드, 이상치 처리.
+      운영 의사결정에 연결된 예측 구간(prediction interval) 포함.
+    signals:
+      - "Data Sources includes time-series data (daily/weekly/monthly)"
+      - "user_message matches: 예측|forecast|시계열|time series|ARIMA|prophet|수요|demand"
+    input_contract:
+      reads: ["02_look.md § Data Sources", "01_ask.md § Scope", ".analysis/config.md § metrics"]
+    output_contract:
+      section_header: "### 🔧 Sub-agent: forecast-agent"
+      writes_to: "03_investigate.md § Forecasting Approach (new subsection)"
+    suppress_after: 1
+
+  - id: anomaly-detector
+    label: "Anomaly Detector"
+    aliases: ["이상탐지", "anomaly", "change point", "structural break", "급변", "갑자기", "스파이크", "spike"]
+    stage: [investigate]
+    type: optional
+    description: >
+      구조적 변화점(change point) 탐지 및 조사 경로 제안.
+      Spike, level shift, trend break 각각에 대한 원인 가설 자동 생성.
+    signals:
+      - "Initial Observations mentions sudden change, spike, or anomaly"
+      - "user_message matches: 이상|anomaly|spike|급변|갑자기|change point|구조적변화|break"
+    input_contract:
+      reads: ["02_look.md § Initial Observations", "02_look.md § Outliers & Anomalies", "01_ask.md § Hypothesis Tree"]
+    output_contract:
+      section_header: "### 🔧 Sub-agent: anomaly-detector"
+      writes_to: "03_investigate.md § Anomaly Investigation Plan (new subsection)"
+    suppress_after: 1
+
+  # ═══════════════════════════════════════════════════════
+  # VOICE STAGE
+  # ═══════════════════════════════════════════════════════
+
+  - id: chart-recommender
+    label: "Chart Recommender"
+    aliases: ["차트", "chart", "시각화", "visualization", "그래프", "graph", "어떤 차트", "plot"]
+    stage: [voice]
+    type: optional
+    description: >
+      데이터 구조 + 커뮤니케이션 목적 → 최적 시각화 유형 추천.
+      차트 선택 근거, 핵심 강조점, 안티패턴 경고 포함.
+    signals:
+      - "Findings present but no visualization recommendations"
+      - "user_message matches: 차트|chart|시각화|visualization|그래프|graph|어떻게 보여주|how to present"
+    input_contract:
+      reads: ["04_voice.md § So What → Now What", "03_investigate.md § Results"]
+    output_contract:
+      section_header: "### 🔧 Sub-agent: chart-recommender"
+      writes_to: "04_voice.md § Visualization Recommendations (new subsection)"
+    suppress_after: 1
+
+  - id: dashboard-designer
+    label: "Dashboard Designer"
+    aliases: ["대시보드", "dashboard", "KPI트리", "KPI tree", "drill-down", "레이아웃", "layout", "모니터링화면"]
+    stage: [voice]
+    type: optional
+    description: >
+      KPI 트리 기반 대시보드 레이아웃 설계.
+      드릴다운 로직, 갱신 주기, 이해관계자별 뷰 정의.
+    signals:
+      - "Evolve section mentions monitoring or dashboard setup"
+      - "Findings include multiple layered metrics"
+      - "user_message matches: 대시보드|dashboard|KPI트리|drill|레이아웃|모니터링 화면"
+    input_contract:
+      reads: ["04_voice.md § So What → Now What", ".analysis/config.md § metrics + stakeholders"]
+    output_contract:
+      section_header: "### 🔧 Sub-agent: dashboard-designer"
+      writes_to: "04_voice.md § Dashboard Design (new subsection)"
+    suppress_after: 1
+
+  - id: narrative-agent
+    label: "Narrative Agent"
+    aliases: ["서술", "narrative", "청중", "audience", "보고서", "스토리", "스토리텔링",
+              "경영진", "executive", "pm", "팀장", "메시지"]
+    stage: [voice]
+    type: optional
+    description: >
+      분석 결론 → 청중별 맞춤 메시지 변환.
+      config.md stakeholders 참조, 각 청중의 관심사·행동 유도점 기반 프레임 생성.
+    signals:
+      - "So What → Now What section filled"
+      - "Audience-specific Messages empty or placeholder"
+      - "user_message matches: 경영진|CEO|임원|PM|팀장|stakeholder|audience|보고"
+    input_contract:
+      reads: ["04_voice.md § So What → Now What", "04_voice.md § Recommendations", ".analysis/config.md § stakeholders"]
+    output_contract:
+      section_header: "### 🔧 Sub-agent: narrative-agent"
+      writes_to: "04_voice.md § Audience-specific Messages"
+    suppress_after: 1
+
+  - id: exec-summarizer
+    label: "Executive Summarizer"
+    aliases: ["요약", "executive summary", "1페이지", "one pager", "경영진보고", "임원", "tldr", "TL;DR"]
+    stage: [voice]
+    type: optional
+    description: >
+      1페이지 경영진 요약 생성: 임팩트, 리스크, 의사결정 요청.
+      3줄 Executive Summary + Key Findings + Recommendations + Ask.
+    signals:
+      - "Executive Summary section empty or generic"
+      - "user_message matches: 요약|summary|1페이지|one pager|tldr|경영진|임원|이사회|board"
+    input_contract:
+      reads: ["04_voice.md (all sections)", "03_investigate.md § Results"]
+    output_contract:
+      section_header: "### 🔧 Sub-agent: exec-summarizer"
+      writes_to: "04_voice.md § Executive Summary (refined)"
+    suppress_after: 1
+
+  - id: decision-memo-writer
+    label: "Decision Memo Writer"
+    aliases: ["의사결정", "decision memo", "ADR", "decision log", "결정문서", "기록", "결정근거"]
+    stage: [voice]
+    type: optional
+    description: >
+      분석 결론 → 구조화된 의사결정 문서(ADR 스타일) 작성.
+      결정 사항, 근거, 대안, 리스크, 의사결정자, 재검토 조건 포함.
+    signals:
+      - "Recommendations section has content"
+      - "user_message matches: 의사결정|decision|ADR|결정문서|기록|승인|approval|decide"
+    input_contract:
+      reads: ["04_voice.md § Recommendations", "04_voice.md § So What → Now What", "04_voice.md § Limitations"]
+    output_contract:
+      section_header: "### 🔧 Sub-agent: decision-memo-writer"
+      writes_to: ".analysis/decisions/{ID}-decision.md (reference added to 04_voice.md)"
+    suppress_after: 1
+
+  # ═══════════════════════════════════════════════════════
+  # EVOLVE STAGE
+  # ═══════════════════════════════════════════════════════
+
+  - id: metric-definer
+    label: "Metric Definer"
+    aliases: ["지표정의", "metric definition", "STEDII", "지표설계", "새지표", "new metric", "측정방법"]
+    stage: [evolve]
+    type: optional
+    description: >
+      신규 지표 정의 워크플로우: 정의, 경계 조건, 엣지 케이스, STEDII 검증.
+      config.md에 추가할 완성된 지표 정의 블록 생성.
+    signals:
+      - "Proposed New Metrics section has content or user mentioned needing a new metric"
+      - "user_message matches: 지표|metric|KPI|새로운 지표|STEDII|어떻게 측정|define"
+    input_contract:
+      reads: ["05_evolve.md § Proposed New Metrics", ".analysis/config.md § metrics"]
+    output_contract:
+      section_header: "### 🔧 Sub-agent: metric-definer"
+      writes_to: "05_evolve.md § Proposed New Metrics (formalized)"
+    suppress_after: 1
+
+  - id: semantic-layer-engineer
+    label: "Semantic Layer Engineer"
+    aliases: ["시맨틱", "semantic layer", "단일진실", "single source of truth", "SSoT", "dbt metrics", "표준화"]
+    stage: [evolve]
+    type: optional
+    description: >
+      지표/차원 정의 표준화 → 단일 진실(SSoT) 계층 구성 안내.
+      dbt metrics, LookML, Cube.js 등 시맨틱 레이어 패턴으로 변환.
+    signals:
+      - "Metric definition finalized"
+      - "config.data_stack has dbt or BI tool"
+      - "user_message matches: 시맨틱|semantic|SSoT|dbt|단일진실|표준화|standardize"
+    input_contract:
+      reads: ["05_evolve.md § Proposed New Metrics", ".analysis/config.md § data_stack + metrics"]
+    output_contract:
+      section_header: "### 🔧 Sub-agent: semantic-layer-engineer"
+      writes_to: "05_evolve.md § Semantic Layer Design (new subsection)"
+    suppress_after: 1
+
+  - id: dre-agent
+    label: "Data Reliability Engineer"
+    aliases: ["DRE", "SLO", "data SLO", "신뢰성", "reliability", "알림", "alert", "회귀", "regression", "모니터링설계"]
+    stage: [evolve]
+    type: optional
+    description: >
+      데이터 SLO 정의, 모니터링, 알림, 회귀 방지 안전장치 설계.
+      지표 이상 감지 조건, 에스컬레이션 경로, 재조사 트리거 포함.
+    signals:
+      - "Monitoring Setup section empty"
+      - "Proposed New Metrics finalized"
+      - "user_message matches: SLO|신뢰성|reliability|모니터링|alert|알림|회귀|regression|data quality"
+    input_contract:
+      reads: ["05_evolve.md § Monitoring Setup", ".analysis/config.md § metrics + data_stack"]
+    output_contract:
+      section_header: "### 🔧 Sub-agent: dre-agent"
+      writes_to: "05_evolve.md § Monitoring Setup (DRE plan)"
+    suppress_after: 1
+
+  - id: data-product-manager
+    label: "Data Product Manager"
+    aliases: ["데이터제품", "data product", "데이터셋", "dataset", "SLA", "로드맵", "adoption", "채택", "사용자"]
+    stage: [evolve]
+    type: optional
+    description: >
+      데이터셋/지표를 제품으로 관리: 사용자, SLA, 로드맵, 채택률 추적.
+      데이터 계약(data contract) 정의 포함.
+    signals:
+      - "analysis produced reusable dataset or metric"
+      - "user_message matches: 데이터제품|data product|SLA|채택|adoption|로드맵|roadmap|data contract"
+    input_contract:
+      reads: ["05_evolve.md § Knowledge Capture", ".analysis/config.md § stakeholders"]
+    output_contract:
+      section_header: "### 🔧 Sub-agent: data-product-manager"
+      writes_to: "05_evolve.md § Data Product Plan (new subsection)"
+    suppress_after: 1
+
+  - id: governance-steward
+    label: "Governance Steward"
+    aliases: ["거버넌스", "governance", "소유권", "ownership", "접근제어", "access control", "용어", "terminology", "컴플라이언스"]
+    stage: [evolve]
+    type: optional
+    description: >
+      용어 표준화, 소유권 명확화, 접근 제어, 컴플라이언스 정렬.
+      GLOSSARY.md 업데이트, 데이터 거버넌스 체크리스트 포함.
+    signals:
+      - "analysis introduces new terminology or metric with ownership unclear"
+      - "user_message matches: 거버넌스|governance|소유권|ownership|접근제어|용어|terminology|컴플라이언스"
+    input_contract:
+      reads: ["05_evolve.md § Proposed New Metrics", ".analysis/config.md", "GLOSSARY.md"]
+    output_contract:
+      section_header: "### 🔧 Sub-agent: governance-steward"
+      writes_to: "05_evolve.md § Governance Actions (new subsection)"
+    suppress_after: 1
+
+  # ═══════════════════════════════════════════════════════
+  # CROSS-CUTTING (all stages)
+  # ═══════════════════════════════════════════════════════
+
+  - id: peer-reviewer
+    label: "Peer Reviewer"
+    aliases: ["리뷰", "review", "비판", "검토", "devil", "시니어", "senior", "피드백", "feedback", "검증"]
+    stage: [investigate, voice]
+    type: optional
+    description: >
+      시니어 분석가 관점 구조화된 비판적 검토.
+      논리 비약, 대안 가설 미검토, 확증 편향, 스토리 일관성 점검.
+      점수(0-5) + 구체적 개선 포인트 + Devil's advocate 질문.
+    signals:
+      - "Results or Findings have substantial content"
+      - "Confidence levels assigned"
+      - "user_message matches: 리뷰|review|검토|피드백|맞아?|괜찮아?|검증|verify"
+    input_contract:
+      reads: ["current stage file (all sections)"]
+    output_contract:
+      section_header: "### 🔧 Sub-agent: peer-reviewer"
+      writes_to: "current stage file (appended review section)"
+    suppress_after: 1
+
+  - id: ethics-guard
+    label: "Ethics Guard"
+    aliases: ["윤리", "ethics", "PII", "개인정보", "편향", "bias", "컴플라이언스", "compliance", "fairness", "공정성", "IRB"]
+    stage: [ask, look, investigate, voice, evolve]
+    type: required-gate
+    description: >
+      PII / 편향 / 컴플라이언스 위험 신호 탐지 → 리스크 섹션 작성.
+      개인식별정보 키워드, Modeling 공정성 이슈, always_run 설정 시 발동.
+    signals:
+      - "user_message or stage_content matches PII keywords"
+      - "analysis type is Modeling with fairness implications"
+      - "config.ethics_guard.always_run == true"
+    gates:
+      auto_run_when:
+        - signal: "PII risk keywords: 개인정보|주민번호|이름|전화번호|이메일|PII|personal.?data|생년월일|신용카드"
+        - config: "always_run: true"
+    input_contract:
+      reads: ["current stage file", ".analysis/config.md"]
+    output_contract:
+      section_header: "### 🔧 Sub-agent: ethics-guard"
+      writes_to: "current stage file § Ethics & Compliance Risk"
+    suppress_after: 999
+
+  - id: reproducibility-keeper
+    label: "Reproducibility Keeper"
+    aliases: ["재현성", "reproducibility", "버전", "version", "스냅샷", "snapshot", "패키지", "package", "환경"]
+    stage: [investigate, evolve]
+    type: required-gate
+    description: >
+      분석 재현성 패키지화: 쿼리, 데이터 스냅샷, 환경 버전, 랜덤 시드 기록.
+      EVOLVE 단계 진입 또는 아카이브 시 자동 실행.
+    signals:
+      - "transitioning to EVOLVE stage"
+      - "Reproducibility section empty in INVESTIGATE"
+      - "user_message matches: 재현|reproducib|버전|version|환경|environment|package"
+    gates:
+      auto_run_when:
+        - signal: "INVESTIGATE complete AND Reproducibility section empty"
+        - signal: "transitioning to EVOLVE"
+    input_contract:
+      reads: ["03_investigate.md § Reproducibility", "assets/ folder"]
+    output_contract:
+      section_header: "### 🔧 Sub-agent: reproducibility-keeper"
+      writes_to: "03_investigate.md § Reproducibility (filled)"
+    suppress_after: 1

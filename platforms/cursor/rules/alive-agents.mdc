@@ -1,0 +1,133 @@
+---
+description: "Sub-agent Dispatch System for alive-analysis. Auto-triggers specialist recommendations at each ALIVE stage. Use when advancing stages, asking for help on a specific analysis task, or when specialist expertise is needed (statistics, data quality, narrative, ethics)."
+alwaysApply: false
+---
+
+# alive-analysis — Sub-agent Dispatch System
+
+This rule activates the Sub-agent Dispatch System on top of the base alive-analysis workflow.
+It mirrors the Claude Code behavior using the same `core/agents/registry.yml` and `router.yml`.
+
+---
+
+## When this rule applies
+
+Activate when:
+- User runs `/analysis-next` (stage transition)
+- User runs `/analysis-agent` (explicit specialist call)
+- User message matches agent aliases: "통계", "가설", "리뷰", "데이터품질", "쿼리", "서술", "윤리", "scope", "sql", "stats", "review", "narrative", "ethics"
+
+---
+
+## Sub-agent Dispatch Protocol
+
+### Step 1: Load config
+Read `.analysis/agents.yml` (project-local) or fall back to `core/config/agents.yml`.
+If `global.enabled: false` → skip all agent dispatch logic.
+
+### Step 2: Determine context
+- Current stage (from analysis folder: which .md files exist)
+- Current stage file content (all sections)
+- `.analysis/agent-state.md` suppression history (if exists)
+
+### Step 3: Evaluate gates
+Check gate conditions from `core/agents/router.yml`:
+
+| Gate | Trigger |
+|------|---------|
+| scope-guard | ASK + Scope empty + Problem Definition filled |
+| data-quality-sentinel | LOOK→INVESTIGATE transition + quality incomplete |
+| ethics-guard | PII keywords in any content |
+| reproducibility-keeper | INVESTIGATE→EVOLVE transition + reproducibility section empty |
+
+For each matching gate (if `enabled: true` in config):
+- Print: `[auto] Running {gate-id} — {reason}`
+- Apply the gate's prompt from `core/agents/prompts/{gate-id}.md`
+- Write output to current stage file
+
+### Step 4: Evaluate recommendations
+Apply routing rules from `core/agents/router.yml` for current stage.
+Score, suppress (agent-state.md), filter by config, take top 3.
+
+### Step 5: Show recommendation block
+```
+─────────────────────────────────────────────────────
+🤖 Specialist Recommendations — {STAGE} stage
+─────────────────────────────────────────────────────
+  1. {label}  —  {reason}
+  2. {label}  —  {reason}
+  3. {label}  —  {reason}
+─────────────────────────────────────────────────────
+Run? (1 / 2 / 3 / all / n)  →
+```
+Ask **at most one** confirmation question.
+
+### Step 6: Execute selected agents
+For each selected agent:
+1. Read `core/agents/prompts/{agent-id}.md`
+2. Apply the agent's task to the current analysis context
+3. Write output to the stage file (append `### 🔧 Sub-agent: {id}` section)
+4. Update `.analysis/agent-state.md`
+
+---
+
+## /analysis-agent command (Cursor)
+
+When user types `/analysis-agent`:
+
+**No argument** → evaluate router → show recommendation block (Step 4-5 above)
+
+**Number** (e.g., `/analysis-agent 1`) → run that recommended agent directly
+
+**Alias** (e.g., `/analysis-agent "통계"`) →
+- Match against aliases in `core/agents/registry.yml`
+- Run matched agent
+
+---
+
+## Agent reference (quick lookup)
+
+| Agent | Stage | Trigger | File |
+|-------|-------|---------|------|
+| hypothesis-gen | ASK | Hypothesis Tree empty | `core/agents/prompts/hypothesis-gen.md` |
+| scope-guard ⚡ | ASK | Scope empty / bundled questions | `core/agents/prompts/scope-guard.md` |
+| data-quality-sentinel ⚡ | LOOK | Quality incomplete / risk keywords | `core/agents/prompts/data-quality-sentinel.md` |
+| sql-writer | LOOK | Data sources set, no queries | `core/agents/prompts/sql-writer.md` |
+| stats-agent | INVESTIGATE | Hypothesis scorecard + causal claims | `core/agents/prompts/stats-agent.md` |
+| peer-reviewer | INVESTIGATE, VOICE | Results/findings have content | `core/agents/prompts/peer-reviewer.md` |
+| narrative-agent | VOICE | So What filled, audience messages empty | `core/agents/prompts/narrative-agent.md` |
+| ethics-guard ⚡ | any | PII keywords / always_run | `core/agents/prompts/ethics-guard.md` |
+| reproducibility-keeper ⚡ | INVESTIGATE, EVOLVE | Reproducibility section empty / EVOLVE transition | `core/agents/prompts/reproducibility-keeper.md` |
+
+⚡ = required gate (auto-runs without user confirmation when triggered)
+
+---
+
+## Output format (all agents)
+
+Every agent appends to the current stage file:
+```markdown
+---
+### 🔧 Sub-agent: {id}
+> Stage: {STAGE} | Triggered: {YYYY-MM-DD} | Reason: {signal}
+> Inputs: {files/sections}
+
+{agent output}
+
+> Next: {suggested action}
+---
+```
+
+---
+
+## State file: .analysis/agent-state.md
+
+Auto-managed. Records which agents ran, when, and content hash for suppression.
+Do not edit manually.
+
+```markdown
+# Agent State
+## {Analysis-ID}
+| Stage | Agent | Ran At | Content Hash | Status |
+|-------|-------|--------|-------------|--------|
+```

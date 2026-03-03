@@ -1,6 +1,7 @@
 # /analysis-next
 
 Advance the current analysis to the next ALIVE stage.
+Includes Sub-agent Dispatch: auto-runs required gates + shows specialist recommendations.
 
 ## Instructions
 
@@ -332,6 +333,76 @@ Strategy: Test the easiest-to-disprove hypotheses first.
 **EVOLVE reached** → Tell user:
 "This analysis is complete. Run `/analysis-archive` to archive it."
 
+### Step 4.5: Sub-agent Dispatch
+
+After generating the new stage file, run the Sub-agent Dispatch system.
+
+#### 4.5a — Load config and state
+1. Read `.analysis/agents.yml` (if exists) else `core/config/agents.yml`
+2. If `global.enabled: false` → skip entire Step 4.5
+3. Read `.analysis/agent-state.md` (suppression history)
+
+#### 4.5b — Auto-run required gates (no user confirmation)
+Evaluate gate conditions from `core/agents/router.yml` for the NEW stage:
+
+**scope-guard** (ASK stage only):
+- Auto-run if: Scope section empty AND Problem Definition has content
+- Auto-run if: user message contains scope-explosion patterns
+- Skip if: config `gates.scope_guard.enabled: false`
+
+**data-quality-sentinel** (LOOK→INVESTIGATE transition):
+- Auto-run if: Data Quality Review incomplete at LOOK→INVESTIGATE transition
+- Auto-run if: quality risk keywords in stage content
+- Skip if: config `gates.data_quality_sentinel.enabled: false`
+
+**ethics-guard** (any stage):
+- Auto-run if: PII keywords detected in user message or stage content
+- Auto-run if: config `gates.ethics_guard.always_run: true`
+- Skip if: config `gates.ethics_guard.enabled: false`
+
+**reproducibility-keeper** (INVESTIGATE→EVOLVE transition):
+- Auto-run if: Reproducibility section empty at INVESTIGATE→EVOLVE transition
+- Auto-run if: config `gates.reproducibility_keeper.auto_run: true`
+- Skip if: config `gates.reproducibility_keeper.enabled: false`
+
+For each gate that fires:
+- Print: `[auto] Running {gate-id} — {reason}`
+- Apply the gate's prompt from `core/agents/prompts/{gate-id}.md`
+- Write output to stage file
+- Update `.analysis/agent-state.md`
+
+#### 4.5c — Evaluate optional recommendations
+Apply routing rules from `core/agents/router.yml` for the new stage:
+1. Score all optional agents by matching conditions + bonuses
+2. Apply suppression (skip if same agent ran in this stage without content change)
+3. Apply user config (skip disabled agents)
+4. Take top_k (max 3, limited by stage config)
+
+#### 4.5d — Show recommendation block (at most one question)
+If recommendations exist:
+```
+─────────────────────────────────────────────────────
+🤖 Specialist Recommendations — {NEW STAGE} stage
+─────────────────────────────────────────────────────
+  1. {label}  —  {reason}
+  2. {label}  —  {reason}
+  3. {label}  —  {reason}
+─────────────────────────────────────────────────────
+Run? (1 / 2 / 3 / all / n)  →
+```
+
+- This is the **only** question asked beyond Step 2 (multiple analyses case)
+- If `ask_confirmation: false` in config → skip question, run all automatically
+- If user says n/no → proceed without running, no further questions
+- If user picks numbers: run those agents (parallel if multiple)
+- If no recommendations: skip this block entirely, proceed to Step 5
+
+#### 4.5e — Execute selected agents
+For each selected agent:
+1. Apply prompt from `core/agents/prompts/{agent-id}.md`
+2. Write output to stage file per agent's output_contract
+3. Update `.analysis/agent-state.md`
+
 ### Step 5: Update status.md
 
 Update the analysis row in `.analysis/status.md`:
@@ -343,5 +414,7 @@ Update the analysis row in `.analysis/status.md`:
 Tell the user:
 - Advanced from {old stage} to {new stage}
 - Show the new file path
+- If agents ran: list them with one-line summary of what they produced
 - Remind them to fill in the content and review the checklist
 - If VOICE: "After completing VOICE and EVOLVE, run `/analysis-archive`"
+- Tip: "Run `/analysis-agent` anytime for specialist help within this stage"

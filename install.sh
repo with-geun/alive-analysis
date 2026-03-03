@@ -188,6 +188,23 @@ if [ "$INSTALL_CLAUDE" = true ]; then
         echo -e "  ${GREEN}References copied${NC}"
     fi
 
+    # 6b. Copy sub-agent dispatch system
+    if [ -d "$SCRIPT_DIR/core/agents" ]; then
+        echo "Copying sub-agent dispatch system..."
+        mkdir -p .claude/skills/alive-analysis/core/agents/prompts
+        cp "$SCRIPT_DIR"/core/agents/registry.yml .claude/skills/alive-analysis/core/agents/ 2>/dev/null || true
+        cp "$SCRIPT_DIR"/core/agents/router.yml .claude/skills/alive-analysis/core/agents/ 2>/dev/null || true
+        cp "$SCRIPT_DIR"/core/agents/runtime.md .claude/skills/alive-analysis/core/agents/ 2>/dev/null || true
+        cp "$SCRIPT_DIR"/core/agents/prompts/*.md .claude/skills/alive-analysis/core/agents/prompts/ 2>/dev/null || true
+        echo -e "  ${GREEN}Sub-agent dispatch system copied${NC}"
+    fi
+
+    # 6c. Copy agent config (if user doesn't have one yet)
+    if [ -d "$SCRIPT_DIR/core/config" ]; then
+        mkdir -p .claude/skills/alive-analysis/core/config
+        cp "$SCRIPT_DIR"/core/config/agents.yml .claude/skills/alive-analysis/core/config/ 2>/dev/null || true
+    fi
+
     # 7. Copy education scenarios and templates
     if [ -d "$SCRIPT_DIR/core/education" ]; then
         echo "Copying education materials..."
@@ -265,10 +282,27 @@ if [ "$INSTALL_CURSOR" = true ]; then
         echo -e "  ${GREEN}hooks.json created (Cursor format)${NC}"
     fi
 
-    # Copy .mdc rule file
+    # Copy .mdc rule files (base + sub-agent dispatch)
     echo "Copying Cursor rules..."
     cp "$PLATFORM_DIR"/rules/alive-analysis.mdc .cursor/rules/
-    echo -e "  ${GREEN}Agent rule copied (.cursor/rules/alive-analysis.mdc)${NC}"
+    cp "$PLATFORM_DIR"/rules/alive-agents.mdc .cursor/rules/
+    echo -e "  ${GREEN}Agent rules copied (.cursor/rules/)${NC}"
+
+    # Copy sub-agent dispatch system for Cursor
+    if [ -d "$SCRIPT_DIR/core/agents" ]; then
+        echo "Copying sub-agent dispatch system..."
+        mkdir -p .cursor/skills/alive-analysis/core/agents/prompts
+        cp "$SCRIPT_DIR"/core/agents/registry.yml .cursor/skills/alive-analysis/core/agents/ 2>/dev/null || true
+        cp "$SCRIPT_DIR"/core/agents/router.yml .cursor/skills/alive-analysis/core/agents/ 2>/dev/null || true
+        cp "$SCRIPT_DIR"/core/agents/runtime.md .cursor/skills/alive-analysis/core/agents/ 2>/dev/null || true
+        cp "$SCRIPT_DIR"/core/agents/prompts/*.md .cursor/skills/alive-analysis/core/agents/prompts/ 2>/dev/null || true
+        echo -e "  ${GREEN}Sub-agent dispatch system copied${NC}"
+    fi
+
+    if [ -d "$SCRIPT_DIR/core/config" ]; then
+        mkdir -p .cursor/skills/alive-analysis/core/config
+        cp "$SCRIPT_DIR"/core/config/agents.yml .cursor/skills/alive-analysis/core/config/ 2>/dev/null || true
+    fi
 
     # Copy core references
     if [ -d "$SCRIPT_DIR/core/references" ]; then

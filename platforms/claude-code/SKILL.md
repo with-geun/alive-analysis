@@ -1668,6 +1668,53 @@ Every EVOLVE template (Full and Quick) includes an **Impact Tracking** section:
 
 ---
 
+## Sub-agent Dispatch Guide
+
+### Overview
+
+The Sub-agent Dispatch System auto-runs required quality gates and surfaces optional specialist recommendations at each ALIVE stage.
+
+### Command: `/analysis-agent`
+
+- **No argument** — Show specialist recommendations for the current stage
+- **Number** (e.g., `/analysis-agent 1`) — Run that recommended agent directly
+- **Alias** (e.g., `/analysis-agent "stats"`, `/analysis-agent "통계"`) — Fuzzy-match to an agent and run it
+
+### Required Gates (auto-run, no confirmation)
+
+| Gate | Stage | Trigger |
+|------|-------|---------|
+| scope-guard | ASK | Scope section empty after Problem Definition filled |
+| data-quality-sentinel | LOOK→INVESTIGATE | Data Quality Review incomplete |
+| ethics-guard | Any | PII keywords detected in content |
+| reproducibility-keeper | INVESTIGATE→EVOLVE | Reproducibility section empty |
+
+### Recommendation Block
+
+```
+─────────────────────────────────────────────────────
+🤖 Specialist Recommendations — {STAGE} stage
+─────────────────────────────────────────────────────
+  1. {label}  —  {reason}
+  2. {label}  —  {reason}
+  3. {label}  —  {reason}
+─────────────────────────────────────────────────────
+Run? (1 / 2 / 3 / all / n)  →
+```
+
+At most one confirmation question. If `ask_confirmation: false` in `.analysis/agents.yml`, all run automatically.
+
+### Configuration
+
+Copy `core/config/agents.yml` to `.analysis/agents.yml` to customize:
+- Enable/disable individual agents
+- Set `always_run: true` for gates that should always fire
+- Adjust `max_recos_per_stage` and verbosity
+
+> Full agent catalog (31 agents): `core/agents/registry.yml`. Routing rules: `core/agents/router.yml`.
+
+---
+
 ## Education Mode Guide
 
 ### Overview
