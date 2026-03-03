@@ -138,10 +138,10 @@ Open your project in Claude Code or Cursor, then type in the **agent chat** (not
 
 ## ✨ Core Features
 
-**20 commands** across analysis, experiments, monitoring, modeling, and education:
+**21 commands** across analysis, experiments, monitoring, modeling, and education:
 
-### Analysis (9 commands)
-`/analysis-init` · `/analysis-new` · `/analysis-status` · `/analysis-next` · `/analysis-archive` · `/analysis-list` · `/analysis-promote` · `/analysis-search` · `/analysis-retro`
+### Analysis (10 commands)
+`/analysis-init` · `/analysis-new` · `/analysis-status` · `/analysis-next` · `/analysis-archive` · `/analysis-list` · `/analysis-promote` · `/analysis-search` · `/analysis-retro` · `/analysis-agent`
 
 ### Experiments (3 commands)
 `/experiment-new` · `/experiment-next` · `/experiment-archive`
@@ -166,6 +166,7 @@ Open your project in Claude Code or Cursor, then type in the **agent chat** (not
 - **Impact tracking** — Recommendation → Decision → Execution → Result. Know if your analyses actually changed anything.
 - **Tags & model registry** — Connect related analyses. Track ML model versions with drift monitoring.
 - **Education mode** — 7 practice scenarios across 4 analysis types. Rubric-based 100-point scoring, 3-level progressive hints, Common Mistakes feedback. Beginner (Quick) and Intermediate (Full) difficulty.
+- **Sub-agent dispatch** — 31 specialist agents auto-run or surface recommendations at each stage. 4 required quality gates (scope, data quality, ethics, reproducibility) + 27 optional specialists (stats, SQL, ML, narrative, causal, etc.). One confirmation question, max 3 recommendations per stage.
 
 ### Platform support
 
@@ -173,7 +174,7 @@ Open your project in Claude Code or Cursor, then type in the **agent chat** (not
 |---|---|---|
 | Interaction | Conversational (one question at a time) | Batch (all questions at once) |
 | State | Session memory | File-based (`.analysis/status.md`) |
-| SKILL.md | ~1,660 lines | ~265 lines |
+| SKILL.md | ~1,870 lines | ~340 lines |
 
 Both platforms share the same `core/` methodology and produce identical outputs. `SKILL.md` is an [open standard](https://github.com/anthropics/claude-code) — works with any agent that supports it.
 
@@ -216,6 +217,51 @@ Learn data analysis thinking through guided practice — no real data needed.
 
 ---
 
+## 🤖 Sub-agent Dispatch (v1.2)
+
+Specialist agents auto-activate at the right moment — without you having to ask.
+
+```
+/analysis-agent          # Show specialist recommendations for current stage
+/analysis-agent 1        # Run the top recommendation directly
+/analysis-agent "sql"    # Run by alias (Korean/English both work)
+```
+
+### How it works
+
+At each stage transition (`/analysis-next`), the system:
+1. **Auto-runs required gates** — no confirmation needed
+2. **Surfaces up to 3 optional specialists** — one question, you pick
+
+```
+─────────────────────────────────────────────────────
+🤖 Specialist Recommendations — INVESTIGATE stage
+─────────────────────────────────────────────────────
+  1. stats-agent  —  Hypothesis scorecard has causal claims
+  2. ml-agent     —  Analysis type: Modeling
+  3. peer-reviewer — Results section has content
+─────────────────────────────────────────────────────
+Run? (1 / 2 / 3 / all / n)  →
+```
+
+### 31 specialists across all stages
+
+| Stage | Agents |
+|-------|--------|
+| **Required gates** ⚡ | scope-guard · data-quality-sentinel · ethics-guard · reproducibility-keeper |
+| ASK | problem-framer · hypothesis-gen · metric-translator |
+| LOOK | data-scout · tracking-auditor · lineage-mapper · sampling-designer · sql-writer |
+| INVESTIGATE | eda-agent · stats-agent · experiment-designer · causal-agent · root-cause-analyst · ml-agent · forecast-agent · anomaly-detector |
+| VOICE | chart-recommender · dashboard-designer · narrative-agent · exec-summarizer · decision-memo-writer |
+| EVOLVE | metric-definer · semantic-layer-engineer · dre-agent · data-product-manager · governance-steward |
+| Cross-cutting | peer-reviewer |
+
+⚡ = auto-runs when triggered, no confirmation required
+
+Configure in `.analysis/agents.yml` — enable/disable individual agents, adjust verbosity, set gates to always-run.
+
+---
+
 ## 🧩 What this is NOT
 
 - **Not a BI dashboard** — No charts or visualizations. It structures your *thinking*, not your *reporting*.
@@ -248,6 +294,7 @@ Real walkthrough coming soon.
 
 - **v1.0** ✅ — ALIVE loop, Full/Quick modes, 3 analysis types, experiments, monitoring, search, retrospectives, dual-platform
 - **v1.1** ✅ — Education Mode with 7 practice scenarios, rubric scoring, progressive hints, Common Mistakes feedback
+- **v1.2** ✅ — Sub-agent Dispatch System: 31 specialist agents, deterministic routing, 4 quality gates, `/analysis-agent` command
 - **Next** — Team dashboard
 
 ---

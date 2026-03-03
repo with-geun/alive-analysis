@@ -4,6 +4,38 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.2.0] - 2026-03-03
+
+Sub-agent Dispatch System — 31 specialist agents with deterministic routing.
+
+### Highlights
+- 4 required quality gates auto-run on signals: scope, data quality, ethics, reproducibility
+- 27 optional specialists recommended at each stage (top 3, one confirmation question)
+- Deterministic routing: per-stage scoring rules, suppression history, user config overrides
+- New command: `/analysis-agent` (Claude Code + Cursor)
+
+### Added
+- `core/agents/registry.yml` — 31 agent definitions with metadata, signals, and I/O contracts
+- `core/agents/router.yml` — per-stage scoring rules, gate conditions, suppression policy
+- `core/agents/runtime.md` — invocation/merge policy, parallelism rules, state tracking
+- `core/config/agents.yml` — user-overridable config (enable/disable, auto_run, verbosity, max_recos)
+- `core/agents/prompts/` — 31 prompt files
+  - ASK: `problem-framer`, `hypothesis-gen`, `metric-translator`
+  - LOOK: `data-scout`, `tracking-auditor`, `lineage-mapper`, `sampling-designer`, `sql-writer`
+  - INVESTIGATE: `eda-agent`, `stats-agent`, `experiment-designer`, `causal-agent`, `root-cause-analyst`, `ml-agent`, `forecast-agent`, `anomaly-detector`
+  - VOICE: `chart-recommender`, `dashboard-designer`, `narrative-agent`, `exec-summarizer`, `decision-memo-writer`
+  - EVOLVE: `metric-definer`, `semantic-layer-engineer`, `dre-agent`, `data-product-manager`, `governance-steward`
+  - Required gates: `scope-guard`, `data-quality-sentinel`, `ethics-guard`, `reproducibility-keeper`
+  - Cross-cutting: `peer-reviewer`
+- `/analysis-agent` command for Claude Code and Cursor: show recommendations, run by number or alias
+- `platforms/cursor/rules/alive-agents.mdc` — Sub-agent Dispatch rule for Cursor
+
+### Changed
+- `/analysis-next` updated with Step 4.5: auto-run gates + recommendation block at every stage transition
+- `install.sh` updated to copy `core/agents/` and `core/config/` to target project
+- Both SKILL.md files updated with Sub-agent Dispatch section (~1,870 lines Claude Code, ~340 lines Cursor)
+- README.md updated: command count 20 → 21, Sub-agent Dispatch section added, roadmap updated
+
 ## [1.1.0] - 2026-02-19
 
 Education Mode — learn data analysis thinking through guided practice scenarios.
