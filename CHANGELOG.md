@@ -35,6 +35,23 @@ Sub-agent Dispatch System — 31 specialist agents with deterministic routing.
 - `install.sh` updated to copy `core/agents/` and `core/config/` to target project
 - Both SKILL.md files updated with Sub-agent Dispatch section (~1,870 lines Claude Code, ~340 lines Cursor)
 - README.md updated: command count 20 → 21, Sub-agent Dispatch section added, roadmap updated
+- `platforms/cursor/rules/alive-agents.mdc` expanded: 9 → 31 agent full reference table with stage-grouped descriptions and "Quick help by task" lookup
+
+### Improved
+- **All 31 agent prompts rewritten** with a consistent quality framework:
+  - Step 1 "Read and internalize" — extracts primary metric, domain, trigger before generating output
+  - Decision framework tables — context-based method selection (test type, chart type, causal method, etc.)
+  - Conditional sections — irrelevant sections are explicitly skipped, not left blank
+  - Output enforcement — no generic placeholders; formulas, exact text citations, and specific values required
+  - Self-check checklist (5 items) — validates output quality before finalizing
+  - Concrete rules — specific prohibitions with stated alternatives
+- Stage-specific highlights:
+  - ASK: bundled-question detection pattern table, "Decision this enables" enforcement
+  - LOOK: survivorship bias check, Simpson's paradox detection protocol, SQL sanity check query
+  - INVESTIGATE: traffic sufficiency first, history sufficiency check, stopping criteria with threshold
+  - VOICE: finding-as-title rule, quantification enforcement (no adjective-only findings), single-action rule
+  - EVOLVE: STEDII evidence specificity standard, breaking change assessment, named-owner enforcement
+  - CROSS: k-anonymity quasi-identifier check, 🔴 risk blocking enforcement
 
 ## [1.1.0] - 2026-02-19
 
