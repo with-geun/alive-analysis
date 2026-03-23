@@ -336,6 +336,8 @@ Each scenario includes: a realistic business briefing, staged data reveals (you 
 
 Visualize your entire analysis history as an interactive node graph. Each analysis is a node. Follow-up connections between analyses are edges.
 
+![ALIVE Dashboard — node graph with 200 demo analyses, click-to-highlight connected nodes](docs/assets/dashboard-preview.png)
+
 ```bash
 # Export analyses from your project
 bash /path/to/alive-analysis/dashboard/export.sh > export.json
