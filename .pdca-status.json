@@ -1,0 +1,10 @@
+{
+  "alive-dashboard": {
+    "phase": "archived",
+    "matchRate": 100,
+    "iterationCount": 0,
+    "startedAt": "2026-03-23T00:00:00Z",
+    "archivedAt": "2026-03-24T00:00:00Z",
+    "archivedTo": "docs/archive/2026-03/alive-dashboard/"
+  }
+}
