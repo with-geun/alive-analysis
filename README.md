@@ -2,7 +2,7 @@
 
 **Structured analysis workflow for AI coding agents — every analysis traceable, repeatable, and team-shareable.**
 
-[![version](https://img.shields.io/badge/version-1.3.2-blue)](CHANGELOG.md)
+[![version](https://img.shields.io/badge/version-1.3.0-blue)](CHANGELOG.md)
 [![npm](https://img.shields.io/npm/v/alive-analysis-mcp)](https://www.npmjs.com/package/alive-analysis-mcp)
 [![license](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude_Code-✓-purple)](https://claude.ai/code)
@@ -10,503 +10,467 @@
 
 ---
 
-## The problem
+## Why this exists
 
-You ask AI to analyze a metric drop. It gives you an answer. You make a decision.
+You ask Claude to investigate a metric drop. It gives you an answer. You act on it.
 
-Three months later: *"Why did we do that?"* — gone. No reasoning, no data checks, no audit trail.
+Three months later: *"Why did we change that?"* — gone. No reasoning, no data checks, no audit trail.
 
-Or you open a fresh chat and start over from scratch, repeating work you've already done.
+Or you open a new chat and explain the whole context again from scratch, repeating work that already happened.
 
-**alive-analysis fixes this.** It's an analysis workflow kit that runs inside Claude Code and Cursor. Every analysis follows a structured five-stage loop, gets saved as plain markdown files, and stays searchable. The AI guides the process — you bring the domain knowledge.
+**alive-analysis solves this** by turning every analysis into a structured, version-controlled workflow. Claude guides you through a five-stage loop. Each stage produces a markdown file. Everything stays in your repo, searchable by you and by Claude.
+
+The result: a growing knowledge base of how your team thinks, not just what it decided.
 
 ---
 
 ## How it works
 
 ```
-You type a question
-       ↓
-AI walks you through 5 stages (ASK → LOOK → INVESTIGATE → VOICE → EVOLVE)
-       ↓
-Each stage is saved as a markdown file in your project
-       ↓
-Files are Git-tracked, searchable, and readable by any AI tool
-       ↓
-Three months later: open the file, see exactly why you made that call
+You describe a question  →  /analysis-new
+                                 ↓
+         Claude walks you through 5 stages:
+         ASK → LOOK → INVESTIGATE → VOICE → EVOLVE
+                                 ↓
+              Each stage = one markdown file in analyses/
+                                 ↓
+         Files are Git-tracked, full-text searchable,
+         readable by Claude in future conversations
+                                 ↓
+         Six months later: /analysis-search "checkout drop"
+         → Claude surfaces context, findings, and follow-ups
 ```
 
 ---
 
-## Quick start
+## Installation
 
 ```bash
-# 1. Clone and install (2 minutes)
+# Clone the repo
 git clone https://github.com/with-geun/alive-analysis.git /tmp/alive-analysis
+
+# Install — pick your platform
 bash /tmp/alive-analysis/install.sh              # Claude Code
 bash /tmp/alive-analysis/install.sh --cursor     # Cursor
 bash /tmp/alive-analysis/install.sh --both       # Both
 
-# 2. In your project, open the agent chat (not the terminal) and type:
-/analysis-init    # One-time setup
+# One-time setup — run in your AI agent chat (not the terminal)
+/analysis-init    # Configure language, team, data stack, key metrics
 /analysis-new     # Start your first analysis
 ```
 
-That's it. The AI takes it from there.
+That's it. Claude handles the rest.
 
 ---
 
 ## The ALIVE Loop
 
-Every analysis — whether it takes 20 minutes or 2 weeks — follows the same five stages.
+Every analysis follows the same five-stage structure. Each stage has a clear purpose, a checklist, and a quality gate before moving forward.
 
-```
-❓ ASK  →  👀 LOOK  →  🔍 INVESTIGATE  →  📢 VOICE  →  🌱 EVOLVE
-```
+| Stage | Question | Output |
+|-------|----------|--------|
+| ❓ **ASK** | What do we want to know — and why? | Hypothesis tree, scope, success criteria |
+| 👀 **LOOK** | What does the data actually show? | Data quality verdict, SQL templates |
+| 🔍 **INVESTIGATE** | Why is it really happening? | Results with confidence levels |
+| 📢 **VOICE** | So what — and now what? | Recommendations, audience-specific messages |
+| 🌱 **EVOLVE** | What would change the conclusion? | Follow-up analyses, impact tracking |
 
-| Stage | What happens |
-|---|---|
-| **ASK** | Define exactly what you're trying to answer. Scope, hypotheses, success criteria. The AI pushes back on vague questions until the framing is tight. |
-| **LOOK** | Observe the data before drawing conclusions. Quality checks, segmentation, confounders, sample size validation. |
-| **INVESTIGATE** | Analyze. Run hypotheses against data, test significance, check for Simpson's paradox, apply causal reasoning when needed. |
-| **VOICE** | Communicate findings. The AI helps you write different versions for different audiences — exec summary, team walkthrough, decision memo. |
-| **EVOLVE** | Close the loop. What did you learn? What comes next? Impact tracking, follow-up questions, knowledge transfer. |
-
-The AI doesn't fill in the blanks for you. At each stage, it asks structured questions that force you to think — then records your answers.
+You never skip a stage without a deliberate choice. The loop enforces analytical discipline — even when you're in a hurry.
 
 ---
 
-## Two modes, one system
+## Three Modes
 
-**Full mode** — for decisions that matter
-
-Five separate files, one per stage. Built-in checklists for confounders, counter-metrics, and sensitivity analysis. Audience-specific communication templates. Used when analysis informs real action.
+### Full Mode — for decisions that matter
+Five separate files, one per stage. ~40-item checklists. All specialist agents available. Use this when the decision is high-stakes, when you'll need to explain your reasoning, or when you want the full audit trail.
 
 ```
 analyses/active/F-2026-0303-001_checkout-drop/
-  01_ask.md
-  02_look.md
-  03_investigate.md
-  04_voice.md
-  05_evolve.md
+├── 01_ask.md
+├── 02_look.md
+├── 03_investigate.md
+├── 04_voice.md
+└── 05_evolve.md
 ```
 
-**Quick mode** — for fast answers
-
-Single file, all five stages. Same ALIVE structure, less ceremony. 20-40 minutes end-to-end. Auto-promotes to Full when complexity grows beyond a single file.
+### Quick Mode — for fast turnaround
+Everything in one file. Compressed checklist. Same ALIVE structure, just lighter. Use this for exploratory questions, morning standups, or anything you need in under an hour. If it grows in scope, `/analysis-promote` converts it to Full automatically.
 
 ```
-analyses/active/Q-2026-0308-001_dau-check.md
+analyses/active/quick_Q-2026-0308-001_dau-check.md
 ```
 
----
+### Learn Mode — for building the skill
+Guided scenarios with rubric-based scoring, progressive hints, and common-mistake detection. Seven real-world scenarios across two levels. Use this onboard new analysts, practice unfamiliar analysis types, or train interns.
 
-## Example output
-
-```markdown
-# Quick Investigation — Signup Rate Comparison
-> ID: Q-2026-0212-001 | Type: Comparison | Status: Archived
-
-## ASK
-Question: Onboarding flow A vs B — which has higher signup completion?
-Scope: Users who started onboarding in the last 30 days
-Decision: Which flow to ship to 100% of new users
-
-## LOOK
-| Segment  | Flow A | Flow B | Users (A/B)    |
-|----------|--------|--------|----------------|
-| Organic  | 34%    | 41%    | 3,200 / 2,800  |
-| Paid     | 28%    | 32%    | 1,500 / 1,200  |
-Data quality: ✅ No tracking gaps. SRM check passed.
-
-## INVESTIGATE
-Flow B outperforms A in every segment (+6-7pp). No Simpson's Paradox.
-Drop-off at step 3 — Flow B made phone verification optional.
-Statistical significance: p < 0.001 (organic), p = 0.04 (paid).
-
-## VOICE
-→ Ship Flow B. Monitor D7 activation as counter-metric.
-Confidence: 🟢 High (organic) · 🟡 Medium (paid — smaller sample)
-
-## EVOLVE
-Follow-up: Does simpler signup affect user quality? Check D30 activation.
-Impact tracking: Decision made 2026-02-15. Review outcome in 30 days.
+```
+analyses/active/L-2026-0220-002_signup-drop-scenario/
 ```
 
 ---
 
-## Features
+## All Commands
 
-### 22 commands across five areas
+### Core workflow
 
-**Analysis**
-```
-/analysis-init      One-time setup (language, team, data stack)
-/analysis-new       Start a new analysis (Full or Quick)
-/analysis-next      Move to the next ALIVE stage
-/analysis-status    See current analysis progress
-/analysis-archive   Mark complete and move to archive
-/analysis-list      Browse all analyses with filters
-/analysis-promote   Upgrade Quick → Full when complexity grows
-/analysis-search    Full-text search across all analysis files
-/analysis-retro     Auto-generate period retrospective report
-/analysis-agent     Manually trigger specialist agent recommendations
-```
+| Command | What it does |
+|---------|-------------|
+| `/analysis-init` | One-time setup: language, team name, data stack, key metrics |
+| `/analysis-new` | Start a new analysis — choose Full or Quick, set the question |
+| `/analysis-next` | Move to the next ALIVE stage with quality gate check |
+| `/analysis-status` | Show current stage, checklist progress, open questions |
+| `/analysis-archive` | Mark complete, move to `analyses/archive/` |
+| `/analysis-list` | Browse all analyses with filters (type, stage, analyst, tags) |
+| `/analysis-promote` | Upgrade a Quick analysis to Full when scope expands |
 
-**Experiments**
-```
-/experiment-new     Design an A/B test (pre-registration required)
-/experiment-next    Move through Design → Validate → Analyze → Decide → Learn
-/experiment-archive Close and archive with outcome recorded
-```
+### Finding and reviewing past work
 
-**Monitoring**
-```
-/monitor-setup      Define metric tiers and alert thresholds
-/monitor-check      Run a check against current metric values
-/monitor-list       See all monitored metrics and their status
-```
+| Command | What it does |
+|---------|-------------|
+| `/analysis-search` | Full-text search across all analyses — titles, findings, hypotheses |
+| `/analysis-retro` | Generate a retrospective report for a period (`--last-month`, `--last-quarter`, `--all`) |
+| `/analysis-dashboard` | Export analyses to JSON → load into the visual team dashboard |
 
-**Modeling**
-```
-/model-register     Register an ML model version (drift tracking, performance history)
-```
+### Specialist agents
 
-**Education** *(see Education Mode below)*
-```
-/analysis-learn       Pick a practice scenario
-/analysis-learn-next  Score current stage and move forward
-/analysis-learn-hint  Get a progressive hint (3 levels)
-/analysis-learn-review Full rubric review at the end
-```
+| Command | What it does |
+|---------|-------------|
+| `/analysis-agent` | Show which specialist agents are recommended for the current stage |
+| `/analysis-agent {number}` | Run a specific agent directly |
+| `/analysis-agent "{alias}"` | Run by alias (e.g. `"stats"`, `"causal"`, `"ethics"`) |
 
----
+### Experiments and monitoring
 
-## 🤖 31 Specialist Agents (v1.2)
+| Command | What it does |
+|---------|-------------|
+| `/analysis-new` (Experiment type) | Start an A/B test analysis — adapted ALIVE loop with pre-registration |
+| `/monitor-setup` | Configure metric monitoring with alert thresholds |
+| `/analysis-new --from-alert {alert-id}` | Escalate a metric alert directly into a new analysis |
 
-This is the part that changes how analysis actually feels.
+### Education mode
 
-When you move between stages with `/analysis-next`, the system automatically routes to specialists based on what's in your analysis. You don't need to know which agent to call — it figures that out from context signals in your files.
-
-**The experience looks like this:**
-
-```
-─────────────────────────────────────────────────────────────
-🤖 Specialists who may help at this stage — INVESTIGATE
-─────────────────────────────────────────────────────────────
-  1. stats-agent      — hypothesis scorecard has multiple tests without correction
-  2. causal-agent     — causal claim present but no experiment designed
-  3. peer-reviewer    — findings section has content ready for review
-─────────────────────────────────────────────────────────────
-Run? (1 / 2 / 3 / all / n)  →
-```
-
-Pick one number. The specialist runs, writes its output directly into your analysis file, and you move on. One question. No configuration.
-
-### The 4 required quality gates
-
-These run **automatically** when their conditions are triggered — no confirmation needed.
-
-| Gate | When it runs | What it checks |
-|---|---|---|
-| **scope-guard** | At ASK stage start | Is the question answerable? Is scope defined? Are success criteria set? |
-| **data-quality-sentinel** | At LOOK stage | Missing values, outliers, tracking gaps, SRM issues, sample size adequacy |
-| **ethics-guard** | When PII or protected groups are detected | Bias risks, PII handling, fairness across demographic segments |
-| **reproducibility-keeper** | At EVOLVE stage | Are methods documented? Can someone reproduce this from your file alone? |
-
-### The 27 optional specialists
-
-You choose these at each stage transition. The system surfaces at most 3 relevant ones.
-
-**ASK stage**
-| Agent | What it does |
-|---|---|
-| `problem-framer` | Restructures vague questions into crisp, answerable hypotheses |
-| `hypothesis-gen` | Generates a hypothesis tree covering likely root causes |
-| `metric-translator` | Maps business questions to measurable metrics and guardrails |
-
-**LOOK stage**
-| Agent | What it does |
-|---|---|
-| `data-scout` | Identifies what data exists, where to find it, and what's likely missing |
-| `tracking-auditor` | Checks for event tracking gaps that could invalidate your analysis |
-| `lineage-mapper` | Traces data from source systems to your analysis to catch transformation errors |
-| `sampling-designer` | Calculates required sample sizes for statistical validity |
-| `sql-writer` | Writes the SQL queries needed for your analysis, with joins and filters |
-
-**INVESTIGATE stage**
-| Agent | What it does |
-|---|---|
-| `eda-agent` | Suggests exploratory cuts: distributions, segments, time trends |
-| `stats-agent` | Picks the right statistical test, applies multiple-testing correction, checks assumptions |
-| `experiment-designer` | Designs a proper A/B test for your hypothesis (randomization, guardrails, duration) |
-| `causal-agent` | Applies causal inference methods when you have a claim but no randomized experiment |
-| `root-cause-analyst` | Builds a structured root cause tree (5 Whys + fishbone) |
-| `ml-agent` | Recommends the right model type, features, and validation strategy |
-| `forecast-agent` | Selects forecasting methods, handles seasonality, quantifies uncertainty |
-| `anomaly-detector` | Classifies anomalies by type (spike, shift, gradual drift) with likely causes |
-
-**VOICE stage**
-| Agent | What it does |
-|---|---|
-| `chart-recommender` | Picks the right visualization type for each finding |
-| `dashboard-designer` | Plans a dashboard layout around your key metrics |
-| `narrative-agent` | Builds the "So what → Now what" narrative arc for your audience |
-| `exec-summarizer` | Writes a 3-bullet executive summary with confidence levels |
-| `decision-memo-writer` | Formats findings as a structured decision memo for stakeholders |
-
-**EVOLVE stage**
-| Agent | What it does |
-|---|---|
-| `metric-definer` | Formalizes metrics discovered during analysis into your metric registry |
-| `semantic-layer-engineer` | Translates metric definitions into BI tool or dbt configurations |
-| `dre-agent` | Designs data reliability engineering checks for your new metrics |
-| `data-product-manager` | Scopes follow-up analyses as product requirements |
-| `governance-steward` | Documents data ownership, access controls, and retention rules |
-
-**Cross-cutting**
-| Agent | What it does |
-|---|---|
-| `peer-reviewer` | Adversarial review of your findings — challenges assumptions, checks logic |
-
-### Running agents manually
-
-```
-/analysis-agent            Show recommendations for current stage
-/analysis-agent 2          Run the second recommendation
-/analysis-agent "causal"   Run by name (partial match works)
-/analysis-agent all        Run all recommended specialists
-```
-
-### Configuring the agent system
-
-```yaml
-# .analysis/agents.yml (auto-generated, edit freely)
-
-agents:
-  ethics-guard:
-    enabled: true
-    auto_run: true    # always runs when triggered
-  stats-agent:
-    enabled: true
-    auto_run: false   # surfaces as recommendation, you decide
-  peer-reviewer:
-    enabled: false    # turn off entirely
-
-settings:
-  max_recommendations: 3    # how many agents to surface at once
-  verbosity: normal         # minimal | normal | detailed
-```
+| Command | What it does |
+|---------|-------------|
+| `/analysis-learn` | Start a learning scenario — choose level and scenario |
+| `/analysis-learn-next` | Get feedback on your current stage and advance |
+| `/analysis-learn-hint` | Request a hint (three levels: direction → specific → near-answer) |
+| `/analysis-learn-review` | Complete the scenario with a scored review and skill radar |
 
 ---
 
-## 📚 Education Mode (v1.1)
+## 31 Specialist Agents
 
-Learn analysis thinking through practice — no data preparation needed.
+At each ALIVE stage, a routing engine reads your analysis context and recommends the right specialists from a pool of 31 agents. You choose which ones to run.
 
-```
-/analysis-learn          Browse scenarios and pick one to start
-/analysis-learn-next     Score your work and move to the next stage
-/analysis-learn-hint     Get a hint (3 levels: direction → approach → near-solution)
-/analysis-learn-review   Full rubric review with key takeaways
-```
+### Required gates (auto-run, no confirmation needed)
 
-### 7 scenarios from real business problems
+These four run automatically when their trigger condition is met:
 
-| ID | Scenario | Type | Level |
-|---|---|---|---|
-| b1 | Signup rate dropped yesterday — why? | Investigation | Beginner |
-| b2 | Two onboarding flows — which is better? | Comparison | Beginner |
-| b3 | How much does employee turnover actually cost? | Quantification | Beginner |
-| i1 | DAU dropped 15% over 3 weeks | Investigation | Intermediate |
-| i2 | Should we lower delivery fees? | Simulation | Intermediate |
-| i3 | Did the new checkout flow improve conversion? | Experiment | Intermediate |
-| i4 | Can we predict which users will churn next month? | Modeling | Intermediate |
+| Agent | When it runs |
+|-------|-------------|
+| **scope-guard** | Detects multi-question mixing or scope expansion — offers 3 options to contain it |
+| **data-quality-sentinel** | Checks data completeness before you leave LOOK |
+| **ethics-guard** | Flags PII exposure, survivorship bias, fairness issues |
+| **reproducibility-keeper** | Verifies steps are documented enough to replay |
 
-Each scenario includes: a realistic business briefing, staged data reveals (you get data as you would in real work), 100-point rubric scoring, 3-level progressive hints, and a model solution you can compare against.
+### Optional specialists by stage
 
-**Beginner** → Quick format (one file). Rich explanations at each step.
-**Intermediate** → Full format (5 files). Minimal guidance — you're expected to know the basics.
+**ASK** — problem-framer, hypothesis-gen, metric-translator, sampling-designer
 
-> Graduation path: 70%+ on 2 Beginner scenarios → try Intermediate. 75%+ on Intermediate → ready for real analysis with `/analysis-new`.
+**LOOK** — data-scout, tracking-auditor, lineage-mapper, sql-writer
+
+**INVESTIGATE** — eda-agent, stats-agent, experiment-designer, causal-agent, root-cause-analyst, ml-agent, forecast-agent, anomaly-detector, chart-recommender, dashboard-designer, peer-reviewer
+
+**VOICE** — narrative-agent, exec-summarizer, decision-memo-writer
+
+**EVOLVE** — metric-definer, semantic-layer-engineer, governance-steward
+
+The routing engine scores each agent against your current context (analysis type, domain, data signals) and presents the top 3 with a plain-language explanation: *"This analysis involves a before/after metric change with no randomization — the causal-agent can assess whether DID or RDD is appropriate here."*
+
+Agents can be disabled per-project in `.analysis/agents.yml`.
 
 ---
 
-## 📊 Team Dashboard (v1.3)
+## Experiment Support (A/B Testing)
 
-Visualize your entire analysis history as an interactive node graph. Each analysis is a node. Follow-up connections between analyses are edges.
+When you run `/analysis-new` and choose Experiment type, the ALIVE loop adapts:
+
+```
+DESIGN → VALIDATE → ANALYZE → DECIDE → LEARN
+```
+
+Key enforcements:
+- **Pre-registration lock**: Analysis plan is written and locked before results are revealed — prevents post-hoc rationalization
+- **SRM detection**: Sample Ratio Mismatch flagged automatically during VALIDATE
+- **Guardrail metrics**: Counter-metrics defined alongside primary metric to catch unintended side effects
+- **Multiple comparison correction**: Alerts when running many variants without adjustment
+- **Statistical validity**: The stats-agent verifies power, sample size, and test selection before you call significance
+
+---
+
+## Metric Monitoring
+
+```bash
+/monitor-setup
+```
+
+Configure thresholds for your key metrics. When an alert fires, escalate it directly into an analysis:
+
+```bash
+/analysis-new --from-alert {alert-id}
+```
+
+The ALIVE context pre-fills with the alert data — metric name, value, time window, relevant segments. You start at ASK with context already loaded.
+
+---
+
+## Analysis Search and Retrospective
+
+### Search across all past analyses
+
+```bash
+/analysis-search "checkout funnel"
+```
+
+Full-text search across titles, hypotheses, findings, and follow-ups. Returns matching analyses with surrounding context, cross-references to related analyses, and suggestions for follow-up work.
+
+### Automatic retrospective
+
+```bash
+/analysis-retro --last-quarter
+```
+
+Aggregates all analyses in a period into a structured report:
+- Activity summary (analyses by type, analyst, stage completion)
+- Impact tracking (recommendations → decisions → outcomes)
+- Recurring patterns and unresolved follow-ups
+- Team-level metrics (acceptance rate, decision speed, analysis accuracy over time)
+
+Output: `analyses/.retro/retro_{period}.md`
+
+---
+
+## Team Dashboard
+
+Visualize your entire analysis history as an interactive node graph.
 
 ![ALIVE Dashboard — node graph with 200 demo analyses, click-to-highlight connected nodes](docs/assets/dashboard-preview.png)
 
-```bash
-# Export analyses from your project
-bash /path/to/alive-analysis/dashboard/export.sh > export.json
+**What the graph shows:**
+- Each node = one analysis
+- Node size = ALIVE stage progress (small = just started, large = complete)
+- Node color = analysis type (Investigation / Experiment / Simulation / Learn)
+- Arc ring = which stages are done
+- Dashed edges = follow-up connections between analyses
+- Solid edges = analyses sharing the same tags
+- Click a node → connected analyses stay highlighted, everything else fades
 
-# Open dashboard/alive-dashboard.html in any browser → click Load → paste JSON
+**Filters:** analyst, tags, type, status, date range. ⌘K to search.
+
+**Setup:**
+```bash
+# Export your analyses to JSON
+bash dashboard/export.sh > export.json
+
+# Open in any browser — no server needed
+open dashboard/alive-dashboard.html
+# Click Load → paste the JSON
 ```
 
-**What you see:**
-- Node size = ALIVE stage progress (small = just started, large = complete)
-- Arc ring segments = which stages are done
-- Dashed edges = follow-up connections between analyses
-- Faint solid edges = analyses sharing the same tags
-- Click a node → its connections highlight, everything else fades
-
-**Filters:** analyst (multi-select), tags, type, status, period. ⌘K to search.
-
-**Adding metadata per analysis:**
+**Add metadata per analysis** to enrich the graph:
 ```yaml
 # analyses/active/F-2026-0303-001_checkout-drop/meta.yml
 analyst: geun
 tags: [checkout, conversion]
 followups: [F-2026-0305-001]
-keyFinding: "2.4pp drop confirmed. UI redesign root cause."
+keyFinding: "2.4pp drop confirmed. Mobile UX root cause."
 ```
-
-**Works with Obsidian too.** Open your `analyses/` folder as an Obsidian vault. Use `[[F-2026-0305-001]]` wiki-links in your markdown — Obsidian's graph view picks them up automatically and draws the same connections the dashboard shows.
-
-→ Full setup guide: [`dashboard/README.md`](dashboard/README.md)
 
 ---
 
-## 🔌 MCP Server (v1.3)
+## MCP Server — Let Claude Query Your Analyses
 
-alive-analysis normally runs through SKILL.md — a prompt-based system that Claude Code and Cursor read to understand the workflow. The MCP server exposes your analysis data as tool calls, so **any MCP-compatible AI client** can query it.
+Install the MCP server and Claude can access your full analysis history directly — in any MCP-compatible client.
 
-### When to use each
+```bash
+npm install -g alive-analysis-mcp
+```
 
-| | SKILL.md (default) | MCP Server |
-|---|---|---|
-| **Purpose** | Writing and running analyses | Querying analysis data |
-| **Clients** | Claude Code, Cursor | Claude Code, Zed, Windsurf, Continue, any MCP client |
-| **Can create analyses** | ✅ Yes | ❌ No (read-only) |
-| **Install** | `install.sh` | `npx alive-analysis-mcp` |
-
-The intended pattern: write analyses with Claude Code or Cursor using the SKILL.md workflow. Query and explore your analysis history from any other tool using the MCP server.
-
-### Setup
-
-Add this to `.mcp.json` in your project root:
-
+**Claude Desktop** (`~/Library/Application\ Support/Claude/claude_desktop_config.json`):
 ```json
 {
   "mcpServers": {
     "alive-analysis": {
-      "command": "npx",
-      "args": ["-y", "alive-analysis-mcp"],
-      "env": {
-        "ALIVE_ANALYSES_DIR": "./analyses"
-      }
+      "command": "alive-analysis-mcp",
+      "args": ["--analyses-dir", "/path/to/your/analyses"]
     }
   }
 }
 ```
 
-Same config works in Zed, Windsurf, and Continue — add it to whichever `settings.json` block handles MCP servers in your client.
+**Claude Code** (`.claude/mcp.json` in your project):
+```json
+{
+  "alive-analysis": {
+    "command": "alive-analysis-mcp",
+    "env": { "ALIVE_ANALYSES_DIR": "./analyses" }
+  }
+}
+```
 
-### Available tools
+### What Claude can do with MCP connected
 
-| Tool | What you can ask |
-|---|---|
-| `alive_list` | "Show me all active investigations tagged 'checkout'" |
-| `alive_get` | "Read the full content of F-2026-0303-001" |
-| `alive_search` | "What have we found about retention before?" |
-| `alive_dashboard_export` | "Give me the JSON to load into the dashboard" |
+| Tool | Example prompt |
+|------|---------------|
+| `alive_list` | *"List all experiments from last quarter"* |
+| `alive_get` | *"Show me the full findings from F-2026-0303-001"* |
+| `alive_search` | *"Find any analysis that mentions SRM or sample ratio"* |
+| `alive_dashboard_export` | *"Give me the JSON to load into the dashboard"* |
 
-**npm:** [`alive-analysis-mcp`](https://www.npmjs.com/package/alive-analysis-mcp)
-**MCP Registry:** [`io.github.with-geun/alive-analysis`](https://registry.modelcontextprotocol.io)
-**Source:** [`mcp/`](mcp/)
+With MCP active, Claude remembers your team's analysis history across sessions. New team members can ask *"What did we learn about checkout drop?"* and get a full briefing — without anyone digging through files.
 
----
-
-## Platform support
-
-| | Claude Code | Cursor 2.4+ |
-|---|---|---|
-| **Interaction style** | Conversational — one question at a time | Batch — all questions at once |
-| **State persistence** | Session memory | File-based (`.analysis/status.md`) |
-| **SKILL.md size** | ~1,870 lines (full methodology) | ~340 lines (streamlined) |
-| **MCP support** | ✅ | ✅ |
-
-Both platforms share `core/` — the same methodology, checklists, agent system, and output format. Your analysis files are identical regardless of which tool you used.
+**MCP Registry:** `io.github.with-geun/alive-analysis`
+Works with Claude Desktop, Claude Code, Cursor, Zed, Windsurf, and any other MCP-compatible client.
 
 ---
 
-## File structure after install
+## Education Mode — Learn Product Analysis
+
+Seven real-world scenarios with guided feedback. Designed to build analytical thinking, not just teach tool mechanics.
+
+### Beginner scenarios (20–30 min, Quick format)
+
+| Scenario | Question | Skills practiced |
+|----------|----------|-----------------|
+| **b1-signup-drop** | "Why did signups drop yesterday?" | Platform-specific root cause, data triangulation |
+| **b2-onboarding-comparison** | "Which onboarding flow is better?" | Simpson's Paradox, SRM validation, counter-metrics |
+| **b3-turnover-cost** | "How much does turnover cost us?" | Quantification, multi-component estimation |
+
+### Intermediate scenarios (45–60 min, Full format)
+
+| Scenario | Question | Skills practiced |
+|----------|----------|-----------------|
+| **i1-dau-drop** | "Why did DAU drop 15%?" | Multi-lens analysis, hypothesis elimination, confidence scoring |
+| **i2-delivery-fee** | "Should we lower delivery fees?" | Policy simulation, sensitivity analysis, uncertainty communication |
+| **i3-ab-test-checkout** | "Did the new checkout improve conversion?" | Experiment validity, SRM detection, guardrail metrics |
+| **i4-churn-prediction** | "Can we predict which users will churn?" | ML pipeline, feature selection, model card, drift monitoring |
+
+### How feedback works
+
+At each stage, Claude evaluates your work against a rubric and gives you specific feedback — not generic praise. Stuck? Three progressive hint levels: direction → specific → near-answer. Made a common mistake? It gets flagged with an explanation of why it matters.
+
+Graduation path: two Beginner scenarios at 70%+ → unlock Intermediate → 75%+ on Intermediate → production-ready.
+
+```bash
+/analysis-learn              # Pick a scenario
+/analysis-learn-hint         # Get a hint without giving away the answer
+/analysis-learn-review       # See your score and skill radar
+```
+
+---
+
+## Situational Protocols
+
+Built into the workflow for situations that derail most analyses:
+
+**Scope creep guard** — When a second question appears inside an analysis, the agent detects it and offers three options: park it as a follow-up, swap the primary question, or explicitly expand scope with documented trade-offs.
+
+**Rabbit hole guard** — After three rounds on a sub-question, checks whether it's still actionable. If not, surfaces a decision point.
+
+**Data quality emergency** — Five response options: patch with available data, scope down, pause until data is ready, report with explicit caveats, or reframe the question entirely.
+
+**Analysis independence** — Built-in safeguards against pressure to reach predetermined conclusions. If the prompt pattern looks like conclusion-first reasoning, it gets flagged.
+
+---
+
+## Obsidian Integration
+
+Your `analyses/` folder works as an Obsidian vault out of the box.
+
+Use `[[F-2026-0305-001]]` wiki-links in your markdown — Obsidian's graph view picks them up and draws the same connections the team dashboard shows. Useful for teams that prefer Obsidian for knowledge management alongside the code workflow.
+
+---
+
+## File Structure
 
 ```
 your-project/
 ├── analyses/
 │   ├── active/
-│   │   ├── F-2026-0303-001_checkout-drop/   ← Full analysis (5 files)
+│   │   ├── F-2026-0303-001_checkout-drop/    # Full analysis
 │   │   │   ├── 01_ask.md
 │   │   │   ├── 02_look.md
 │   │   │   ├── 03_investigate.md
 │   │   │   ├── 04_voice.md
 │   │   │   ├── 05_evolve.md
-│   │   │   └── meta.yml                     ← optional: analyst, tags, followups
-│   │   └── Q-2026-0308-001_dau-check.md     ← Quick analysis (1 file)
-│   └── archive/
-│       └── 2026-03/
-│           └── F-2026-0220-001_cohort/
-├── ab-tests/                                 ← Experiment module
+│   │   │   ├── meta.yml
+│   │   │   └── assets/
+│   │   │       └── queries/
+│   │   └── quick_Q-2026-0308-001_dau-check.md  # Quick analysis
+│   └── archive/                               # Completed analyses
 ├── .analysis/
-│   ├── config.md                             ← Your team settings
-│   ├── agents.yml                            ← Agent enable/disable config
-│   ├── metrics/                              ← Monitoring definitions
-│   └── models/                              ← ML model registry
-└── .mcp.json                                 ← MCP server config (optional)
+│   ├── config.md          # Team settings (language, data stack, metrics)
+│   ├── agents.yml         # Enable/disable individual agents
+│   ├── checklists/        # Stage checklists — edit to customize
+│   ├── status.md          # Current analysis state
+│   ├── agent-state.md     # Agent suppression history
+│   ├── models/            # ML model registry
+│   ├── metrics/           # Metric definitions and monitors
+│   └── decisions/         # Decision artifacts
 ```
 
-All analysis files are plain markdown. Git-tracked. No proprietary format. Open in Obsidian, search with grep, diff in code review — it all works.
+Analysis IDs by type:
+- `F-YYYY-MMDD-NNN` — Investigation or Modeling (Full)
+- `Q-YYYY-MMDD-NNN` — Quick check
+- `E-YYYY-MMDD-NNN` — Experiment / A/B test
+- `S-YYYY-MMDD-NNN` — Simulation
+- `L-YYYY-MMDD-NNN` — Learn scenario
 
 ---
 
-## Who this is for
+## Platform Support
 
-**Data analysts** — Full mode gives you the structure to run analyses that hold up to scrutiny. Checklists catch what you'd otherwise miss at 11pm before a board presentation.
+| Feature | Claude Code | Cursor 2.4+ |
+|---------|------------|-------------|
+| Full ALIVE loop | ✅ | ✅ |
+| All 22+ commands | ✅ | ✅ (batch interaction) |
+| 31 specialist agents | ✅ | ✅ |
+| Education mode | ✅ | ✅ |
+| MCP server | ✅ | ✅ |
+| Team dashboard | ✅ | ✅ |
 
-**Product managers** — Quick mode with guided questions means you can do structured analysis without a statistics background. When it gets complex, the AI tells you to escalate.
-
-**Growth and marketing teams** — The A/B test module handles design through post-analysis. Metric monitoring connects to your analysis workflow.
-
-**Students and aspiring analysts** — Education Mode gives you 7 realistic practice scenarios with rubric scoring and hints. The gap between textbook statistics and actual analysis work is real — this bridges it.
-
-**Teams** — When everyone uses the same format, analysis becomes reviewable. A PM can read a data analyst's LOOK file and actually understand the data decisions made.
-
----
-
-## What this is not
-
-- **Not a BI tool.** No charts, no dashboards built in (the Team Dashboard is for visualization of your analysis history, not your metrics). alive-analysis structures your *thinking*, not your *reporting*.
-- **Not a statistics library.** It doesn't run models or crunch numbers. You bring the data and the tools; it brings the process.
-- **Not AI doing analysis for you.** The AI asks questions and enforces structure. The analytical judgments are yours.
+Cursor uses a batch interaction model — all required inputs presented at once rather than sequentially, optimized for Cursor's agent loop behavior.
 
 ---
 
-## Roadmap
+## What it's not
 
-| Version | Status | What shipped |
-|---|---|---|
-| v1.0 | ✅ | ALIVE loop, Full/Quick modes, 3 analysis types, A/B experiments, metric monitoring, insight search, retrospectives, Claude Code + Cursor |
-| v1.1 | ✅ | Education Mode: 7 practice scenarios, rubric scoring, progressive hints, Common Mistakes feedback |
-| v1.2 | ✅ | Sub-agent Dispatch: 31 specialists, 4 quality gates, deterministic routing, `/analysis-agent` command |
-| v1.3 | ✅ | Team Dashboard (node graph), MCP server (`alive-analysis-mcp` on npm + MCP Registry) |
+**Not a BI tool.** The team dashboard visualizes your analysis history, not your business metrics. alive-analysis structures your *thinking*, not your *reporting*.
+
+**Not a data pipeline.** It doesn't connect to databases or run queries automatically. It helps you think through what queries to run and why.
+
+**Not opinionated about your data stack.** Works with any combination of SQL, Python, R, notebooks, or spreadsheets. The methodology is tool-agnostic.
+
+---
+
+## Changelog highlights
+
+| Version | What shipped |
+|---------|-------------|
+| v1.3.0 | Team Dashboard (interactive node graph), MCP server (`alive-analysis-mcp` on npm + MCP Registry) |
+| v1.2.0 | 31 specialist agents — registry, router, 31 dedicated prompts, Cursor full agent table |
+| v1.1.0 | Education mode — 7 scenarios, Common Mistakes feedback, 4 commands × 2 platforms |
+| v1.0.0 | Analysis search, automatic retrospective, unified README |
+| v0.3.0 | A/B testing module, metric monitoring, Quick→Full promotion, platforms split (Claude Code / Cursor) |
+
+Full changelog: [CHANGELOG.md](CHANGELOG.md)
 
 ---
 
 ## Contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md). Feedback on methodology, checklists, and agent prompts especially welcome — those are the hardest parts to get right.
-
----
+Issues and PRs welcome. See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## License
 
-MIT
-
----
-
-**New to analysis terminology?** → [GLOSSARY.md](GLOSSARY.md)
-**Step-by-step install help?** → [INSTALL.md](INSTALL.md)
-**Language support:** Works in any language — set yours during `/analysis-init`.
+MIT — [with-geun](https://github.com/with-geun)
