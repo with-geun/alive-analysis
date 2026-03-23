@@ -1,0 +1,28 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.with-geun/alive-analysis",
+  "description": "Query alive-analysis history from any AI client. Tools: list, get, search, dashboard export.",
+  "repository": {
+    "url": "https://github.com/with-geun/alive-analysis",
+    "source": "github"
+  },
+  "version": "1.3.2",
+  "packages": [
+    {
+      "registryType": "npm",
+      "identifier": "alive-analysis-mcp",
+      "version": "1.3.2",
+      "transport": {
+        "type": "stdio"
+      },
+      "environmentVariables": [
+        {
+          "name": "ALIVE_ANALYSES_DIR",
+          "description": "Path to your analyses/ directory (default: ./analyses)",
+          "isRequired": false,
+          "format": "string"
+        }
+      ]
+    }
+  ]
+}
