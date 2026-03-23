@@ -1868,3 +1868,46 @@ Generates a comprehensive retrospective from archived analyses for a given perio
 - User asks "what have we been analyzing?" or "what should we focus on next?"
 - When Impact Tracking shows many pending items
 - Team retrospective or planning meetings
+
+---
+
+## Team Dashboard
+
+### `/analysis-dashboard` — Team Analysis Graph
+
+Generates a JSON export of all analyses and opens instructions for the ALIVE Dashboard.
+
+**When to use:**
+- Team wants to see all analyses as a connected graph
+- Onboarding a new team member — show the full picture
+- Sprint/quarter review — visualize what's been done and what's connected
+
+**What it does:**
+1. Run `bash dashboard/export.sh > dashboard-export.json` to scan `analyses/` and produce JSON
+2. Open `dashboard/alive-dashboard.html` in a browser
+3. Click **Load**, paste the JSON, confirm
+4. Explore: filter by analyst, tag, stage, period — click nodes to trace connections
+
+**If `dashboard/` folder is not present:**
+- Point the user to `github.com/with-geun/alive-analysis` → `dashboard/` folder
+- Or run `install.sh` to get the latest version
+
+**Graph reading guide:**
+- Node size = ALIVE stage progress (small = ASK, large = EVOLVE)
+- Arc ring segments = completed stages
+- Dashed edges = follow-up connections
+- Faint solid edges = shared tags
+- Click a node → connected analyses highlight, others dim
+
+**Optional: add `meta.yml` per analysis for richer graph**
+
+```yaml
+# analyses/active/{ID}_{slug}/meta.yml
+analyst: geun
+tags: [checkout, conversion]
+followups: [F-2026-0305-001]
+keyFinding: "결제 UI 리디자인 이후 2.4pp 하락 확인"
+```
+
+**Obsidian tip:** Open `analyses/` as an Obsidian vault.
+Use `[[F-2026-0305-001]]` wiki-links in markdown → Obsidian graph view picks them up automatically.

@@ -4,6 +4,27 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.3.0] - 2026-03-23
+
+Team Dashboard — visualize your analysis history as an interactive node graph.
+
+### Highlights
+- Single HTML file dashboard, no backend, no server — open directly in browser
+- Force-directed node graph: each analysis is a node, follow-up connections are edges
+- Click a node → connected analyses highlight, the rest dim (3-level opacity system)
+- Filter by type, status, period, analyst (multi-select), tags (multi-select)
+- ⌘K search across title, ID, analyst, tags
+- `export.sh` script scans `analyses/` folder and generates dashboard JSON
+- Optional `meta.yml` per analysis for analyst, tags, followups, keyFinding
+- Obsidian-compatible: open `analyses/` as vault, `[[wiki-links]]` become graph edges
+- New command: `/analysis-dashboard` (Claude Code + Cursor)
+
+### Added
+- `dashboard/alive-dashboard.html` — standalone team dashboard (Canvas-based D3 graph)
+- `dashboard/export.sh` — bash export script: `analyses/` → dashboard JSON
+- `dashboard/README.md` — setup and usage guide
+- `/analysis-dashboard` command added to both SKILL.md files
+
 ## [1.2.0] - 2026-03-03
 
 Sub-agent Dispatch System — 31 specialist agents with deterministic routing.

@@ -336,3 +336,17 @@ Generates a retrospective report from archived analyses for a given period. Outp
 Sections: Summary, Analysis Activity, Impact Tracking, Patterns, Unresolved Follow-ups, Recommendations, Appendix.
 
 Options: `--last-month` (default), `--last-quarter`, `--range {from to}`, `--all`
+
+---
+
+## Team Dashboard
+
+### `/analysis-dashboard`
+
+Exports analyses to JSON and opens the ALIVE Dashboard (node graph visualization).
+
+1. `bash dashboard/export.sh > dashboard-export.json`
+2. Open `dashboard/alive-dashboard.html` in browser
+3. Load → paste JSON
+
+Add `meta.yml` to each analysis folder for analyst, tags, followups, keyFinding fields.

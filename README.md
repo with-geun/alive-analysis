@@ -167,6 +167,7 @@ Open your project in Claude Code or Cursor, then type in the **agent chat** (not
 - **Tags & model registry** — Connect related analyses. Track ML model versions with drift monitoring.
 - **Education mode** — 7 practice scenarios across 4 analysis types. Rubric-based 100-point scoring, 3-level progressive hints, Common Mistakes feedback. Beginner (Quick) and Intermediate (Full) difficulty.
 - **Sub-agent dispatch** — 31 specialist agents auto-run or surface recommendations at each stage. 4 required quality gates (scope, data quality, ethics, reproducibility) + 27 optional specialists (stats, SQL, ML, narrative, causal, etc.). One confirmation question, max 3 recommendations per stage.
+- **Team Dashboard** — single HTML file visualizing all analyses as a node graph. Follow-up chains as edges, 3-level click highlighting, multi-select filters, ⌘K search. Export from `analyses/` with one bash command.
 
 ### Platform support
 
@@ -259,6 +260,40 @@ Run? (1 / 2 / 3 / all / n)  →
 ⚡ = auto-runs when triggered, no confirmation required
 
 Configure in `.analysis/agents.yml` — enable/disable individual agents, adjust verbosity, set gates to always-run.
+
+---
+
+## 📊 Team Dashboard (v1.3)
+
+Visualize your entire analysis history as an interactive node graph.
+
+```bash
+# Export your analyses (run from project root)
+bash /path/to/alive-analysis/dashboard/export.sh > export.json
+
+# Open dashboard/alive-dashboard.html in browser → Load → paste JSON
+```
+
+**What you see:**
+- Each analysis as a node — size shows ALIVE stage progress, arc ring shows completed stages
+- Follow-up connections as dashed edges — trace which questions spawned which
+- Click any node — connected analyses highlight, others dim
+- Filter by analyst (multi-select), tags, type, status, period
+- ⌘K to search across title, ID, analyst, tags
+
+**Add optional metadata per analysis:**
+
+```yaml
+# analyses/active/F-2026-0303-001_checkout-drop/meta.yml
+analyst: geun
+tags: [checkout, conversion]
+followups: [F-2026-0305-001]
+keyFinding: "결제 UI 리디자인 이후 2.4pp 하락 확인"
+```
+
+**Obsidian:** Open `analyses/` directly as a vault. Use `[[F-2026-0305-001]]` wiki-links in your markdown — Obsidian graph view picks them up automatically.
+
+→ See `dashboard/README.md` for full setup guide.
 
 ---
 
