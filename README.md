@@ -297,6 +297,81 @@ keyFinding: "결제 UI 리디자인 이후 2.4pp 하락 확인"
 
 ---
 
+## 🔌 MCP Server (v1.3)
+
+alive-analysis는 Claude Code의 SKILL.md 방식으로 작동하지만, MCP 서버로 래핑하면 **다른 AI 클라이언트에서도 동일한 분석 데이터에 접근**할 수 있습니다.
+
+### SKILL.md vs MCP — 뭐가 다른가?
+
+| | SKILL.md 방식 | MCP 서버 |
+|---|---|---|
+| 동작 방식 | Claude Code / Cursor가 프롬프트를 읽고 파일을 직접 조작 | AI 클라이언트가 tool call로 데이터를 요청 |
+| 지원 클라이언트 | Claude Code, Cursor | Claude Code, **Zed, Windsurf, Continue, 기타 MCP 호환 클라이언트** |
+| 설치 | `install.sh` 실행 | `npx alive-analysis-mcp` |
+| 분석 생성 | ✅ 전체 ALIVE 루프 지원 | ❌ 읽기 전용 (조회·검색·내보내기) |
+| 추천 | 분석 작성 시 | 다른 클라이언트에서 분석 조회 시 |
+
+> **결론:** 분석은 SKILL.md 방식으로 작성하고, 다른 툴에서 데이터를 조회할 때 MCP를 함께 쓰는 것이 자연스러운 구성입니다.
+
+### 설치
+
+```bash
+npm install -g alive-analysis-mcp
+# 또는 npx로 바로 실행 (설치 없음)
+```
+
+### 클라이언트별 설정
+
+**Claude Code** — 프로젝트 루트에 `.mcp.json` 추가:
+```json
+{
+  "mcpServers": {
+    "alive-analysis": {
+      "command": "npx",
+      "args": ["-y", "alive-analysis-mcp"],
+      "env": {
+        "ALIVE_ANALYSES_DIR": "./analyses"
+      }
+    }
+  }
+}
+```
+
+**Zed / Windsurf / Continue** — `settings.json`의 MCP 섹션에 동일하게 추가.
+
+**CLI 직접 실행:**
+```bash
+ALIVE_ANALYSES_DIR=./analyses node mcp/dist/index.js
+```
+
+### 사용 가능한 Tool
+
+| Tool | 설명 |
+|---|---|
+| `alive_list` | 분석 목록 조회. type / stage / status / analyst / tags 필터 지원 |
+| `alive_get` | ID로 분석 전체 내용 읽기 (모든 ALIVE 단계 파일 포함) |
+| `alive_search` | 전체 분석 파일 풀텍스트 검색. 파일명·라인 번호 포함 스니펫 반환 |
+| `alive_dashboard_export` | 분석 전체를 Dashboard JSON으로 내보내기 |
+
+**사용 예시 (AI 클라이언트에서):**
+```
+"지난달 checkout 관련 분석 목록 보여줘"
+→ alive_list(tags: ["checkout"], status: "active")
+
+"F-2026-0303-001 분석 내용 전체 읽어줘"
+→ alive_get(id: "F-2026-0303-001")
+
+"리텐션 관련해서 이전에 뭘 분석했지?"
+→ alive_search(query: "retention")
+
+"대시보드용 JSON 뽑아줘"
+→ alive_dashboard_export(team: "Data Team")
+```
+
+→ See `mcp/` folder for source code.
+
+---
+
 ## 🧩 What this is NOT
 
 - **Not a BI dashboard** — No charts or visualizations. It structures your *thinking*, not your *reporting*.

@@ -24,6 +24,12 @@ Team Dashboard — visualize your analysis history as an interactive node graph.
 - `dashboard/export.sh` — bash export script: `analyses/` → dashboard JSON
 - `dashboard/README.md` — setup and usage guide
 - `/analysis-dashboard` command added to both SKILL.md files
+- `mcp/` — MCP server (`alive-analysis-mcp` npm package)
+  - `alive_list` — list analyses with type/stage/status/analyst/tags filters
+  - `alive_get` — read full analysis content by ID
+  - `alive_search` — full-text search with file:line snippets
+  - `alive_dashboard_export` — export JSON for ALIVE Dashboard
+  - Compatible with Claude Code, Zed, Windsurf, Continue, and any MCP client
 
 ## [1.2.0] - 2026-03-03
 

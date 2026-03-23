@@ -1,0 +1,33 @@
+{
+  "name": "alive-analysis-mcp",
+  "version": "1.3.0",
+  "description": "MCP server for alive-analysis — expose your analysis history to any AI client (Claude Code, Zed, Windsurf, Cursor, etc.)",
+  "main": "dist/index.js",
+  "bin": {
+    "alive-analysis-mcp": "dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "ts-node src/index.ts",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": ["mcp", "alive-analysis", "data-analysis", "claude-code"],
+  "author": "with-geun",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/with-geun/alive-analysis.git",
+    "directory": "mcp"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.0",
+    "@types/node": "^20.0.0",
+    "ts-node": "^10.9.0"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
